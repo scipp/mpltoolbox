@@ -29,6 +29,13 @@ class Lines:
 
         # self._active_line_drawing = False
 
+    def __del__(self):
+        for c in self._connections.values():
+            self._fig.canvas.mpl_disconnect(c)
+        for line in self.lines:
+            line.remove()
+        del self.lines, self._connections
+
     def _make_new_line(self, x=0, y=0):
         line = self._ax.plot([x, x], [y, y], 'o', ls='solid')[0]
         self.lines.append(line)

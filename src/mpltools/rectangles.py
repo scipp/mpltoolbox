@@ -20,6 +20,13 @@ class Rectangles:
         self.on_button_press = on_button_press
         self.on_pick = on_pick
 
+    def __del__(self):
+        for c in self._connections.values():
+            self._fig.canvas.mpl_disconnect(c)
+        for rect in self.rectangles:
+            rect.remove()
+        del self.rectangles, self._connections
+
     def _make_new_rectangle(self, x=0, y=0):
         self.rectangles.append(
             Rectangle((x, y), 0, 0, fc=(0, 0, 0, 0.1), ec=(0, 0, 0, 1), picker=True))

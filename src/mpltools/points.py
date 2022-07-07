@@ -27,6 +27,12 @@ class Points:
         self._pick_lock = False
         self._moving_dot_indices = None
 
+    def __del__(self):
+        for c in self._connections.values():
+            self._fig.canvas.mpl_disconnect(c)
+        self._scatter.remove()
+        del self._scatter, self._connections
+
     def _make_scatter(self, x=0, y=0):
         self._scatter = self._ax.scatter([x], [y], picker=True)
 
