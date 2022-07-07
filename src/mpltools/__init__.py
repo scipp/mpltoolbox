@@ -1,2 +1,2 @@
-from .dots import Dots
+from .points import Points
 from .lines import Lines

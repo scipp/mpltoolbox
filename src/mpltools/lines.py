@@ -43,9 +43,9 @@ class Lines:
         self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
-        if None in (event.xdata, event.ydata):
-            return
         if event.button != 1:
+            return
+        if None in (event.xdata, event.ydata):
             return
         if not self._active_line_drawing:
             self._make_new_line(x=event.xdata, y=event.ydata)
