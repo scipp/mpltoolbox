@@ -6,16 +6,25 @@ class Dots:
     def __init__(self, ax, color=None):
         self._ax = ax
         self._fig = self._ax.get_figure()
-        self.points = None
-        self.line = self._ax.plot(self._ax.get_xlim()[0],
-                                  self._ax.get_ylim()[0], 'o')[0]
+        # self.points = None
+
         # self._current_point
 
-        self._fig.canvas.mpl_connect('motion_notify_event', self._on_motion_notify)
-        self._fig.canvas.mpl_connect('button_press_event', self._on_button_press)
+        # self._fig.canvas.mpl_connect('motion_notify_event', self._on_motion_notify)
 
-        self.on_motion_notify = None
+        self._scatter = None
+
+        self._connections = {}
+        self.connections['button_press_event'] = self._fig.canvas.mpl_connect(
+            'button_press_event', self._on_button_press)
+        self._connections['pick_event'] = self._fig.canvas.mpl_connect(
+            'pick_event', self._on_pick)
+
         self.on_button_press = None
+        self.on_pick = None
+
+    def _make_scatter(self, x=0, y=0):
+        self._scatter = self._ax.scatter([0], [0])
 
     def _on_motion_notify(self, event):
         self._move_dot(event)
