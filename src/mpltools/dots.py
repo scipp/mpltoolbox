@@ -25,7 +25,7 @@ class Dots:
     def _move_dot(self, event):
         if None in (event.xdata, event.ydata):
             return
-        ind = self.npoints - 1
+        ind = len(self) - 1
         new_data = self.line.get_data()
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
@@ -46,8 +46,7 @@ class Dots:
                        new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
         self._fig.canvas.draw_idle()
 
-    @property
-    def npoints(self):
+    def __len__(self):
         return len(self.line.get_xydata())
 
     # fig.canvas.mpl_connect('motion_notify_event', move_dot)
