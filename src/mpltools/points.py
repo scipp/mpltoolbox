@@ -3,7 +3,12 @@ import numpy as np
 
 class Points:
 
-    def __init__(self, ax, color=None):
+    def __init__(self,
+                 ax,
+                 color=None,
+                 on_motion_notify=None,
+                 on_button_press=None,
+                 on_pick=None):
         self._ax = ax
         self._fig = self._ax.get_figure()
 
@@ -15,9 +20,9 @@ class Points:
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
             'pick_event', self._on_pick)
 
-        self.on_motion_notify = None
-        self.on_button_press = None
-        self.on_pick = None
+        self.on_motion_notify = on_motion_notify
+        self.on_button_press = on_button_press
+        self.on_pick = on_pick
 
         self._pick_lock = False
         self._moving_dot_indices = None

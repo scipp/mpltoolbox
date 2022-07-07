@@ -3,7 +3,12 @@ import numpy as np
 
 class Lines:
 
-    def __init__(self, ax, n):
+    def __init__(self,
+                 ax,
+                 n,
+                 on_motion_notify=None,
+                 on_button_press=None,
+                 on_pick=None):
         self._ax = ax
         self._fig = ax.get_figure()
         self._nmax = n
@@ -18,9 +23,9 @@ class Lines:
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
             'pick_event', self._on_pick)
 
-        self.on_motion_notify = None
-        self.on_button_press = None
-        self.on_pick = None
+        self.on_motion_notify = on_motion_notify
+        self.on_button_press = on_button_press
+        self.on_pick = on_pick
 
         # self._active_line_drawing = False
 
