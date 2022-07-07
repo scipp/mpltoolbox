@@ -11,8 +11,8 @@ class Lines:
         self.lines = []
 
         self._connections = {}
-        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._on_motion_notify)
+        # self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+        #     'motion_notify_event', self._on_motion_notify)
         self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
             'button_press_event', self._on_button_press)
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
@@ -22,7 +22,7 @@ class Lines:
         self.on_button_press = None
         self.on_pick = None
 
-        self._active_line_drawing = False
+        # self._active_line_drawing = False
 
     def _make_new_line(self, x=0, y=0):
         line = self._ax.plot([x, x], [y, y], 'o', ls='solid')[0]
@@ -34,7 +34,7 @@ class Lines:
             self.on_motion_notify(event)
 
     def _move_dot(self, event):
-        if None in (event.xdata, event.ydata) or (not self._active_line_drawing):
+        if None in (event.xdata, event.ydata):  # or (not self._active_line_drawing):
             return
         new_data = self.lines[-1].get_data()
         new_data[0][-1] = event.xdata
@@ -47,9 +47,12 @@ class Lines:
             return
         if None in (event.xdata, event.ydata):
             return
-        if not self._active_line_drawing:
+        # if not self._active_line_drawing:
+        if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
-            self._active_line_drawing = True
+            # self._active_line_drawing = True
+            self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+                'motion_notify_event', self._on_motion_notify)
             self._fig.canvas.draw_idle()
         else:
             self._persist_dot(event)
@@ -60,7 +63,9 @@ class Lines:
         if None in (event.xdata, event.ydata):
             return
         if self._get_line_length(-1) == self._nmax:
-            self._active_line_drawing = False
+            # self._active_line_drawing = False
+            self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
+            del self._connections['motion_notify_event']
             self.lines[-1].set_picker(5.0)
         else:
             new_data = self.lines[-1].get_data()

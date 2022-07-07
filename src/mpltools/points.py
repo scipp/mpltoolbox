@@ -81,3 +81,9 @@ class Points:
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         self._pick_lock = False
+
+    def get_point(self, ind):
+        return self._scatter.get_offsets()[ind]
+
+    def get_all_points(self):
+        return self._scatter.get_offsets()
