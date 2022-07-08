@@ -32,9 +32,11 @@ class Points:
             self._fig.canvas.mpl_disconnect(c)
         self._scatter.remove()
         del self._scatter, self._connections
+        self._fig.canvas.draw_idle()
 
     def _make_scatter(self, x=0, y=0):
         self._scatter = self._ax.scatter([x], [y], picker=True)
+        self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock:
@@ -53,10 +55,12 @@ class Points:
         offsets = self._scatter.get_offsets()
         offsets = np.concatenate([offsets, [[x, y]]])
         self._scatter.set_offsets(offsets)
+        self._fig.canvas.draw_idle()
 
     def _remove_point(self, inds):
         offsets = np.delete(self._scatter.get_offsets(), inds, axis=0)
         self._scatter.set_offsets(offsets)
+        self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
         button = event.mouseevent.button
@@ -87,6 +91,7 @@ class Points:
         offsets = self._scatter.get_offsets()
         offsets[ind] = [event.xdata, event.ydata]
         self._scatter.set_offsets(offsets)
+        self._fig.canvas.draw_idle()
 
     def _on_button_release(self, event):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])

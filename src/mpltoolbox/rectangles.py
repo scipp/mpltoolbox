@@ -26,6 +26,7 @@ class Rectangles:
         for rect in self.rectangles:
             rect.remove()
         del self.rectangles, self._connections
+        self._fig.canvas.draw_idle()
 
     def _make_new_rectangle(self, x=0, y=0):
         self.rectangles.append(
@@ -46,6 +47,7 @@ class Rectangles:
         x, y = self.rectangles[-1].xy
         self.rectangles[-1].set_width(event.xdata - x)
         self.rectangles[-1].set_height(event.ydata - y)
+        self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
         if event.button != 1:
@@ -65,6 +67,7 @@ class Rectangles:
     def _remove_rectangle(self, rect):
         rect.remove()
         self.rectangles.remove(rect)
+        self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
         if event.mouseevent.button == 3:
