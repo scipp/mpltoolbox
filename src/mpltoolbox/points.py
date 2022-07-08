@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+
 import numpy as np
 
 
@@ -67,7 +70,7 @@ class Points:
         if button == 1:
             self._pick_lock = True
             self._activate_moving_dot(event)
-        elif button == 3:
+        elif button in (2, 3):
             self._remove_point(event.ind)
         # if self.on_pick is not None:
         #     self.on_pick(event)

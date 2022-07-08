@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+
 import numpy as np
 
 
@@ -56,18 +59,10 @@ class Lines:
         self.lines.append(line)
 
     def _on_motion_notify(self, event):
-        self._move_dot(event)
+        # self._move_dot(event)
+        self._move_vertex(event=event, ind=-1, line=self.lines[-1])
         # if self.on_motion_notify is not None:
         #     self.on_motion_notify(event)
-
-    def _move_dot(self, event):
-        if None in (event.xdata, event.ydata):  # or (not self._active_line_drawing):
-            return
-        new_data = self.lines[-1].get_data()
-        new_data[0][-1] = event.xdata
-        new_data[1][-1] = event.ydata
-        self.lines[-1].set_data(new_data)
-        self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock:
@@ -110,11 +105,11 @@ class Lines:
     def _on_pick(self, event):
         if event.mouseevent.button == 1:
             self._pick_lock = True
-            self._activate_moving_vertx(event)
-        elif event.mouseevent.button == 3:
+            self._activate_moving_vertex(event)
+        elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
 
-    def _activate_moving_vertx(self, event):
+    def _activate_moving_vertex(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._on_vertex_motion)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
@@ -123,13 +118,15 @@ class Lines:
         self._moving_vertex_artist = event.artist
 
     def _on_vertex_motion(self, event):
-        self._move_vertex(event)
+        self._move_vertex(event=event,
+                          ind=self._moving_vertex_index,
+                          line=self._moving_vertex_artist)
 
-    def _move_vertex(self, event):
+    def _move_vertex(self, event, ind, line):
         if None in (event.xdata, event.ydata):
             return
-        ind = self._moving_vertex_index
-        line = self._moving_vertex_artist
+        # ind = self._moving_vertex_index
+        # line = self._moving_vertex_artist
         new_data = line.get_data()
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
