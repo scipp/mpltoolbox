@@ -6,9 +6,9 @@ class Points:
     def __init__(self,
                  ax,
                  color=None,
-                 on_motion_notify=None,
-                 on_button_press=None,
-                 on_pick=None):
+                 on_vertex_press=None,
+                 on_vertex_move=None,
+                 on_vertex_release=None):
         self._ax = ax
         self._fig = self._ax.get_figure()
 
@@ -20,9 +20,9 @@ class Points:
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
             'pick_event', self._on_pick)
 
-        self.on_motion_notify = on_motion_notify
-        self.on_button_press = on_button_press
-        self.on_pick = on_pick
+        self.on_vertex_press = on_vertex_press
+        self.on_vertex_move = on_vertex_move
+        self.on_vertex_release = on_vertex_release
 
         self._pick_lock = False
         self._moving_dot_indices = None
@@ -48,8 +48,8 @@ class Points:
             self._make_scatter(x=x, y=y)
         else:
             self._persist_dot(x=x, y=y)
-        if self.on_button_press is not None:
-            self.on_button_press(event)
+        # if self.on_button_press is not None:
+        #     self.on_button_press(event)
 
     def _persist_dot(self, x, y):
         offsets = self._scatter.get_offsets()
@@ -67,10 +67,10 @@ class Points:
         if button == 1:
             self._pick_lock = True
             self._activate_moving_dot(event)
-        if button == 3:
+        elif button == 3:
             self._remove_point(event.ind)
-        if self.on_pick is not None:
-            self.on_pick(event)
+        # if self.on_pick is not None:
+        #     self.on_pick(event)
 
     def _activate_moving_dot(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
@@ -81,8 +81,8 @@ class Points:
 
     def _on_motion_notify(self, event):
         self._move_dot(event)
-        if self.on_motion_notify is not None:
-            self.on_motion_notify(event)
+        # if self.on_motion_notify is not None:
+        #     self.on_motion_notify(event)
 
     def _move_dot(self, event):
         if None in (event.xdata, event.ydata):

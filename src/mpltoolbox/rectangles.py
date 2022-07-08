@@ -4,7 +4,15 @@ from matplotlib.patches import Rectangle
 
 class Rectangles:
 
-    def __init__(self, ax, on_motion_notify=None, on_button_press=None, on_pick=None):
+    def __init__(self,
+                 ax,
+                 on_vertex_press=None,
+                 on_vertex_move=None,
+                 on_vertex_release=None,
+                 on_drag_press=None,
+                 on_drag_move=None,
+                 on_drag_release=None):
+
         self._ax = ax
         self._fig = ax.get_figure()
 
@@ -16,9 +24,12 @@ class Rectangles:
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
             'pick_event', self._on_pick)
 
-        self.on_motion_notify = on_motion_notify
-        self.on_button_press = on_button_press
-        self.on_pick = on_pick
+        self.on_vertex_press = on_vertex_press
+        self.on_vertex_move = on_vertex_move
+        self.on_vertex_release = on_vertex_release
+        self.on_drag_press = on_drag_press
+        self.on_drag_move = on_drag_move
+        self.on_drag_release = on_drag_release
 
     def __del__(self):
         for c in self._connections.values():
@@ -38,8 +49,8 @@ class Rectangles:
 
     def _on_motion_notify(self, event):
         self._resize_rectangle(event)
-        if self.on_motion_notify is not None:
-            self.on_motion_notify(event)
+        # if self.on_motion_notify is not None:
+        #     self.on_motion_notify(event)
 
     def _resize_rectangle(self, event):
         if None in (event.xdata, event.ydata):
@@ -61,8 +72,8 @@ class Rectangles:
         else:
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
-        if self.on_button_press is not None:
-            self.on_button_press(event)
+        # if self.on_button_press is not None:
+        #     self.on_button_press(event)
 
     def _remove_rectangle(self, rect):
         rect.remove()
@@ -72,8 +83,17 @@ class Rectangles:
     def _on_pick(self, event):
         if event.mouseevent.button == 3:
             self._remove_rectangle(event.artist)
-        if self.on_pick is not None:
-            self.on_pick(event)
+        # if self.on_pick is not None:
+        #     self.on_pick(event)
 
     def get_rectangle(self, ind):
-        return self.rectangles[ind]
+        rect = self.rectangles[ind]
+        box = rect.get_bbox()
+        return {
+            "xmin": box.xmin,
+            "xmax": box.xmax,
+            "ymin": box.ymin,
+            "ymax": box.ymax,
+            "width": abs(rect.get_width()),
+            "height": abs(rect.get_height())
+        }
