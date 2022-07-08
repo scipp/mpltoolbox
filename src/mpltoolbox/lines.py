@@ -80,12 +80,15 @@ class Lines(Tool):
             self._activate_moving_vertex(event)
         elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
+        elif event.mouseevent.button == 3:
+            self._pick_lock = True
+            self._grab_line(event)
 
     def _activate_moving_vertex(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._on_vertex_motion)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._on_button_release)
+            'button_release_event', self._release_line)
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_artist = event.artist
 
@@ -108,12 +111,30 @@ class Lines(Tool):
         # if self.on_pick is not None:
         #     self.on_pick(event)
 
-    def _on_button_release(self, event):
+    def _release_line(self, event):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         del self._connections['motion_notify_event']
         del self._connections['button_release_event']
         self._pick_lock = False
+
+    def _grab_line(self, event):
+        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+            'motion_notify_event', self._move_line)
+        self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
+            'button_release_event', self._release_line)
+        self._grab_artist = event.artist
+        self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
+        self._grab_artist_origin = self._grab_artist.get_data()
+
+    def _move_line(self, event):
+        if None in (event.xdata, event.ydata):
+            return
+        dx = event.xdata - self._grab_mouse_origin[0]
+        dy = event.ydata - self._grab_mouse_origin[1]
+        self._grab_artist.set_data(
+            (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
+        self._fig.canvas.draw_idle()
 
     def _get_line_length(self, ind):
         return len(self.lines[ind].get_xydata())
