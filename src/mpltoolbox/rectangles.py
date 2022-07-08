@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
-import numpy as np
 from matplotlib.patches import Rectangle
 
 
@@ -22,6 +21,17 @@ class Rectangles(Tool):
     def __del__(self):
         super().shutdown(artists=self.rectangles)
 
+    def _on_button_press(self, event):
+        if event.button != 1 or self._pick_lock or self._get_active_tool():
+            return
+        if event.inaxes != self._ax:
+            return
+        self._make_new_rectangle(x=event.xdata, y=event.ydata)
+        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+            'motion_notify_event', self._on_motion_notify)
+        self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
+            'button_release_event', self._persist_rectangle)
+
     def _make_new_rectangle(self, x=0, y=0):
         self.rectangles.append(
             Rectangle((x, y), 0, 0, fc=(0, 0, 0, 0.1), ec=(0, 0, 0, 1), picker=True))
@@ -36,27 +46,12 @@ class Rectangles(Tool):
         #     self.on_motion_notify(event)
 
     def _resize_rectangle(self, event):
-        # if None in (event.xdata, event.ydata):
-        #     return
         if event.inaxes != self._ax:
             return
         x, y = self.rectangles[-1].xy
         self.rectangles[-1].set_width(event.xdata - x)
         self.rectangles[-1].set_height(event.ydata - y)
         self._fig.canvas.draw_idle()
-
-    def _on_button_press(self, event):
-        if event.button != 1 or self._pick_lock or self._get_active_tool():
-            return
-        # if None in (event.xdata, event.ydata):
-        #     return
-        if event.inaxes != self._ax:
-            return
-        self._make_new_rectangle(x=event.xdata, y=event.ydata)
-        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._on_motion_notify)
-        self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._persist_rectangle)
 
     def _persist_rectangle(self, event):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
@@ -92,8 +87,6 @@ class Rectangles(Tool):
         self._grab_artist_origin = self._grab_artist.xy
 
     def _move_rectangle(self, event):
-        # if None in (event.xdata, event.ydata):
-        #     return
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]

@@ -21,12 +21,10 @@ class Lines(Tool):
         super().shutdown(artists=self.lines)
 
     def _make_new_line(self, x=0, y=0):
-        # line = Line(ax=self._ax, x=x, y=y)
         line = self._ax.plot([x, x], [y, y], '-o')[0]
         self.lines.append(line)
 
     def _on_motion_notify(self, event):
-        # self._move_dot(event)
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
         # if self.on_motion_notify is not None:
         #     self.on_motion_notify(event)
@@ -34,13 +32,10 @@ class Lines(Tool):
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
-        # if None in (event.xdata, event.ydata):
         if event.inaxes != self._ax:
             return
-        # if not self._active_line_drawing:
         if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
-            # self._active_line_drawing = True
             self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
                 'motion_notify_event', self._on_motion_notify)
             self._fig.canvas.draw_idle()
@@ -50,10 +45,7 @@ class Lines(Tool):
         #     self.on_button_press(event)
 
     def _persist_dot(self, event):
-        # if None in (event.xdata, event.ydata):
-        #     return
         if self._get_line_length(-1) == self._nmax:
-            # self._active_line_drawing = False
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
             self.lines[-1].set_picker(5.0)
@@ -97,27 +89,15 @@ class Lines(Tool):
                           line=self._moving_vertex_artist)
 
     def _move_vertex(self, event, ind, line):
-        # if None in (event.xdata, event.ydata):
-        #     return
         if event.inaxes != self._ax:
             return
-        # ind = self._moving_vertex_index
-        # line = self._moving_vertex_artist
         new_data = line.get_data()
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
         line.set_data(new_data)
         self._fig.canvas.draw_idle()
-
         # if self.on_pick is not None:
         #     self.on_pick(event)
-
-    def _release_line(self, event):
-        self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
-        self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
-        del self._connections['motion_notify_event']
-        del self._connections['button_release_event']
-        self._pick_lock = False
 
     def _grab_line(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
@@ -129,8 +109,6 @@ class Lines(Tool):
         self._grab_artist_origin = self._grab_artist.get_data()
 
     def _move_line(self, event):
-        # if None in (event.xdata, event.ydata):
-        #     return
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
@@ -138,6 +116,13 @@ class Lines(Tool):
         self._grab_artist.set_data(
             (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
         self._fig.canvas.draw_idle()
+
+    def _release_line(self, event):
+        self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
+        self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
+        del self._connections['motion_notify_event']
+        del self._connections['button_release_event']
+        self._pick_lock = False
 
     def _get_line_length(self, ind):
         return len(self.lines[ind].get_xydata())
