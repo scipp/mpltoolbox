@@ -50,8 +50,8 @@ class Lines(Tool):
         #     self.on_button_press(event)
 
     def _persist_dot(self, event):
-        if None in (event.xdata, event.ydata):
-            return
+        # if None in (event.xdata, event.ydata):
+        #     return
         if self._get_line_length(-1) == self._nmax:
             # self._active_line_drawing = False
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
@@ -71,6 +71,8 @@ class Lines(Tool):
 
     def _on_pick(self, event):
         if self._get_active_tool():
+            return
+        if event.mouseevent.inaxes != self._ax:
             return
         if event.mouseevent.button == 1:
             self._pick_lock = True
@@ -95,7 +97,9 @@ class Lines(Tool):
                           line=self._moving_vertex_artist)
 
     def _move_vertex(self, event, ind, line):
-        if None in (event.xdata, event.ydata):
+        # if None in (event.xdata, event.ydata):
+        #     return
+        if event.inaxes != self._ax:
             return
         # ind = self._moving_vertex_index
         # line = self._moving_vertex_artist
@@ -125,7 +129,9 @@ class Lines(Tool):
         self._grab_artist_origin = self._grab_artist.get_data()
 
     def _move_line(self, event):
-        if None in (event.xdata, event.ydata):
+        # if None in (event.xdata, event.ydata):
+        #     return
+        if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]

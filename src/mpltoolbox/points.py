@@ -25,9 +25,11 @@ class Points(Tool):
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
-        x, y = event.xdata, event.ydata
-        if None in (x, y):
+        if event.inaxes != self._ax:
             return
+        x, y = event.xdata, event.ydata
+        # if None in (x, y):
+        #     return
         if self._scatter is None:
             self._make_scatter(x=x, y=y)
         else:
@@ -48,6 +50,8 @@ class Points(Tool):
 
     def _on_pick(self, event):
         if self._get_active_tool():
+            return
+        if event.mouseevent.inaxes != self._ax:
             return
         button = event.mouseevent.button
         if button == 1:
@@ -71,7 +75,7 @@ class Points(Tool):
         #     self.on_motion_notify(event)
 
     def _move_dot(self, event):
-        if None in (event.xdata, event.ydata):
+        if event.inaxes != self._ax:
             return
         ind = self._moving_dot_indices[0]
         offsets = self._scatter.get_offsets()
