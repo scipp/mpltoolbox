@@ -44,7 +44,7 @@ class Rectangles(Tool):
         self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
-        if event.button != 1 or self._pick_lock:
+        if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
         if None in (event.xdata, event.ydata):
             return
@@ -66,6 +66,8 @@ class Rectangles(Tool):
         self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
+        if self._get_active_tool():
+            return
         if event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_rectangle(event)

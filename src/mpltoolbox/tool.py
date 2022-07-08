@@ -45,3 +45,6 @@ class Tool:
             a.remove()
         del artists, self._connections
         self._fig.canvas.draw_idle()
+
+    def _get_active_tool(self):
+        return self._fig.canvas.toolbar.get_state()['_current_action']

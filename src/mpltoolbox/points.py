@@ -23,7 +23,7 @@ class Points(Tool):
         self._fig.canvas.draw_idle()
 
     def _on_button_press(self, event):
-        if event.button != 1 or self._pick_lock:
+        if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
         x, y = event.xdata, event.ydata
         if None in (x, y):
@@ -47,6 +47,8 @@ class Points(Tool):
         self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
+        if self._get_active_tool():
+            return
         button = event.mouseevent.button
         if button == 1:
             self._pick_lock = True

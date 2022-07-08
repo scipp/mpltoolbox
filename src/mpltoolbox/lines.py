@@ -20,11 +20,6 @@ class Lines(Tool):
     def __del__(self):
         super().shutdown(artists=self.lines)
 
-    def _find_line_from_artist(self, artist, attr):
-        for line in self.lines:
-            if artist is getattr(line, attr):
-                return line
-
     def _make_new_line(self, x=0, y=0):
         # line = Line(ax=self._ax, x=x, y=y)
         line = self._ax.plot([x, x], [y, y], '-o')[0]
@@ -37,9 +32,10 @@ class Lines(Tool):
         #     self.on_motion_notify(event)
 
     def _on_button_press(self, event):
-        if event.button != 1 or self._pick_lock:
+        if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
-        if None in (event.xdata, event.ydata):
+        # if None in (event.xdata, event.ydata):
+        if event.inaxes != self._ax:
             return
         # if not self._active_line_drawing:
         if 'motion_notify_event' not in self._connections:
@@ -69,22 +65,23 @@ class Lines(Tool):
         self._fig.canvas.draw_idle()
 
     def _remove_line(self, line):
-        # line = self._find_line_from_artist(artist, "line")
         line.remove()
         self.lines.remove(line)
         self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
+        if self._get_active_tool():
+            return
         if event.mouseevent.button == 1:
             self._pick_lock = True
-            self._activate_moving_vertex(event)
+            self._grab_vertex(event)
         elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
         elif event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_line(event)
 
-    def _activate_moving_vertex(self, event):
+    def _grab_vertex(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._on_vertex_motion)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
