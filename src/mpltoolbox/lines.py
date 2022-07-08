@@ -1,52 +1,24 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
+from .tool import Tool
 import numpy as np
 
 
-class Lines:
+class Lines(Tool):
 
-    def __init__(self,
-                 ax,
-                 n,
-                 on_vertex_press=None,
-                 on_vertex_move=None,
-                 on_vertex_release=None,
-                 on_drag_press=None,
-                 on_drag_move=None,
-                 on_drag_release=None):
-        self._ax = ax
-        self._fig = ax.get_figure()
+    def __init__(self, ax, n, **kwargs):
+
+        super().__init__(ax, **kwargs)
+
         self._nmax = n
-
         self.lines = []
-
-        self._connections = {}
-        # self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-        #     'motion_notify_event', self._on_motion_notify)
-        self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
-            'button_press_event', self._on_button_press)
-        self._connections['pick_event'] = self._fig.canvas.mpl_connect(
-            'pick_event', self._on_pick)
-
-        self.on_vertex_press = on_vertex_press
-        self.on_vertex_move = on_vertex_move
-        self.on_vertex_release = on_vertex_release
-        self.on_drag_press = on_drag_press
-        self.on_drag_move = on_drag_move
-        self.on_drag_release = on_drag_release
-
-        # self._active_line_drawing = False
         self._pick_lock = False
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
 
     def __del__(self):
-        for c in self._connections.values():
-            self._fig.canvas.mpl_disconnect(c)
-        for line in self.lines:
-            line.remove()
-        del self.lines, self._connections
+        super().shutdown(artists=self.lines)
 
     def _find_line_from_artist(self, artist, attr):
         for line in self.lines:

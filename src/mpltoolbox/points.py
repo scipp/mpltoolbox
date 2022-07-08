@@ -1,41 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
+from .tool import Tool
 import numpy as np
 
 
-class Points:
+class Points(Tool):
 
-    def __init__(self,
-                 ax,
-                 color=None,
-                 on_vertex_press=None,
-                 on_vertex_move=None,
-                 on_vertex_release=None):
-        self._ax = ax
-        self._fig = self._ax.get_figure()
+    def __init__(self, ax, color=None, **kwargs):
+
+        super().__init__(ax, **kwargs)
 
         self._scatter = None
-
-        self._connections = {}
-        self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
-            'button_press_event', self._on_button_press)
-        self._connections['pick_event'] = self._fig.canvas.mpl_connect(
-            'pick_event', self._on_pick)
-
-        self.on_vertex_press = on_vertex_press
-        self.on_vertex_move = on_vertex_move
-        self.on_vertex_release = on_vertex_release
-
         self._pick_lock = False
         self._moving_dot_indices = None
 
     def __del__(self):
-        for c in self._connections.values():
-            self._fig.canvas.mpl_disconnect(c)
-        self._scatter.remove()
-        del self._scatter, self._connections
-        self._fig.canvas.draw_idle()
+        super().shutdown(artists=[self._scatter])
 
     def _make_scatter(self, x=0, y=0):
         self._scatter = self._ax.scatter([x], [y], picker=True)

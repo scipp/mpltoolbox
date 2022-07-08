@@ -1,52 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
+from .tool import Tool
 import numpy as np
 from matplotlib.patches import Rectangle
 
 
-class Rectangles:
+class Rectangles(Tool):
 
-    def __init__(self,
-                 ax,
-                 on_vertex_press=None,
-                 on_vertex_move=None,
-                 on_vertex_release=None,
-                 on_drag_press=None,
-                 on_drag_move=None,
-                 on_drag_release=None):
+    def __init__(self, *args, **kwargs):
 
-        self._ax = ax
-        self._fig = ax.get_figure()
+        super().__init__(*args, **kwargs)
 
         self.rectangles = []
-
-        self._connections = {}
-        self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
-            'button_press_event', self._on_button_press)
-        self._connections['pick_event'] = self._fig.canvas.mpl_connect(
-            'pick_event', self._on_pick)
-
         self._drag_rectangle = False
         self._grab_artist = None
         self._grab_mouse_origin = None
         self._grab_artist_origin = None
         self._pick_lock = False
 
-        self.on_vertex_press = on_vertex_press
-        self.on_vertex_move = on_vertex_move
-        self.on_vertex_release = on_vertex_release
-        self.on_drag_press = on_drag_press
-        self.on_drag_move = on_drag_move
-        self.on_drag_release = on_drag_release
-
     def __del__(self):
-        for c in self._connections.values():
-            self._fig.canvas.mpl_disconnect(c)
-        for rect in self.rectangles:
-            rect.remove()
-        del self.rectangles, self._connections
-        self._fig.canvas.draw_idle()
+        super().shutdown(artists=self.rectangles)
 
     def _make_new_rectangle(self, x=0, y=0):
         self.rectangles.append(
