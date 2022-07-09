@@ -27,8 +27,6 @@ class Lines(Tool):
 
     def _on_motion_notify(self, event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
-        # if self.on_motion_notify is not None:
-        #     self.on_motion_notify(event)
 
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
@@ -42,8 +40,6 @@ class Lines(Tool):
             self._fig.canvas.draw_idle()
         else:
             self._persist_dot(event)
-        # if self.on_button_press is not None:
-        #     self.on_button_press(event)
 
     def _persist_dot(self, event):
         if self._get_line_length(-1) == self._nmax:
@@ -107,8 +103,6 @@ class Lines(Tool):
         new_data[1][ind] = event.ydata
         line.set_data(new_data)
         self._fig.canvas.draw_idle()
-        # if self.on_pick is not None:
-        #     self.on_pick(event)
 
     def _grab_line(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(

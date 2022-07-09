@@ -42,8 +42,6 @@ class Rectangles(Tool):
 
     def _on_motion_notify(self, event):
         self._resize_rectangle(event)
-        # if self.on_motion_notify is not None:
-        #     self.on_motion_notify(event)
 
     def _resize_rectangle(self, event):
         if event.inaxes != self._ax:
@@ -80,9 +78,6 @@ class Rectangles(Tool):
             self._remove_rectangle(event.artist)
             if self.on_remove is not None:
                 self.on_remove(event)
-
-        # if self.on_pick is not None:
-        #     self.on_pick(event)
 
     def _grab_rectangle(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(

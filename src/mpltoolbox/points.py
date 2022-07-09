@@ -11,12 +11,13 @@ class Points(Tool):
 
         super().__init__(ax, **kwargs)
 
-        self._scatter = None
+        self.scatter = None
         self._pick_lock = False
         self._moving_point_indices = None
+        self._color = color
 
     def __del__(self):
-        super().shutdown(artists=[self._scatter])
+        super().shutdown(artists=[self.scatter])
 
     def _on_button_press(self, event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
@@ -24,28 +25,26 @@ class Points(Tool):
         if event.inaxes != self._ax:
             return
         x, y = event.xdata, event.ydata
-        if self._scatter is None:
+        if self.scatter is None:
             self._make_scatter(x=x, y=y)
         else:
             self._persist_point(x=x, y=y)
-        # if self.on_button_press is not None:
-        #     self.on_button_press(event)
 
     def _make_scatter(self, x=0, y=0):
-        self._scatter = self._ax.scatter([x], [y], picker=True)
+        self.scatter = self._ax.scatter([x], [y], color=self._color, picker=True)
         self._fig.canvas.draw_idle()
 
     def _persist_point(self, x, y):
-        offsets = self._scatter.get_offsets()
+        offsets = self.scatter.get_offsets()
         offsets = np.concatenate([offsets, [[x, y]]])
-        self._scatter.set_offsets(offsets)
+        self.scatter.set_offsets(offsets)
         self._fig.canvas.draw_idle()
         if self.on_create is not None:
             self.on_create({'x': x, 'y': y})
 
     def _remove_point(self, inds):
-        offsets = np.delete(self._scatter.get_offsets(), inds, axis=0)
-        self._scatter.set_offsets(offsets)
+        offsets = np.delete(self.scatter.get_offsets(), inds, axis=0)
+        self.scatter.set_offsets(offsets)
         self._fig.canvas.draw_idle()
 
     def _on_pick(self, event):
@@ -64,9 +63,6 @@ class Points(Tool):
             if self.on_remove is not None:
                 self.on_remove(event)
 
-        # if self.on_pick is not None:
-        #     self.on_pick(event)
-
     def _grab_point(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._move_point)
@@ -74,19 +70,13 @@ class Points(Tool):
             'button_release_event', self._release_point)
         self._moving_point_indices = event.ind
 
-    # def _on_motion_notify(self, event):
-    #     self._move_point(event)
-
-    # if self.on_motion_notify is not None:
-    #     self.on_motion_notify(event)
-
     def _move_point(self, event):
         if event.inaxes != self._ax:
             return
         ind = self._moving_point_indices[0]
-        offsets = self._scatter.get_offsets()
+        offsets = self.scatter.get_offsets()
         offsets[ind] = [event.xdata, event.ydata]
-        self._scatter.set_offsets(offsets)
+        self.scatter.set_offsets(offsets)
         self._fig.canvas.draw_idle()
         if self.on_drag_move is not None:
             self.on_drag_move(event)
@@ -99,4 +89,4 @@ class Points(Tool):
             self.on_drag_release(event)
 
     def get_points(self):
-        return self._scatter.get_offsets()
+        return self.scatter.get_offsets()
