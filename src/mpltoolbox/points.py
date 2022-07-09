@@ -32,20 +32,20 @@ class Points(Tool):
 
     def _make_scatter(self, x=0, y=0):
         self.scatter = self._ax.scatter([x], [y], color=self._color, picker=True)
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _persist_point(self, x, y):
         offsets = self.scatter.get_offsets()
         offsets = np.concatenate([offsets, [[x, y]]])
         self.scatter.set_offsets(offsets)
-        self._fig.canvas.draw_idle()
+        self._draw()
         if self.on_create is not None:
             self.on_create({'x': x, 'y': y})
 
     def _remove_point(self, inds):
         offsets = np.delete(self.scatter.get_offsets(), inds, axis=0)
         self.scatter.set_offsets(offsets)
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _on_pick(self, event):
         if self._get_active_tool():
@@ -77,7 +77,7 @@ class Points(Tool):
         offsets = self.scatter.get_offsets()
         offsets[ind] = [event.xdata, event.ydata]
         self.scatter.set_offsets(offsets)
-        self._fig.canvas.draw_idle()
+        self._draw()
         if self.on_drag_move is not None:
             self.on_drag_move(event)
 

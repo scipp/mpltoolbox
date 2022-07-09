@@ -4,11 +4,14 @@
 from .tool import Tool
 import numpy as np
 from functools import partial
+from matplotlib.pyplot import Artist, Axes
+from matplotlib.backend_bases import Event
+from typing import Callable, List
 
 
 class Lines(Tool):
 
-    def __init__(self, ax, n, **kwargs):
+    def __init__(self, ax: Axes, n: int, **kwargs):
 
         super().__init__(ax, **kwargs)
 
@@ -21,14 +24,14 @@ class Lines(Tool):
     def __del__(self):
         super().shutdown(artists=self.lines)
 
-    def _make_new_line(self, x=0, y=0):
+    def _make_new_line(self, x: float = 0, y: float = 0):
         line = self._ax.plot([x, x], [y, y], '-o')[0]
         self.lines.append(line)
 
-    def _on_motion_notify(self, event):
+    def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
 
-    def _on_button_press(self, event):
+    def _on_button_press(self, event: Event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
         if event.inaxes != self._ax:
@@ -37,11 +40,11 @@ class Lines(Tool):
             self._make_new_line(x=event.xdata, y=event.ydata)
             self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
                 'motion_notify_event', self._on_motion_notify)
-            self._fig.canvas.draw_idle()
+            self._draw()
         else:
             self._persist_dot(event)
 
-    def _persist_dot(self, event):
+    def _persist_dot(self, event: Event):
         if self._get_line_length(-1) == self._nmax:
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
@@ -53,12 +56,12 @@ class Lines(Tool):
             self.lines[-1].set_data(
                 (np.append(new_data[0],
                            new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _remove_line(self, line):
         line.remove()
         self.lines.remove(line)
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _on_pick(self, event):
         if self._get_active_tool():
@@ -102,7 +105,7 @@ class Lines(Tool):
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
         line.set_data(new_data)
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _grab_line(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
@@ -120,7 +123,7 @@ class Lines(Tool):
         dy = event.ydata - self._grab_mouse_origin[1]
         self._grab_artist.set_data(
             (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
-        self._fig.canvas.draw_idle()
+        self._draw()
 
     def _release_line(self, event, kind):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])

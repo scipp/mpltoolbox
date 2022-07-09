@@ -1,21 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+from matplotlib.pyplot import Artist, Axes
+from typing import Callable, List
 
 
 class Tool:
 
     def __init__(self,
-                 ax,
+                 ax: Axes,
                  *,
-                 autostart=True,
-                 on_create=None,
-                 on_remove=None,
-                 on_vertex_press=None,
-                 on_vertex_move=None,
-                 on_vertex_release=None,
-                 on_drag_press=None,
-                 on_drag_move=None,
-                 on_drag_release=None):
+                 autostart: bool = True,
+                 on_create: Callable = None,
+                 on_remove: Callable = None,
+                 on_vertex_press: Callable = None,
+                 on_vertex_move: Callable = None,
+                 on_vertex_release: Callable = None,
+                 on_drag_press: Callable = None,
+                 on_drag_move: Callable = None,
+                 on_drag_release: Callable = None):
+        """
+        A generic tool that stores user callbacks and provides
+        start/stop/shutdown mechanism.
+        """
 
         self._ax = ax
         self._fig = ax.get_figure()
@@ -33,6 +39,9 @@ class Tool:
         if autostart:
             self.start()
 
+    def _draw(self):
+        self._fig.canvas.draw_idle()
+
     def start(self):
         self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
             'button_press_event', self._on_button_press)
@@ -43,12 +52,12 @@ class Tool:
         for c in self._connections.values():
             self._fig.canvas.mpl_disconnect(c)
 
-    def shutdown(self, artists):
+    def shutdown(self, artists: List[Artist]):
         self.stop()
         for a in artists:
             a.remove()
         del artists, self._connections
-        self._fig.canvas.draw_idle()
+        self._draw()
 
-    def _get_active_tool(self):
+    def _get_active_tool(self) -> str:
         return self._fig.canvas.toolbar.get_state()['_current_action']
