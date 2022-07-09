@@ -8,6 +8,8 @@ class Tool:
                  ax,
                  *,
                  autostart=True,
+                 on_create=None,
+                 on_remove=None,
                  on_vertex_press=None,
                  on_vertex_move=None,
                  on_vertex_release=None,
@@ -19,6 +21,8 @@ class Tool:
         self._fig = ax.get_figure()
         self._connections = {}
 
+        self.on_create = on_create
+        self.on_remove = on_remove
         self.on_vertex_press = on_vertex_press
         self.on_vertex_move = on_vertex_move
         self.on_vertex_release = on_vertex_release

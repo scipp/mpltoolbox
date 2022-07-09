@@ -3,6 +3,7 @@
 
 from .tool import Tool
 import numpy as np
+from functools import partial
 
 
 class Lines(Tool):
@@ -49,6 +50,8 @@ class Lines(Tool):
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
             self.lines[-1].set_picker(5.0)
+            if self.on_create is not None:
+                self.on_create(event)
         else:
             new_data = self.lines[-1].get_data()
             self.lines[-1].set_data(
@@ -69,17 +72,23 @@ class Lines(Tool):
         if event.mouseevent.button == 1:
             self._pick_lock = True
             self._grab_vertex(event)
+            if self.on_vertex_press is not None:
+                self.on_vertex_press(event)
         elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
+            if self.on_remove is not None:
+                self.on_remove(event)
         elif event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_line(event)
+            if self.on_drag_press is not None:
+                self.on_drag_press(event)
 
     def _grab_vertex(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._on_vertex_motion)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._release_line)
+            'button_release_event', partial(self._release_line, kind='vertex'))
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_artist = event.artist
 
@@ -87,6 +96,8 @@ class Lines(Tool):
         self._move_vertex(event=event,
                           ind=self._moving_vertex_index,
                           line=self._moving_vertex_artist)
+        if self.on_vertex_move is not None:
+            self.on_vertex_move(event)
 
     def _move_vertex(self, event, ind, line):
         if event.inaxes != self._ax:
@@ -103,7 +114,7 @@ class Lines(Tool):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._move_line)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._release_line)
+            'button_release_event', partial(self._release_line, kind='grab'))
         self._grab_artist = event.artist
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
         self._grab_artist_origin = self._grab_artist.get_data()
@@ -117,12 +128,16 @@ class Lines(Tool):
             (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
         self._fig.canvas.draw_idle()
 
-    def _release_line(self, event):
+    def _release_line(self, event, kind):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         del self._connections['motion_notify_event']
         del self._connections['button_release_event']
         self._pick_lock = False
+        if (kind == 'vertex') and (self.on_vertex_release is not None):
+            self.on_vertex_release(event)
+        elif (kind == 'drag') and (self.on_drag_release is not None):
+            self.on_drag_release(event)
 
     def _get_line_length(self, ind):
         return len(self.lines[ind].get_xydata())

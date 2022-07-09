@@ -40,6 +40,8 @@ class Points(Tool):
         offsets = np.concatenate([offsets, [[x, y]]])
         self._scatter.set_offsets(offsets)
         self._fig.canvas.draw_idle()
+        if self.on_create is not None:
+            self.on_create({'x': x, 'y': y})
 
     def _remove_point(self, inds):
         offsets = np.delete(self._scatter.get_offsets(), inds, axis=0)
@@ -55,22 +57,28 @@ class Points(Tool):
         if button == 1:
             self._pick_lock = True
             self._grab_point(event)
+            if self.on_drag_press is not None:
+                self.on_drag_press()
         elif button in (2, 3):
             self._remove_point(event.ind)
+            if self.on_remove is not None:
+                self.on_remove(event)
+
         # if self.on_pick is not None:
         #     self.on_pick(event)
 
     def _grab_point(self, event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._on_motion_notify)
+            'motion_notify_event', self._move_point)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._on_button_release)
+            'button_release_event', self._release_point)
         self._moving_point_indices = event.ind
 
-    def _on_motion_notify(self, event):
-        self._move_point(event)
-        # if self.on_motion_notify is not None:
-        #     self.on_motion_notify(event)
+    # def _on_motion_notify(self, event):
+    #     self._move_point(event)
+
+    # if self.on_motion_notify is not None:
+    #     self.on_motion_notify(event)
 
     def _move_point(self, event):
         if event.inaxes != self._ax:
@@ -80,11 +88,15 @@ class Points(Tool):
         offsets[ind] = [event.xdata, event.ydata]
         self._scatter.set_offsets(offsets)
         self._fig.canvas.draw_idle()
+        if self.on_drag_move is not None:
+            self.on_drag_move(event)
 
-    def _on_button_release(self, event):
+    def _release_point(self, event):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         self._pick_lock = False
+        if self.on_drag_release is not None:
+            self.on_drag_release(event)
 
     def get_points(self):
         return self._scatter.get_offsets()

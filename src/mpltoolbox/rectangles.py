@@ -53,11 +53,13 @@ class Rectangles(Tool):
         self.rectangles[-1].set_height(event.ydata - y)
         self._fig.canvas.draw_idle()
 
-    def _persist_rectangle(self, event):
+    def _persist_rectangle(self, event=None):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         del self._connections['motion_notify_event']
         del self._connections['button_release_event']
+        if (event is not None) and (self.on_create is not None):
+            self.on_create(event)
 
     def _remove_rectangle(self, rect):
         rect.remove()
@@ -72,8 +74,13 @@ class Rectangles(Tool):
         if event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_rectangle(event)
+            if self.on_drag_press is not None:
+                self.on_drag_press(event)
         elif event.mouseevent.button == 2:
             self._remove_rectangle(event.artist)
+            if self.on_remove is not None:
+                self.on_remove(event)
+
         # if self.on_pick is not None:
         #     self.on_pick(event)
 
@@ -94,10 +101,14 @@ class Rectangles(Tool):
         self._grab_artist.xy = (self._grab_artist_origin[0] + dx,
                                 self._grab_artist_origin[1] + dy)
         self._fig.canvas.draw_idle()
+        if self.on_drag_move is not None:
+            self.on_drag_move(event)
 
     def _release_rectangle(self, event):
-        self._persist_rectangle(event)
+        self._persist_rectangle()
         self._pick_lock = False
+        if self.on_drag_release is not None:
+            self.on_drag_release(event)
 
     def get_rectangle(self, ind):
         rect = self.rectangles[ind]
