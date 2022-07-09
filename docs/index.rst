@@ -2,9 +2,6 @@
 Mpltoolbox - Interactive tools for Matplotlib
 *********************************************
 
-Installation
-============
-
 Install with ``pip install mpltoolbox``.
 
 Points
@@ -38,6 +35,14 @@ Ellipses
    :maxdepth: 2
 
    ellipses
+
+API
+===
+
+.. toctree::
+   :maxdepth: 2
+
+   api
 
 Indices and tables
 ==================

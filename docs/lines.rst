@@ -7,6 +7,7 @@ Use the ``Lines`` tool to add lines to a plot:
 
    import matplotlib.pyplot as plt
    import mpltoolbox as tbx
+   %matplotlib widget
 
    fig, ax = plt.subplots()
    ax.set_xlim(0, 100)
