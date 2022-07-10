@@ -35,7 +35,7 @@ ax.set_ylim(0, 100)
 points = tbx.Points(ax=ax)
 ```
 
-![points](images/points.png)
+![points](docs/images/points.png)
 
 
 ### Lines
@@ -48,7 +48,7 @@ ax.set_ylim(0, 100)
 lines = tbx.Lines(ax=ax, n=2)
 ```
 
-![lines](images/lines01.png)
+![lines](docs/images/lines01.png)
 
 ### Rectangles
 
@@ -60,7 +60,7 @@ ax.set_ylim(0, 100)
 rectangles = tbx.Rectangles(ax=ax)
 ```
 
-![rects](images/rectangles.png)
+![rects](docs/images/rectangles.png)
 
 ### Ellipses
 
@@ -72,4 +72,4 @@ ax.set_ylim(0, 100)
 ellipses = tbx.Ellipses(ax=ax)
 ```
 
-![ellipses](images/ellipses.png)
+![ellipses](docs/images/ellipses.png)
