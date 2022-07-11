@@ -6,7 +6,6 @@ import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
-from typing import Callable, List
 
 
 class Lines(Tool):
