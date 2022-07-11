@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
+from .utils import make_color
 import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
@@ -10,22 +11,30 @@ from matplotlib.backend_bases import Event
 
 class Lines(Tool):
 
-    def __init__(self, ax: Axes, n: int, **kwargs):
-
+    def __init__(self, ax: Axes, n: int, color=None, **kwargs):
         super().__init__(ax, **kwargs)
-
         self._nmax = n
         self.lines = []
         self._pick_lock = False
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
+        self._is_points = self._nmax == 1
+        self._color = color
+        self._line_counter = 0
 
     def __del__(self):
         super().shutdown(artists=self.lines)
 
-    def _make_new_line(self, x: float = 0, y: float = 0):
-        line = self._ax.plot([x, x], [y, y], '-o')[0]
+    def _make_new_line(self, x: float, y: float):
+        xpos = [x] if self._is_points else [x, x]
+        ypos = [y] if self._is_points else [y, y]
+        line, = self._ax.plot(xpos,
+                              ypos,
+                              '-o',
+                              color=make_color(color=self._color,
+                                               counter=self._line_counter))
         self.lines.append(line)
+        self._line_counter += 1
 
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
@@ -37,9 +46,12 @@ class Lines(Tool):
             return
         if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
-            self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-                'motion_notify_event', self._on_motion_notify)
-            self._draw()
+            if self._is_points:
+                self._finalize_line()
+            else:
+                self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+                    'motion_notify_event', self._on_motion_notify)
+                self._draw()
         else:
             self._persist_dot(event)
 
@@ -47,14 +59,18 @@ class Lines(Tool):
         if self._get_line_length(-1) == self._nmax:
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
-            self.lines[-1].set_picker(5.0)
-            if self.on_create is not None:
-                self.on_create(event)
+            self._finalize_line()
         else:
             new_data = self.lines[-1].get_data()
             self.lines[-1].set_data(
                 (np.append(new_data[0],
                            new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
+            self._draw()
+
+    def _finalize_line(self):
+        self.lines[-1].set_picker(5.0)
+        if self.on_create is not None:
+            self.on_create(event)
         self._draw()
 
     def _remove_line(self, line: Artist):
