@@ -47,7 +47,7 @@ class Lines(Tool):
         if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
             if self._is_points:
-                self._finalize_line()
+                self._finalize_line(event)
             else:
                 self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
                     'motion_notify_event', self._on_motion_notify)
@@ -59,7 +59,7 @@ class Lines(Tool):
         if self._get_line_length(-1) == self._nmax:
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
-            self._finalize_line()
+            self._finalize_line(event)
         else:
             new_data = self.lines[-1].get_data()
             self.lines[-1].set_data(
@@ -67,7 +67,7 @@ class Lines(Tool):
                            new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
             self._draw()
 
-    def _finalize_line(self):
+    def _finalize_line(self, event):
         self.lines[-1].set_picker(5.0)
         if self.on_create is not None:
             self.on_create(event)
