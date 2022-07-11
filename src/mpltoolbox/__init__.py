@@ -7,3 +7,4 @@ from .lines import Lines
 from .rectangles import Rectangles
 from .ellipses import Ellipses
 from .points import Points
+from .polygon import Polygons
