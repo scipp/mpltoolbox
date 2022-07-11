@@ -19,7 +19,7 @@ pip install mpltoolbox
 
 ## Examples
 
-```
+```Py
 import matplotlib.pyplot as plt
 import mpltoolbox as tbx
 %matplotlib widget
@@ -27,7 +27,7 @@ import mpltoolbox as tbx
 
 ### Points
 
-```
+```Py
 fig, ax = plt.subplots()
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
@@ -40,7 +40,7 @@ points = tbx.Points(ax=ax)
 
 ### Lines
 
-```
+```Py
 fig, ax = plt.subplots()
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
@@ -52,7 +52,7 @@ lines = tbx.Lines(ax=ax, n=2)
 
 ### Rectangles
 
-```
+```Py
 fig, ax = plt.subplots()
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
@@ -64,7 +64,7 @@ rectangles = tbx.Rectangles(ax=ax)
 
 ### Ellipses
 
-```
+```Py
 fig, ax = plt.subplots()
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
