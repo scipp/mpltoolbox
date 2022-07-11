@@ -2,18 +2,18 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
+from .utils import make_color
 from abc import abstractmethod
 from matplotlib.patches import Patch
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
+from matplotlib.colors import to_rgb
 
 
 class Patches(Tool):
 
-    def __init__(self, ax: Axes, patch: Patch, **kwargs):
-
+    def __init__(self, ax: Axes, patch: Patch, color=None, alpha=0.05, **kwargs):
         super().__init__(ax=ax, **kwargs)
-
         self._patch = patch
         self.patches = []
         self._drag_patch = False
@@ -21,6 +21,9 @@ class Patches(Tool):
         self._grab_mouse_origin = None
         self._grab_artist_origin = None
         self._pick_lock = False
+        self._patch_counter = 0
+        self._color = color
+        self._alpha = alpha
 
     def __del__(self):
         super().shutdown(artists=self.patches)
@@ -37,8 +40,10 @@ class Patches(Tool):
             'button_release_event', self._persist_patch)
 
     def _make_new_patch(self, x: float, y: float):
-        self.patches.append(
-            self._patch((x, y), 0, 0, fc=(0, 0, 0, 0.1), ec=(0, 0, 0, 1), picker=True))
+        ec = make_color(color=self._color, counter=self._patch_counter)
+        fc = to_rgb(ec) + (self._alpha, )
+        self.patches.append(self._patch((x, y), 0, 0, fc=fc, ec=ec, picker=True))
+        self._patch_counter += 1
         self._ax.add_patch(self.patches[-1])
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._on_motion_notify)

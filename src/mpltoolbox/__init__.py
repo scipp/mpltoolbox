@@ -3,7 +3,7 @@
 
 # flake8: noqa
 
-from .points import Points
 from .lines import Lines
 from .rectangles import Rectangles
 from .ellipses import Ellipses
+from .points import Points
