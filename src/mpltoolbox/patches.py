@@ -3,11 +3,15 @@
 
 from .tool import Tool
 from abc import abstractmethod
+from matplotlib.patches import Patch
+from matplotlib.pyplot import Artist, Axes
+from matplotlib.backend_bases import Event
+from typing import Callable, List
 
 
 class Patches(Tool):
 
-    def __init__(self, ax, patch, **kwargs):
+    def __init__(self, ax: Axes, patch: Patch, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
 
@@ -22,7 +26,7 @@ class Patches(Tool):
     def __del__(self):
         super().shutdown(artists=self.patches)
 
-    def _on_button_press(self, event):
+    def _on_button_press(self, event: Event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
         if event.inaxes != self._ax:
@@ -33,7 +37,7 @@ class Patches(Tool):
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
             'button_release_event', self._persist_patch)
 
-    def _make_new_patch(self, x, y):
+    def _make_new_patch(self, x: float, y: float):
         self.patches.append(
             self._patch((x, y), 0, 0, fc=(0, 0, 0, 0.1), ec=(0, 0, 0, 1), picker=True))
         self._ax.add_patch(self.patches[-1])
@@ -41,10 +45,10 @@ class Patches(Tool):
             'motion_notify_event', self._on_motion_notify)
         self._draw()
 
-    def _on_motion_notify(self, event):
+    def _on_motion_notify(self, event: Event):
         self._resize_patch(event)
 
-    def _resize_patch(self, event):
+    def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:
             return
         x, y = self.patches[-1].xy
@@ -52,7 +56,7 @@ class Patches(Tool):
         self.patches[-1].set_height(event.ydata - y)
         self._draw()
 
-    def _persist_patch(self, event=None):
+    def _persist_patch(self, event: Event = None):
         self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
         self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
         del self._connections['motion_notify_event']
@@ -60,12 +64,12 @@ class Patches(Tool):
         if (event is not None) and (self.on_create is not None):
             self.on_create(event)
 
-    def _remove_patch(self, rect):
+    def _remove_patch(self, rect: Artist):
         rect.remove()
         self.patches.remove(rect)
         self._draw()
 
-    def _on_pick(self, event):
+    def _on_pick(self, event: Event):
         if self._get_active_tool():
             return
         if event.mouseevent.inaxes != self._ax:
@@ -80,7 +84,7 @@ class Patches(Tool):
             if self.on_remove is not None:
                 self.on_remove(event)
 
-    def _grab_patch(self, event):
+    def _grab_patch(self, event: Event):
         self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
             'motion_notify_event', self._move_patch)
         self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
@@ -88,7 +92,7 @@ class Patches(Tool):
         self._grab_artist = event.artist
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
 
-    def _move_patch(self, event):
+    def _move_patch(self, event: Event):
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
@@ -99,14 +103,14 @@ class Patches(Tool):
             self.on_drag_move(event)
 
     @abstractmethod
-    def _update_artist_position(self, dx, dy):
+    def _update_artist_position(self, dx: float, dy: float):
         return
 
-    def _release_patch(self, event):
+    def _release_patch(self, event: Event):
         self._persist_patch()
         self._pick_lock = False
         if self.on_drag_release is not None:
             self.on_drag_release(event)
 
-    def get(self, ind):
+    def get(self, ind: int) -> Patch:
         return self.patches[ind]

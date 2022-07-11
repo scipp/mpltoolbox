@@ -3,15 +3,18 @@
 
 from .patches import Patches
 from matplotlib.patches import Rectangle
+from matplotlib.pyplot import Artist, Axes
+from matplotlib.backend_bases import Event
+from typing import Callable, List
 
 
 class Rectangles(Patches):
 
-    def __init__(self, ax, **kwargs):
+    def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, patch=Rectangle, **kwargs)
 
-    def _resize_patch(self, event):
+    def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:
             return
         x, y = self.patches[-1].xy
@@ -21,10 +24,10 @@ class Rectangles(Patches):
         })
         self._draw()
 
-    def _grab_patch(self, event):
+    def _grab_patch(self, event: Event):
         super()._grab_patch(event)
         self._grab_artist_origin = self._grab_artist.xy
 
-    def _update_artist_position(self, dx, dy):
+    def _update_artist_position(self, dx: float, dy: float):
         self._grab_artist.xy = (self._grab_artist_origin[0] + dx,
                                 self._grab_artist_origin[1] + dy)
