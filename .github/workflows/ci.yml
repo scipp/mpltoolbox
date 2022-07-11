@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+
+name: Mpltoolbox
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        which python
+        python -m pip install --upgrade pip
+        python -m pip install flake8 toml yapf==0.32 build pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Check yapf formatting
+      run: |
+        yapf --diff --recursive .
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --statistics
+    - name: Install docs requirements
+      run: |
+        pip install -r docs/requirements.txt
+        sudo apt install pandoc
+        ln -s $(pwd)/src/mpltoolbox .
+    # - name: Run python tests
+    #   run: |
+    #     python -m pytest test
+    - name: Build documentation
+      run: |
+        sphinx-build -b html docs/. docs/build
+    - name: Archive documentation artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: DocumentationHTML
+        path: docs/build
+    - name: Build a binary wheel and a source tarball
+      if: startsWith(github.ref, 'refs/tags')
+      run: |
+        python -m build --sdist --wheel --outdir dist/ .
+    - name: Publish to PyPI
+      if: startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}

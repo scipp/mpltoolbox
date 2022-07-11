@@ -3,9 +3,9 @@
 
 from .tool import Tool
 import numpy as np
-from matplotlib.pyplot import Artist, Axes
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Callable, List
+from typing import List
 
 
 class Points(Tool):

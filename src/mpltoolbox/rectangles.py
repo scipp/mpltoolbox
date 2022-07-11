@@ -3,9 +3,8 @@
 
 from .patches import Patches
 from matplotlib.patches import Rectangle
-from matplotlib.pyplot import Artist, Axes
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Callable, List
 
 
 class Rectangles(Patches):

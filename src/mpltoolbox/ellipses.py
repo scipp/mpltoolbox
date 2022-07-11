@@ -3,7 +3,7 @@
 
 from .patches import Patches
 from matplotlib.patches import Ellipse
-from matplotlib.pyplot import Artist, Axes
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
 
 
