@@ -61,14 +61,18 @@ class Lines(Tool):
         if self._get_line_length(-1) == self._nmax:
             self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
             del self._connections['motion_notify_event']
-            self.lines[-1].set_picker(5.0)
-            if self.on_create is not None:
-                self.on_create(event)
+            self._finalize_line(event)
         else:
             new_data = self.lines[-1].get_data()
             self.lines[-1].set_data(
                 (np.append(new_data[0],
                            new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
+            self._draw()
+
+    def _finalize_line(self, event):
+        self.lines[-1].set_picker(5.0)
+        if self.on_create is not None:
+            self.on_create(event)
         self._draw()
 
     def _remove_line(self, line: Artist):

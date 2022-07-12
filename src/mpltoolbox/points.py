@@ -15,6 +15,4 @@ class Points(Lines):
         return [x], [y]
 
     def _after_line_creation(self, event):
-        self.lines[-1].set_picker(5.0)
-        if self.on_create is not None:
-            self.on_create(event)
+        self._finalize_line(event)
