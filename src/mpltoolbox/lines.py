@@ -7,6 +7,7 @@ import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
+from typing import Tuple
 
 
 class Lines(Tool):
@@ -18,16 +19,17 @@ class Lines(Tool):
         self._pick_lock = False
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
-        self._is_points = self._nmax == 1
         self._color = color
         self._line_counter = 0
 
     def __del__(self):
         super().shutdown(artists=self.lines)
 
+    def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
+        return [x, x], [y, y]
+
     def _make_new_line(self, x: float, y: float):
-        xpos = [x] if self._is_points else [x, x]
-        ypos = [y] if self._is_points else [y, y]
+        xpos, ypos = self._new_line_pos(x, y)
         line, = self._ax.plot(xpos,
                               ypos,
                               '-o',
@@ -39,6 +41,11 @@ class Lines(Tool):
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
 
+    def _after_line_creation(self, event):
+        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
+            'motion_notify_event', self._on_motion_notify)
+        self._draw()
+
     def _on_button_press(self, event: Event):
         if event.button != 1 or self._pick_lock or self._get_active_tool():
             return
@@ -46,12 +53,7 @@ class Lines(Tool):
             return
         if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
-            if self._is_points:
-                self._finalize_line(event)
-            else:
-                self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-                    'motion_notify_event', self._on_motion_notify)
-                self._draw()
+            self._after_line_creation(event)
         else:
             self._persist_dot(event)
 
