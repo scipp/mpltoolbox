@@ -3,7 +3,6 @@
 
 from .tool import Tool
 from .utils import make_color
-from abc import abstractmethod
 from matplotlib.patches import Patch
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
@@ -35,7 +34,7 @@ class Patches(Tool):
             return
         self._make_new_patch(x=event.xdata, y=event.ydata)
         self._connect({
-            'motion_notify_event': self._on_motion_notify,
+            'motion_notify_event': self._resize_patch,
             'button_release_event': self._persist_patch
         })
 
@@ -45,28 +44,19 @@ class Patches(Tool):
         self.patches.append(self._patch((x, y), 0, 0, fc=fc, ec=ec, picker=True))
         self._patch_counter += 1
         self._ax.add_patch(self.patches[-1])
-        self._connect({'motion_notify_event': self._on_motion_notify})
-        self._draw()
-
-    def _on_motion_notify(self, event: Event):
-        self._resize_patch(event)
-
-    def _resize_patch(self, event: Event):
-        if event.inaxes != self._ax:
-            return
-        x, y = self.patches[-1].xy
-        self.patches[-1].set_width(event.xdata - x)
-        self.patches[-1].set_height(event.ydata - y)
         self._draw()
 
     def _persist_patch(self, event: Event = None):
         self._disconnect(['motion_notify_event', 'button_release_event'])
-        if (event is not None) and (self.on_create is not None):
-            self.on_create(event)
+        if event is not None:
+            self._add_vertices()
+            if self.on_create is not None:
+                self.on_create(event)
 
-    def _remove_patch(self, rect: Artist):
-        rect.remove()
-        self.patches.remove(rect)
+    def _remove_patch(self, patch: Artist):
+        patch.remove()
+        patch._vertices.remove()
+        self.patches.remove(patch)
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -74,15 +64,43 @@ class Patches(Tool):
             return
         if event.mouseevent.inaxes != self._ax:
             return
+        is_patch = isinstance(event.artist, Patch)
+        if event.mouseevent.button == 1:
+            if is_patch:
+                return
+            self._pick_lock = True
+            self._grab_vertex(event)
+            if self.on_vertex_press is not None:
+                self.on_vertex_press(event)
         if event.mouseevent.button == 3:
+            if not is_patch:
+                return
             self._pick_lock = True
             self._grab_patch(event)
             if self.on_drag_press is not None:
                 self.on_drag_press(event)
         elif event.mouseevent.button == 2:
+            if not is_patch:
+                return
             self._remove_patch(event.artist)
             if self.on_remove is not None:
                 self.on_remove(event)
+
+    def _grab_vertex(self, event: Event):
+        self._connect({
+            'motion_notify_event': self._on_vertex_motion,
+            'button_release_event': self._release_patch
+        })
+
+        self._moving_vertex_index = event.ind[0]
+        self._moving_vertex_artist = event.artist
+
+    def _on_vertex_motion(self, event: Event):
+        self._move_vertex(event=event,
+                          ind=self._moving_vertex_index,
+                          line=self._moving_vertex_artist)
+        if self.on_vertex_move is not None:
+            self.on_vertex_move(event)
 
     def _grab_patch(self, event: Event):
         self._connect({
@@ -102,18 +120,8 @@ class Patches(Tool):
         if self.on_drag_move is not None:
             self.on_drag_move(event)
 
-    @abstractmethod
-    def _update_artist_position(self, dx: float, dy: float):
-        return
-
     def _release_patch(self, event: Event):
         self._persist_patch()
         self._pick_lock = False
         if self.on_drag_release is not None:
             self.on_drag_release(event)
-
-    def get(self, ind: int) -> Patch:
-        """
-        Get the patch identified by its index `ind`.
-        """
-        return self.patches[ind]

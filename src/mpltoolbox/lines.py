@@ -179,9 +179,3 @@ class Lines(Tool):
 
     def _get_line_length(self, ind: int):
         return len(self.lines[ind].get_xydata())
-
-    def get(self, ind: int) -> np.ndarray:
-        """
-        Get the line data (x, y coordinates) for line identified by its index `ind`.
-        """
-        return self.lines[ind].get_xydata()
