@@ -35,7 +35,7 @@ ax.set_ylim(0, 100)
 points = tbx.Points(ax=ax)
 ```
 
-![points](docs/images/points.png)
+![points](https://mpltoolbox.readthedocs.io/en/latest/_images/points_4_0.png)
 
 
 ### Lines
@@ -48,7 +48,7 @@ ax.set_ylim(0, 100)
 lines = tbx.Lines(ax=ax, n=2)
 ```
 
-![lines](docs/images/lines01.png)
+![lines](https://mpltoolbox.readthedocs.io/en/latest/_images/lines_4_0.png)
 
 ### Rectangles
 
@@ -60,7 +60,7 @@ ax.set_ylim(0, 100)
 rectangles = tbx.Rectangles(ax=ax)
 ```
 
-![rects](docs/images/rectangles.png)
+![rects](https://mpltoolbox.readthedocs.io/en/latest/_images/rectangles_4_0.png)
 
 ### Ellipses
 
@@ -72,4 +72,4 @@ ax.set_ylim(0, 100)
 ellipses = tbx.Ellipses(ax=ax)
 ```
 
-![ellipses](docs/images/ellipses.png)
+![ellipses](https://mpltoolbox.readthedocs.io/en/latest/_images/ellipses_4_0.png)
