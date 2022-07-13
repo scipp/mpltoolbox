@@ -8,6 +8,25 @@ from matplotlib.backend_bases import Event
 
 
 class Ellipses(Patches):
+    """
+    Add ellipses to the supplied axes.
+
+    Controls:
+      - Left-click and hold to make new ellipses
+      - Right-click and hold to drag/move ellipse
+      - Middle-click to delete ellipse
+
+    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param color: The ellipse colors. Can be a string (all lines will have the same
+        color), a list of strings (one entry per ellipse), or a callable (this will be
+        called every time a new ellipse is created and should return a color).
+    :param autostart: Automatically activate the tool upon creation if `True`.
+    :param on_create: Callback that fires when a ellipse is created.
+    :param on_remove: Callback that fires when a ellipse is removed.
+    :param on_drag_press: Callback that fires when a ellipse is right-clicked.
+    :param on_drag_move: Callback that fires when a ellipse is dragged.
+    :param on_drag_release: Callback that fires when a ellipse is released.
+    """
 
     def __init__(self, ax: Axes, **kwargs):
 

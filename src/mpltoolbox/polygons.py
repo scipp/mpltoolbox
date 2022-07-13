@@ -11,6 +11,29 @@ from matplotlib.patches import Polygon
 
 
 class Polygons(Tool):
+    """
+    Add closed polygons to the supplied axes.
+
+    Controls:
+      - Left-click to make new polygons
+      - Left-click and hold on polygon vertex to move vertex
+      - Right-click and hold to drag/move the entire polygon
+      - Middle-click to delete polygon
+
+    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param color: The polygon colors. Can be a string (all lines will have the same
+        color), a list of strings (one entry per polygon), or a callable (this will be
+        called every time a new polygon is created and should return a color).
+    :param autostart: Automatically activate the tool upon creation if `True`.
+    :param on_create: Callback that fires when a polygon is created.
+    :param on_remove: Callback that fires when a polygon is removed.
+    :param on_vertex_press: Callback that fires when a vertex is left-clicked.
+    :param on_vertex_move: Callback that fires when a vertex is moved.
+    :param on_vertex_release: Callback that fires when a vertex is released.
+    :param on_drag_press: Callback that fires when a polygon is right-clicked.
+    :param on_drag_move: Callback that fires when a polygon is dragged.
+    :param on_drag_release: Callback that fires when a polygon is released.
+    """
 
     def __init__(self, ax: Axes, color=None, alpha=0.05, **kwargs):
         super().__init__(ax, **kwargs)
@@ -193,5 +216,8 @@ class Polygons(Tool):
         elif (kind == 'drag') and (self.on_drag_release is not None):
             self.on_drag_release(event)
 
-    def get_polygon(self, ind: int) -> np.ndarray:
+    def get(self, ind: int) -> np.ndarray:
+        """
+        Get the polygon data (x, y coordinates) for line identified by its index `ind`.
+        """
         return self.lines[ind].get_xydata()

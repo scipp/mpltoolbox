@@ -113,4 +113,7 @@ class Patches(Tool):
             self.on_drag_release(event)
 
     def get(self, ind: int) -> Patch:
+        """
+        Get the patch identified by its index `ind`.
+        """
         return self.patches[ind]
