@@ -3,8 +3,13 @@
 
 from .patches import Patches
 from matplotlib.patches import Ellipse
-from matplotlib.pyplot import Axes
+from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+
+
+def _vertices_from_ellipse(center, width, height):
+    return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
+            [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
 
 
 class Ellipses(Patches):
@@ -50,10 +55,57 @@ class Ellipses(Patches):
         })
         self._draw()
 
+    def _add_vertices(self):
+        patch = self.patches[-1]
+        vertices = _vertices_from_ellipse(center=patch.center,
+                                          width=patch.get_width(),
+                                          height=patch.get_height())
+
+        line, = self._ax.plot(vertices[0],
+                              vertices[1],
+                              'o',
+                              mec=patch.get_edgecolor(),
+                              mfc='None',
+                              picker=5.0)
+        patch._vertices = line
+        line._patch = patch
+
+    def _move_vertex(self, event: Event, ind: int, line: Artist):
+        if event.inaxes != self._ax:
+            return
+        x, y = line.get_data()
+        patch = line._patch
+        x[ind] = event.xdata
+        y[ind] = event.ydata
+        opp = (ind + 2) % 4
+        even_ind = (ind % 2) == 0
+        if even_ind:
+            if ind == 0:
+                width = x[opp] - x[ind]
+            else:
+                width = x[ind] - x[opp]
+            height = patch.get_height()
+            center = (0.5 * (x[ind] + x[opp]), patch.center[1])
+        else:
+            if ind == 1:
+                height = y[opp] - y[ind]
+            else:
+                height = y[ind] - y[opp]
+            width = patch.get_width()
+            center = (patch.center[0], 0.5 * (y[ind] + y[opp]))
+        line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
+        line._patch.update({'center': center, 'width': width, 'height': height})
+        self._draw()
+
     def _grab_patch(self, event: Event):
         super()._grab_patch(event)
         self._grab_artist_origin = self._grab_artist.center
 
     def _update_artist_position(self, dx: float, dy: float):
-        self._grab_artist.center = (self._grab_artist_origin[0] + dx,
-                                    self._grab_artist_origin[1] + dy)
+        ell = self._grab_artist
+        ell.center = (self._grab_artist_origin[0] + dx,
+                      self._grab_artist_origin[1] + dy)
+        ell._vertices.set_data(
+            _vertices_from_ellipse(center=ell.center,
+                                   width=ell.get_width(),
+                                   height=ell.get_height()))

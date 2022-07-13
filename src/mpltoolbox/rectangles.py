@@ -6,8 +6,6 @@ from matplotlib.patches import Rectangle
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 
-OPPOSITE_VERTEX_MAPPING = {0: 2, 1: 3, 2: 0, 3: 1}
-
 
 def _vertices_from_rectangle(xy, width, height):
     return ([xy[0]] + [xy[0] + width] * 2 + [xy[0]], [xy[1]] * 2 + [xy[1] + height] * 2)
@@ -50,10 +48,7 @@ class Rectangles(Patches):
 
     def _add_vertices(self):
         patch = self.patches[-1]
-        xy = patch.xy
-        # vertices = [[xy[0]] + [xy[0] + patch.get_width()] * 2 + [xy[0]],
-        #             [xy[1]] * 2 + [xy[1] + patch.get_height()] * 2]
-        vertices = _vertices_from_rectangle(xy=xy,
+        vertices = _vertices_from_rectangle(xy=patch.xy,
                                             width=patch.get_width(),
                                             height=patch.get_height())
 
@@ -66,20 +61,13 @@ class Rectangles(Patches):
         patch._vertices = line
         line._patch = patch
 
-    def _persist_patch(self, event: Event = None):
-        self._disconnect(['motion_notify_event', 'button_release_event'])
-        if event is not None:
-            self._add_vertices()
-        if None not in (event, self.on_create):
-            self.on_create(event)
-
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:
             return
         x, y = line.get_data()
         x[ind] = event.xdata
         y[ind] = event.ydata
-        opp = OPPOSITE_VERTEX_MAPPING[ind]
+        opp = (ind + 2) % 4
         if ind == 0:
             width = x[opp] - x[ind]
             height = y[opp] - y[ind]
@@ -96,22 +84,11 @@ class Rectangles(Patches):
               min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
         line.set_data(_vertices_from_rectangle(xy=xy, width=width, height=height))
         line._patch.update({'xy': xy, 'width': width, 'height': height})
-        # set_xy(np.array(new_data).T)
         self._draw()
 
     def _grab_patch(self, event: Event):
         super()._grab_patch(event)
         self._grab_artist_origin = self._grab_artist.xy
-
-    def _move_patch(self, event: Event):
-        if event.inaxes != self._ax:
-            return
-        dx = event.xdata - self._grab_mouse_origin[0]
-        dy = event.ydata - self._grab_mouse_origin[1]
-        self._update_artist_position(dx, dy)
-        self._draw()
-        if self.on_drag_move is not None:
-            self.on_drag_move(event)
 
     def _update_artist_position(self, dx: float, dy: float):
         rect = self._grab_artist
@@ -120,13 +97,3 @@ class Rectangles(Patches):
             _vertices_from_rectangle(xy=rect.xy,
                                      width=rect.get_width(),
                                      height=rect.get_height()))
-
-
-# def on_plot_hover(event):
-#     # Iterating over each data member plotted
-#     for curve in plot.get_lines():
-#         # Searching which data member corresponds to current mouse position
-#         if curve.contains(event)[0]:
-#             print("over %s" % curve.get_gid())
-
-# fig.canvas.mpl_connect('motion_notify_event', on_plot_hover)

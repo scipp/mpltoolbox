@@ -54,6 +54,7 @@ class Polygons(Tool):
     def _make_new_line(self, x: float, y: float):
         line, = self._ax.plot([x, x], [y, y],
                               '-o',
+                              mfc='None',
                               color=make_color(color=self._color,
                                                counter=self._line_counter))
         self.lines.append(line)
@@ -215,9 +216,3 @@ class Polygons(Tool):
             self.on_vertex_release(event)
         elif (kind == 'drag') and (self.on_drag_release is not None):
             self.on_drag_release(event)
-
-    def get(self, ind: int) -> np.ndarray:
-        """
-        Get the polygon data (x, y coordinates) for line identified by its index `ind`.
-        """
-        return self.lines[ind].get_xydata()
