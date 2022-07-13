@@ -17,7 +17,8 @@ class Tool:
                  on_vertex_release: Callable = None,
                  on_drag_press: Callable = None,
                  on_drag_move: Callable = None,
-                 on_drag_release: Callable = None):
+                 on_drag_release: Callable = None,
+                 **kwargs):
         self._ax = ax
         self._fig = ax.get_figure()
         self._connections = {}
@@ -31,8 +32,22 @@ class Tool:
         self.on_drag_move = on_drag_move
         self.on_drag_release = on_drag_release
 
+        self._kwargs = kwargs
+        self._artist_counter = 0
+
         if autostart:
             self.start()
+
+    def _parse_kwargs(self):
+        parsed = {}
+        for key, value in self._kwargs.items():
+            if callable(value):
+                parsed[key] = value()
+            elif isinstance(value, list):
+                parsed[key] = value[self._artist_counter % len(value)]
+            else:
+                parsed[key] = value
+        return parsed
 
     def _draw(self):
         self._fig.canvas.draw_idle()
