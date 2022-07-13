@@ -72,4 +72,10 @@ Example
    :maxdepth: 2
    :hidden:
 
+   polygons
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
    api
