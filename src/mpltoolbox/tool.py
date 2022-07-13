@@ -49,8 +49,6 @@ class Tool:
             'pick_event', self._on_pick)
 
     def stop(self):
-        # for c in self._connections.values():
-        #     self._fig.canvas.mpl_disconnect(c)
         self._disconnect(self._connections.keys())
 
     def shutdown(self, artists: List[Artist]):
