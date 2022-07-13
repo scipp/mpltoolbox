@@ -61,7 +61,7 @@ class Patches(Tool):
 
     def _persist_patch(self, event: Event = None):
         self._disconnect(['motion_notify_event', 'button_release_event'])
-        if (event is not None) and (self.on_create is not None):
+        if None not in (event, self.on_create):
             self.on_create(event)
 
     def _remove_patch(self, rect: Artist):
@@ -74,15 +74,60 @@ class Patches(Tool):
             return
         if event.mouseevent.inaxes != self._ax:
             return
+        is_patch = isinstance(event.artist, Patch)
+        if event.mouseevent.button == 1:
+            if is_patch:
+                return
+            self._pick_lock = True
+            self._grab_vertex(event)
+            if self.on_vertex_press is not None:
+                self.on_vertex_press(event)
         if event.mouseevent.button == 3:
+            if not is_patch:
+                return
             self._pick_lock = True
             self._grab_patch(event)
             if self.on_drag_press is not None:
                 self.on_drag_press(event)
         elif event.mouseevent.button == 2:
+            if not is_patch:
+                return
             self._remove_patch(event.artist)
             if self.on_remove is not None:
                 self.on_remove(event)
+
+    def _grab_vertex(self, event: Event):
+        self._connect({
+            'motion_notify_event':
+            self._on_vertex_motion,
+            'button_release_event':
+            # partial(self._release_patch, kind='vertex')
+            self._release_patch
+        })
+
+        self._moving_vertex_index = event.ind[0]
+        self._moving_vertex_artist = event.artist
+
+    def _on_vertex_motion(self, event: Event):
+        self._move_vertex(event=event,
+                          ind=self._moving_vertex_index,
+                          line=self._moving_vertex_artist)
+        if self.on_vertex_move is not None:
+            self.on_vertex_move(event)
+
+    def _move_vertex(self, event: Event, ind: int, line: Artist):
+        return
+        # if event.inaxes != self._ax:
+        #     return
+        # new_data = vertices.get_data()
+        # # if ind in (0, len(new_data[0])):
+        # #     ind = [0, -1]
+        # new_data[0][ind] = event.xdata
+        # new_data[1][ind] = event.ydata
+        # vertices.set_data(new_data)
+
+        # line._fill.set_xy(np.array(new_data).T)
+        # self._draw()
 
     def _grab_patch(self, event: Event):
         self._connect({
