@@ -8,6 +8,25 @@ from matplotlib.backend_bases import Event
 
 
 class Rectangles(Patches):
+    """
+    Add rectangles to the supplied axes.
+
+    Controls:
+      - Left-click and hold to make new rectangles
+      - Right-click and hold to drag/move rectangle
+      - Middle-click to delete rectangle
+
+    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param color: The rectangle colors. Can be a string (all lines will have the same
+        color), a list of strings (one entry per rectangle), or a callable (this will be
+        called every time a new rectangle is created and should return a color).
+    :param autostart: Automatically activate the tool upon creation if `True`.
+    :param on_create: Callback that fires when a rectangle is created.
+    :param on_remove: Callback that fires when a rectangle is removed.
+    :param on_drag_press: Callback that fires when a rectangle is right-clicked.
+    :param on_drag_move: Callback that fires when a rectangle is dragged.
+    :param on_drag_release: Callback that fires when a rectangle is released.
+    """
 
     def __init__(self, ax: Axes, **kwargs):
 

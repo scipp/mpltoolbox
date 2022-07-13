@@ -18,11 +18,6 @@ class Tool:
                  on_drag_press: Callable = None,
                  on_drag_move: Callable = None,
                  on_drag_release: Callable = None):
-        """
-        A generic tool that stores user callbacks and provides
-        start/stop/shutdown mechanism.
-        """
-
         self._ax = ax
         self._fig = ax.get_figure()
         self._connections = {}
@@ -43,15 +38,24 @@ class Tool:
         self._fig.canvas.draw_idle()
 
     def start(self):
+        """
+        Activate the tool.
+        """
         self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
             'button_press_event', self._on_button_press)
         self._connections['pick_event'] = self._fig.canvas.mpl_connect(
             'pick_event', self._on_pick)
 
     def stop(self):
+        """
+        Dectivate the tool.
+        """
         self._disconnect(list(self._connections.keys()))
 
     def shutdown(self, artists: List[Artist]):
+        """
+        Deactivate the tool and remove all artists from the axes.
+        """
         self.stop()
         for a in artists:
             a.remove()
