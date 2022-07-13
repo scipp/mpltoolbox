@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
-from .utils import make_color
 from matplotlib.patches import Patch
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event

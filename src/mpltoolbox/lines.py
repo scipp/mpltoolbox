@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
-from .utils import make_color
 import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes

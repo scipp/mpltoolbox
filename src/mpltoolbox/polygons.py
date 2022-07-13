@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
-from .utils import make_color
 import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
@@ -35,36 +34,37 @@ class Polygons(Tool):
     :param on_drag_release: Callback that fires when a polygon is released.
     """
 
-    def __init__(self, ax: Axes, color=None, alpha=0.05, **kwargs):
+    def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax, **kwargs)
         self.lines = []
         self._pick_lock = False
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
-        self._color = color
-        self._line_counter = 0
         self._distance_from_first_point = 0.05
         self._first_point_position = None
         self._finalize_polygon = False
-        self._alpha = alpha
 
     def __del__(self):
         super().shutdown(artists=self.lines + [line._fill for line in self.lines])
 
     def _make_new_line(self, x: float, y: float):
-        line, = self._ax.plot([x, x], [y, y],
-                              '-o',
-                              mfc='None',
-                              color=make_color(color=self._color,
-                                               counter=self._line_counter))
+        line_kwargs = self._parse_kwargs()
+        fill_kwargs = {}
+        for arg in ('ec', 'edgecolor', 'fc', 'facecolor', 'alpha'):
+            if arg in line_kwargs:
+                fill_kwargs[arg] = line_kwargs.pop(arg)
+        if set(['mfc', 'markerfacecolor']).isdisjoint(set(line_kwargs.keys())):
+            line_kwargs['mfc'] = 'None'
+        line, = self._ax.plot([x, x], [y, y], '-o', **line_kwargs)
         self.lines.append(line)
-        self._line_counter += 1
+        self._artist_counter += 1
         self._first_point_position_data = (x, y)
         self._first_point_position_axes = self._data_to_axes_transform(x, y)
-        fill, = self._ax.fill(line.get_xdata(),
-                              line.get_ydata(),
-                              color=line.get_color(),
-                              alpha=self._alpha)
+        if 'alpha' not in fill_kwargs:
+            fill_kwargs['alpha'] = 0.05
+        if set(['fc', 'facecolor']).isdisjoint(set(fill_kwargs.keys())):
+            fill_kwargs['fc'] = line.get_color()
+        fill, = self._ax.fill(line.get_xdata(), line.get_ydata(), **fill_kwargs)
         line._fill = fill
         fill._line = line
 
