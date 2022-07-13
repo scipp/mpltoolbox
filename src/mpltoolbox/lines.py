@@ -41,7 +41,7 @@ class Lines(Tool):
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
 
-    def _after_line_creation(self, event):
+    def _after_line_creation(self, event: Event):
         self._connect({'motion_notify_event': self._on_motion_notify})
         self._draw()
 
@@ -70,7 +70,7 @@ class Lines(Tool):
         else:
             self._duplicate_last_vertex()
 
-    def _finalize_line(self, event):
+    def _finalize_line(self, event: Event):
         self.lines[-1].set_picker(5.0)
         if self.on_create is not None:
             self.on_create(event)
