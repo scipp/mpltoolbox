@@ -34,10 +34,10 @@ class Patches(Tool):
         if event.inaxes != self._ax:
             return
         self._make_new_patch(x=event.xdata, y=event.ydata)
-        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._on_motion_notify)
-        self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._persist_patch)
+        self._connect({
+            'motion_notify_event': self._on_motion_notify,
+            'button_release_event': self._persist_patch
+        })
 
     def _make_new_patch(self, x: float, y: float):
         ec = make_color(color=self._color, counter=self._patch_counter)
@@ -45,8 +45,7 @@ class Patches(Tool):
         self.patches.append(self._patch((x, y), 0, 0, fc=fc, ec=ec, picker=True))
         self._patch_counter += 1
         self._ax.add_patch(self.patches[-1])
-        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._on_motion_notify)
+        self._connect({'motion_notify_event': self._on_motion_notify})
         self._draw()
 
     def _on_motion_notify(self, event: Event):
@@ -61,10 +60,7 @@ class Patches(Tool):
         self._draw()
 
     def _persist_patch(self, event: Event = None):
-        self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
-        self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
-        del self._connections['motion_notify_event']
-        del self._connections['button_release_event']
+        self._disconnect(['motion_notify_event', 'button_release_event'])
         if (event is not None) and (self.on_create is not None):
             self.on_create(event)
 
@@ -89,10 +85,10 @@ class Patches(Tool):
                 self.on_remove(event)
 
     def _grab_patch(self, event: Event):
-        self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-            'motion_notify_event', self._move_patch)
-        self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-            'button_release_event', self._release_patch)
+        self._connect({
+            'motion_notify_event': self._move_patch,
+            'button_release_event': self._release_patch
+        })
         self._grab_artist = event.artist
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
 

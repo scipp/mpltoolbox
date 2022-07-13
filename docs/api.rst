@@ -10,4 +10,5 @@ API Reference
    Ellipses
    Lines
    Points
+   Polygons
    Rectangles

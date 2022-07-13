@@ -49,8 +49,7 @@ class Tool:
             'pick_event', self._on_pick)
 
     def stop(self):
-        for c in self._connections.values():
-            self._fig.canvas.mpl_disconnect(c)
+        self._disconnect(list(self._connections.keys()))
 
     def shutdown(self, artists: List[Artist]):
         self.stop()
@@ -61,3 +60,12 @@ class Tool:
 
     def _get_active_tool(self) -> str:
         return self._fig.canvas.toolbar.get_state()['_current_action']
+
+    def _disconnect(self, keys: List[str]):
+        for key in keys:
+            self._fig.canvas.mpl_disconnect(self._connections[key])
+            del self._connections[key]
+
+    def _connect(self, connections: dict):
+        for key, func in connections.items():
+            self._connections[key] = self._fig.canvas.mpl_connect(key, func)
