@@ -5,9 +5,11 @@ from .patches import Patches
 from matplotlib.patches import Ellipse
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+from typing import Tuple, List
 
 
-def _vertices_from_ellipse(center, width, height):
+def _vertices_from_ellipse(center: Tuple[float], width: float,
+                           height: float) -> Tuple[List[float]]:
     return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
             [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
 

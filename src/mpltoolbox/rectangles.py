@@ -5,9 +5,11 @@ from .patches import Patches
 from matplotlib.patches import Rectangle
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+from typing import Tuple, List
 
 
-def _vertices_from_rectangle(xy, width, height):
+def _vertices_from_rectangle(xy: Tuple[float], width: float,
+                             height: float) -> Tuple[List[float]]:
     return ([xy[0]] + [xy[0] + width] * 2 + [xy[0]], [xy[1]] * 2 + [xy[1] + height] * 2)
 
 
