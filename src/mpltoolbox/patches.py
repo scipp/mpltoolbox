@@ -11,7 +11,7 @@ from matplotlib.colors import to_rgb
 
 class Patches(Tool):
 
-    def __init__(self, ax: Axes, patch: Patch, color=None, alpha=0.05, **kwargs):
+    def __init__(self, ax: Axes, patch: Patch, **kwargs):
         super().__init__(ax=ax, **kwargs)
         self._patch = patch
         self.patches = []
@@ -20,9 +20,6 @@ class Patches(Tool):
         self._grab_mouse_origin = None
         self._grab_artist_origin = None
         self._pick_lock = False
-        self._patch_counter = 0
-        self._color = color
-        self._alpha = alpha
 
     def __del__(self):
         super().shutdown(artists=self.patches)
@@ -39,10 +36,14 @@ class Patches(Tool):
         })
 
     def _make_new_patch(self, x: float, y: float):
-        ec = make_color(color=self._color, counter=self._patch_counter)
-        fc = to_rgb(ec) + (self._alpha, )
-        self.patches.append(self._patch((x, y), 0, 0, fc=fc, ec=ec, picker=True))
-        self._patch_counter += 1
+        kwargs = self._parse_kwargs()
+        defaut_color = f'C{self._artist_counter}'
+        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['ec'] = defaut_color
+        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
+        self.patches.append(self._patch((x, y), 0, 0, picker=True, **kwargs))
+        self._artist_counter += 1
         self._ax.add_patch(self.patches[-1])
         self._draw()
 

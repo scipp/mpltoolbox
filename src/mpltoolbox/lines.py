@@ -44,7 +44,6 @@ class Lines(Tool):
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
         self._color = color
-        self._line_counter = 0
 
     def __del__(self):
         super().shutdown(artists=self.lines)
@@ -54,13 +53,9 @@ class Lines(Tool):
 
     def _make_new_line(self, x: float, y: float):
         xpos, ypos = self._new_line_pos(x, y)
-        line, = self._ax.plot(xpos,
-                              ypos,
-                              '-o',
-                              color=make_color(color=self._color,
-                                               counter=self._line_counter))
+        line, = self._ax.plot(xpos, ypos, '-o', **self._parse_kwargs())
         self.lines.append(line)
-        self._line_counter += 1
+        self._artist_counter += 1
 
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
