@@ -64,7 +64,7 @@ class Tool:
         return self._fig.canvas.toolbar.get_state()['_current_action']
 
     def _disconnect(self, keys):
-        for key in keys:
+        for key in list(keys):
             self._fig.canvas.mpl_disconnect(self._connections[key])
             del self._connections[key]
 

@@ -42,8 +42,6 @@ class Lines(Tool):
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
 
     def _after_line_creation(self, event):
-        # self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-        #     'motion_notify_event', self._on_motion_notify)
         self._connect({'motion_notify_event': self._on_motion_notify})
         self._draw()
 
@@ -67,17 +65,10 @@ class Lines(Tool):
 
     def _persist_dot(self, event: Event):
         if self._get_line_length(-1) == self._nmax:
-            # self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
-            # del self._connections['motion_notify_event']
             self._disconnect(['motion_notify_event'])
             self._finalize_line(event)
         else:
             self._duplicate_last_vertex()
-            # new_data = self.lines[-1].get_data()
-            # self.lines[-1].set_data(
-            #     (np.append(new_data[0],
-            #                new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
-            # self._draw()
 
     def _finalize_line(self, event):
         self.lines[-1].set_picker(5.0)
@@ -111,10 +102,6 @@ class Lines(Tool):
                 self.on_drag_press(event)
 
     def _grab_vertex(self, event: Event):
-        # self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-        #     'motion_notify_event', self._on_vertex_motion)
-        # self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-        #     'button_release_event', partial(self._release_line, kind='vertex'))
         self._connect({
             'motion_notify_event': self._on_vertex_motion,
             'button_release_event': partial(self._release_line, kind='vertex')
@@ -140,10 +127,6 @@ class Lines(Tool):
         self._draw()
 
     def _grab_line(self, event: Event):
-        # self._connections['motion_notify_event'] = self._fig.canvas.mpl_connect(
-        #     'motion_notify_event', self._move_line)
-        # self._connections['button_release_event'] = self._fig.canvas.mpl_connect(
-        #     'button_release_event', partial(self._release_line, kind='grab'))
         self._connect({
             'motion_notify_event': self._move_line,
             'button_release_event': partial(self._release_line, kind='grab')
@@ -163,10 +146,6 @@ class Lines(Tool):
         self._draw()
 
     def _release_line(self, event: Event, kind: str):
-        # self._fig.canvas.mpl_disconnect(self._connections['motion_notify_event'])
-        # self._fig.canvas.mpl_disconnect(self._connections['button_release_event'])
-        # del self._connections['motion_notify_event']
-        # del self._connections['button_release_event']
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
