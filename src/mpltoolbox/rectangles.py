@@ -23,15 +23,16 @@ class Rectangles(Patches):
       - Middle-click to delete rectangle
 
     :param ax: The Matplotlib axes to which the Lines tool will be attached.
-    :param color: The rectangle colors. Can be a string (all lines will have the same
-        color), a list of strings (one entry per rectangle), or a callable (this will be
-        called every time a new rectangle is created and should return a color).
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a rectangle is created.
     :param on_remove: Callback that fires when a rectangle is removed.
     :param on_drag_press: Callback that fires when a rectangle is right-clicked.
     :param on_drag_move: Callback that fires when a rectangle is dragged.
     :param on_drag_release: Callback that fires when a rectangle is released.
+    :param kwargs: Matplotlib parameters used for customization.
+        Each parameter can be a single item (it will apply to all rectangles),
+        a list of items (one entry per rectangle), or a callable (which will be
+        called every time a new rectangle is created).
     """
 
     def __init__(self, ax: Axes, **kwargs):

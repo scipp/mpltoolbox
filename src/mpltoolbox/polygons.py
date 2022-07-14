@@ -20,9 +20,6 @@ class Polygons(Tool):
       - Middle-click to delete polygon
 
     :param ax: The Matplotlib axes to which the Lines tool will be attached.
-    :param color: The polygon colors. Can be a string (all lines will have the same
-        color), a list of strings (one entry per polygon), or a callable (this will be
-        called every time a new polygon is created and should return a color).
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a polygon is created.
     :param on_remove: Callback that fires when a polygon is removed.
@@ -32,6 +29,10 @@ class Polygons(Tool):
     :param on_drag_press: Callback that fires when a polygon is right-clicked.
     :param on_drag_move: Callback that fires when a polygon is dragged.
     :param on_drag_release: Callback that fires when a polygon is released.
+    :param kwargs: Matplotlib parameters used for customization.
+        Each parameter can be a single item (it will apply to all polygons),
+        a list of items (one entry per polygon), or a callable (which will be
+        called every time a new polygon is created).
     """
 
     def __init__(self, ax: Axes, **kwargs):

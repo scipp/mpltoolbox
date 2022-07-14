@@ -20,10 +20,7 @@ class Lines(Tool):
       - Middle-click to delete line
 
     :param ax: The Matplotlib axes to which the Lines tool will be attached.
-    :param n: The number of vertices for each line.
-    :param color: The line colors. Can be a string (all lines will have the same
-        color), a list of strings (one entry per line), or a callable (this will be
-        called every time a new line is created and should return a color).
+    :param n: The number of vertices for each line. Default is 2.
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a line is created.
     :param on_remove: Callback that fires when a line is removed.
@@ -33,16 +30,19 @@ class Lines(Tool):
     :param on_drag_press: Callback that fires when a line is right-clicked.
     :param on_drag_move: Callback that fires when a line is dragged.
     :param on_drag_release: Callback that fires when a line is released.
+    :param kwargs: Matplotlib line parameters used for customization.
+        Each parameter can be a single item (it will apply to all lines),
+        a list of items (one entry per line), or a callable (which will be
+        called every time a new line is created).
     """
 
-    def __init__(self, ax: Axes, n: int, color=None, **kwargs):
+    def __init__(self, ax: Axes, n: int = 2, **kwargs):
         super().__init__(ax, **kwargs)
         self._nmax = n
         self.lines = []
         self._pick_lock = False
         self._moving_vertex_index = None
         self._moving_vertex_artist = None
-        self._color = color
 
     def __del__(self):
         super().shutdown(artists=self.lines)
