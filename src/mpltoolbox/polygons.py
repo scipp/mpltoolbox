@@ -55,6 +55,10 @@ class Polygons(Tool):
                 fill_kwargs[arg] = line_kwargs.pop(arg)
         if set(['mfc', 'markerfacecolor']).isdisjoint(set(line_kwargs.keys())):
             line_kwargs['mfc'] = 'None'
+        if set(['ls', 'linestyle']).isdisjoint(set(line_kwargs.keys())):
+            line_kwargs['ls'] = 'solid'
+        if 'marker' not in line_kwargs:
+            line_kwargs['marker'] = 'o'
         line, = self._ax.plot([x, x], [y, y], '-o', **line_kwargs)
         self.lines.append(line)
         self._artist_counter += 1

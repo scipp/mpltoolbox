@@ -52,7 +52,12 @@ class Lines(Tool):
 
     def _make_new_line(self, x: float, y: float):
         xpos, ypos = self._new_line_pos(x, y)
-        line, = self._ax.plot(xpos, ypos, '-o', **self._parse_kwargs())
+        kwargs = self._parse_kwargs()
+        if set(['ls', 'linestyle']).isdisjoint(set(kwargs.keys())):
+            kwargs['ls'] = 'solid'
+        if 'marker' not in kwargs:
+            kwargs['marker'] = 'o'
+        line, = self._ax.plot(xpos, ypos, **kwargs)
         self.lines.append(line)
         self._artist_counter += 1
 

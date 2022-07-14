@@ -78,7 +78,7 @@ class Tool:
         self._draw()
 
     def _get_active_tool(self) -> str:
-        return self._fig.canvas.toolbar.get_state()['_current_action']
+        return self._fig.canvas.toolbar.mode
 
     def _disconnect(self, keys: List[str]):
         for key in keys:
