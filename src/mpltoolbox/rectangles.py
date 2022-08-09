@@ -63,7 +63,6 @@ class Rectangles(Patches):
                               picker=5.0)
         patch._vertices = line
         line._patch = patch
-        self._draw()
 
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:

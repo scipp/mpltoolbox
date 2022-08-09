@@ -50,6 +50,7 @@ class Patches(Tool):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         if event is not None:
             self._add_vertices()
+            self._draw()
             if self.on_create is not None:
                 self.on_create(event)
 
