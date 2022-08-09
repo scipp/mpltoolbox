@@ -5,7 +5,7 @@ Mpltoolbox aims to provide some basic tools (that other libraries such as bokeh 
 There are many interactive examples in the Matplotlib documentation pages,
 but the code snippets are often long and potentially not straightforward to maintain.
 
-With `mpltoolbox`, activating these tools should (hopefully) just be a on-liner.
+With `mpltoolbox`, activating these tools should (hopefully) just be a one-liner.
 
 ## Documentation
 
