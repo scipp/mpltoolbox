@@ -6,6 +6,7 @@ from matplotlib.patches import Patch
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
+import uuid
 
 
 class Patches(Tool):
@@ -54,7 +55,7 @@ class Patches(Tool):
             self._add_vertices()
             self._draw()
             if self.on_create is not None:
-                self.on_create(event)
+                self.on_create({'event': event, 'artist': self.patches[-1]})
 
     def _remove_patch(self, patch: Artist):
         patch.remove()
@@ -74,20 +75,24 @@ class Patches(Tool):
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.on_vertex_press(event)
+                self.on_vertex_press({
+                    'event': event,
+                    'ind': self._moving_vertex_index,
+                    'artist': self._moving_vertex_artist
+                })
         if event.mouseevent.button == 3:
             if not is_patch:
                 return
             self._pick_lock = True
             self._grab_patch(event)
             if self.on_drag_press is not None:
-                self.on_drag_press(event)
+                self.on_drag_press({'event': event, 'artist': self._grab_artist})
         elif event.mouseevent.button == 2:
             if not is_patch:
                 return
             self._remove_patch(event.artist)
             if self.on_remove is not None:
-                self.on_remove(event)
+                self.on_remove({'event': event, 'artist': event.artist})
 
     def _grab_vertex(self, event: Event):
         self._connect({
@@ -103,7 +108,11 @@ class Patches(Tool):
                           ind=self._moving_vertex_index,
                           line=self._moving_vertex_artist)
         if self.on_vertex_move is not None:
-            self.on_vertex_move(event)
+            self.on_vertex_move({
+                'event': event,
+                'ind': self._moving_vertex_index,
+                'artist': self._moving_vertex_artist
+            })
 
     def _grab_patch(self, event: Event):
         self._connect({
@@ -121,7 +130,7 @@ class Patches(Tool):
         self._update_artist_position(dx, dy)
         self._draw()
         if self.on_drag_move is not None:
-            self.on_drag_move(event)
+            self.on_drag_move({'event': event, 'artist': self._grab_artist})
 
     def _release_patch(self, event: Event):
         self._persist_patch()

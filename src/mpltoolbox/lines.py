@@ -98,7 +98,7 @@ class Lines(Tool):
     def _finalize_line(self, event: Event):
         self.lines[-1].set_picker(5.0)
         if self.on_create is not None:
-            self.on_create(event)
+            self.on_create({'event': event, 'artist': self.lines[-1]})
         self._draw()
 
     def _remove_line(self, line: Artist, draw: bool = True):
@@ -116,16 +116,20 @@ class Lines(Tool):
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.on_vertex_press(event)
+                self.on_vertex_press({
+                    'event': event,
+                    'ind': self._moving_vertex_index,
+                    'artist': self._moving_vertex_artist
+                })
         elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
             if self.on_remove is not None:
-                self.on_remove(event)
+                self.on_remove({'event': event, 'artist': event.artist})
         elif event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_line(event)
             if self.on_drag_press is not None:
-                self.on_drag_press(event)
+                self.on_drag_press({'event': event, 'artist': self._grab_artist})
 
     def _grab_vertex(self, event: Event):
         self._connect({
@@ -137,24 +141,22 @@ class Lines(Tool):
         self._moving_vertex_artist = event.artist
 
     def _on_vertex_motion(self, event: Event):
-        self._move_vertex(event=event,
-                          ind=self._moving_vertex_index,
-                          line=self._moving_vertex_artist)
+        event_dict = {
+            'event': event,
+            'ind': self._moving_vertex_index,
+            'artist': self._moving_vertex_artist
+        }
+        self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
-            self.on_vertex_move({
-                'event': event,
-                'ind': self._moving_vertex_index,
-                'line': self._moving_vertex_artist,
-                'number': self.lines.index(self._moving_vertex_artist)
-            })
+            self.on_vertex_move(event_dict)
 
-    def _move_vertex(self, event: Event, ind: int, line: Artist):
+    def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:
             return
-        new_data = line.get_data()
+        new_data = artist.get_data()
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
-        line.set_data(new_data)
+        artist.set_data(new_data)
         self._draw()
 
     def _grab_line(self, event: Event):

@@ -93,7 +93,7 @@ class Polygons(Lines):
             self._finalize_polygon = True
         else:
             self._finalize_polygon = False
-        self._move_vertex(event=event, ind=-1, line=self.lines[-1])
+        self._move_vertex(event=event, ind=-1, artist=self.lines[-1])
 
     # def _after_line_creation(self, event: Event):
     #     self._connect({'motion_notify_event': self._on_motion_notify})
@@ -155,20 +155,24 @@ class Polygons(Lines):
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.on_vertex_press(event)
+                self.on_vertex_press({
+                    'event': event,
+                    'ind': self._moving_vertex_index,
+                    'artist': self._moving_vertex_artist
+                })
         elif event.mouseevent.button == 2:
             if not is_polygon:
                 return
             self._remove_polygon(event.artist)
             if self.on_remove is not None:
-                self.on_remove(event)
+                self.on_remove({'event': event, 'artist': event.artist})
         elif event.mouseevent.button == 3:
             if not is_polygon:
                 return
             self._pick_lock = True
             self._grab_line(event)
             if self.on_drag_press is not None:
-                self.on_drag_press(event)
+                self.on_drag_press({'event': event, 'artist': self._grab_artist})
 
     # def _grab_vertex(self, event: Event):
     #     self._connect({
@@ -188,16 +192,16 @@ class Polygons(Lines):
     #     if self.on_vertex_move is not None:
     #         self.on_vertex_move(event)
 
-    def _move_vertex(self, event: Event, ind: int, line: Artist):
+    def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:
             return
-        new_data = line.get_data()
+        new_data = artist.get_data()
         if ind in (0, len(new_data[0])):
             ind = [0, -1]
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
-        line.set_data(new_data)
-        line._fill.set_xy(np.array(new_data).T)
+        artist.set_data(new_data)
+        artist._fill.set_xy(np.array(new_data).T)
         self._draw()
 
     # def _grab_polygon(self, event: Event):
