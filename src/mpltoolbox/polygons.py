@@ -3,7 +3,6 @@
 
 from .lines import Lines
 import numpy as np
-from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
 from matplotlib.patches import Polygon
