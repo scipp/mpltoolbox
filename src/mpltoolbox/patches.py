@@ -41,9 +41,11 @@ class Patches(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        self.patches.append(self._patch((x, y), 0, 0, picker=True, **kwargs))
+        patch = self._patch((x, y), 0, 0, picker=True, **kwargs)
+        patch.id = str(uuid.uuid1())
+        self.patches.append(patch)
         self._artist_counter += 1
-        self._ax.add_patch(self.patches[-1])
+        self._ax.add_patch(patch)
         self._draw()
 
     def _persist_patch(self, event: Event = None):

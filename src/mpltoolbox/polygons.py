@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .tool import Tool
+from .lines import Lines
 import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
@@ -9,7 +9,7 @@ from matplotlib.backend_bases import Event
 from matplotlib.patches import Polygon
 
 
-class Polygons(Tool):
+class Polygons(Lines):
     """
     Add closed polygons to the supplied axes.
 
@@ -37,10 +37,10 @@ class Polygons(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax, **kwargs)
-        self.lines = []
-        self._pick_lock = False
-        self._moving_vertex_index = None
-        self._moving_vertex_artist = None
+        # self.lines = []
+        # self._pick_lock = False
+        # self._moving_vertex_index = None
+        # self._moving_vertex_artist = None
         self._distance_from_first_point = 0.05
         self._first_point_position = None
         self._finalize_polygon = False
@@ -60,7 +60,7 @@ class Polygons(Tool):
             line_kwargs['ls'] = 'solid'
         if 'marker' not in line_kwargs:
             line_kwargs['marker'] = 'o'
-        line, = self._ax.plot([x, x], [y, y], '-o', **line_kwargs)
+        line, = self._ax.plot([x, x], [y, y], **line_kwargs)
         self.lines.append(line)
         self._artist_counter += 1
         self._first_point_position_data = (x, y)
@@ -78,6 +78,8 @@ class Polygons(Tool):
         return self._ax.transAxes.inverted().transform(trans)
 
     def _compute_distance_from_first_point(self, event):
+        if event.inaxes != self._ax:
+            return np.Inf
         xdisplay, ydisplay = self._data_to_axes_transform(event.xdata, event.ydata)
         dist = np.sqrt((xdisplay - self._first_point_position_axes[0])**2 +
                        (ydisplay - self._first_point_position_axes[1])**2)
@@ -93,27 +95,27 @@ class Polygons(Tool):
             self._finalize_polygon = False
         self._move_vertex(event=event, ind=-1, line=self.lines[-1])
 
-    def _after_line_creation(self, event: Event):
-        self._connect({'motion_notify_event': self._on_motion_notify})
-        self._draw()
+    # def _after_line_creation(self, event: Event):
+    #     self._connect({'motion_notify_event': self._on_motion_notify})
+    #     self._draw()
 
-    def _on_button_press(self, event: Event):
-        if event.button != 1 or self._pick_lock or self._get_active_tool():
-            return
-        if event.inaxes != self._ax:
-            return
-        if 'motion_notify_event' not in self._connections:
-            self._make_new_line(x=event.xdata, y=event.ydata)
-            self._after_line_creation(event)
-        else:
-            self._persist_dot(event)
+    # def _on_button_press(self, event: Event):
+    #     if event.button != 1 or self._pick_lock or self._get_active_tool():
+    #         return
+    #     if event.inaxes != self._ax:
+    #         return
+    #     if 'motion_notify_event' not in self._connections:
+    #         self._make_new_line(x=event.xdata, y=event.ydata)
+    #         self._after_line_creation(event)
+    #     else:
+    #         self._persist_dot(event)
 
-    def _duplicate_last_vertex(self):
-        new_data = self.lines[-1].get_data()
-        self.lines[-1].set_data(
-            (np.append(new_data[0],
-                       new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
-        self._draw()
+    # def _duplicate_last_vertex(self):
+    #     new_data = self.lines[-1].get_data()
+    #     self.lines[-1].set_data(
+    #         (np.append(new_data[0],
+    #                    new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
+    #     self._draw()
 
     def _persist_dot(self, event: Event):
         if self._finalize_polygon:
@@ -124,16 +126,21 @@ class Polygons(Tool):
             self._duplicate_last_vertex()
 
     def _finalize_line(self, event: Event):
-        self.lines[-1].set_picker(5.0)
         self.lines[-1]._fill.set_picker(5.0)
-        if self.on_create is not None:
-            self.on_create(event)
-        self._draw()
+        super()._finalize_line(event=event)
+
+    # def _finalize_line(self, event: Event):
+    #     self.lines[-1].set_picker(5.0)
+    #     self.lines[-1]._fill.set_picker(5.0)
+    #     if self.on_create is not None:
+    #         self.on_create(event)
+    #     self._draw()
 
     def _remove_polygon(self, artist: Artist):
+        self._remove_line(line=artist._line, draw=False)
         artist.remove()
-        artist._line.remove()
-        self.lines.remove(artist._line)
+        # artist._line.remove()
+        # self.lines.remove(artist._line)
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -159,27 +166,27 @@ class Polygons(Tool):
             if not is_polygon:
                 return
             self._pick_lock = True
-            self._grab_polygon(event)
+            self._grab_line(event)
             if self.on_drag_press is not None:
                 self.on_drag_press(event)
 
-    def _grab_vertex(self, event: Event):
-        self._connect({
-            'motion_notify_event':
-            self._on_vertex_motion,
-            'button_release_event':
-            partial(self._release_polygon, kind='vertex')
-        })
+    # def _grab_vertex(self, event: Event):
+    #     self._connect({
+    #         'motion_notify_event':
+    #         self._on_vertex_motion,
+    #         'button_release_event':
+    #         partial(self._release_polygon, kind='vertex')
+    #     })
 
-        self._moving_vertex_index = event.ind[0]
-        self._moving_vertex_artist = event.artist
+    #     self._moving_vertex_index = event.ind[0]
+    #     self._moving_vertex_artist = event.artist
 
-    def _on_vertex_motion(self, event: Event):
-        self._move_vertex(event=event,
-                          ind=self._moving_vertex_index,
-                          line=self._moving_vertex_artist)
-        if self.on_vertex_move is not None:
-            self.on_vertex_move(event)
+    # def _on_vertex_motion(self, event: Event):
+    #     self._move_vertex(event=event,
+    #                       ind=self._moving_vertex_index,
+    #                       line=self._moving_vertex_artist)
+    #     if self.on_vertex_move is not None:
+    #         self.on_vertex_move(event)
 
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:
@@ -193,31 +200,43 @@ class Polygons(Tool):
         line._fill.set_xy(np.array(new_data).T)
         self._draw()
 
-    def _grab_polygon(self, event: Event):
-        self._connect({
-            'motion_notify_event':
-            self._move_polygon,
-            'button_release_event':
-            partial(self._release_polygon, kind='grab')
-        })
-        self._grab_artist = event.artist._line
-        self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
-        self._grab_artist_origin = self._grab_artist.get_data()
+    # def _grab_polygon(self, event: Event):
+    #     self._connect({
+    #         'motion_notify_event':
+    #         self._move_polygon,
+    #         'button_release_event':
+    #         partial(self._release_polygon, kind='grab')
+    #     })
+    #     self._grab_artist = event.artist._line
+    #     self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
+    #     self._grab_artist_origin = self._grab_artist.get_data()
 
-    def _move_polygon(self, event: Event):
-        if event.inaxes != self._ax:
-            return
-        dx = event.xdata - self._grab_mouse_origin[0]
-        dy = event.ydata - self._grab_mouse_origin[1]
-        new_data = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
-        self._grab_artist.set_data(new_data)
-        self._grab_artist._fill.set_xy(np.array(new_data).T)
+    # def _move_polygon(self, event: Event):
+    #     if event.inaxes != self._ax:
+    #         return
+    #     dx = event.xdata - self._grab_mouse_origin[0]
+    #     dy = event.ydata - self._grab_mouse_origin[1]
+    #     new_data = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
+    #     self._grab_artist.set_data(new_data)
+    #     self._grab_artist._fill.set_xy(np.array(new_data).T)
+    #     self._draw()
+
+    def _move_line(self, event: Event):
+        super()._move_line(event=event, draw=False)
+        # if event.inaxes != self._ax:
+        #     return
+        # dx = event.xdata - self._grab_mouse_origin[0]
+        # dy = event.ydata - self._grab_mouse_origin[1]
+        # new_data = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
+        # self._grab_artist.set_data(new_data)
+        # print("MOVING", self._grab_artist.get_data())
+        self._grab_artist._fill.set_xy(np.array(self._grab_artist.get_data()).T)
         self._draw()
 
-    def _release_polygon(self, event: Event, kind: str):
-        self._disconnect(['motion_notify_event', 'button_release_event'])
-        self._pick_lock = False
-        if (kind == 'vertex') and (self.on_vertex_release is not None):
-            self.on_vertex_release(event)
-        elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.on_drag_release(event)
+    # def _release_polygon(self, event: Event, kind: str):
+    #     self._disconnect(['motion_notify_event', 'button_release_event'])
+    #     self._pick_lock = False
+    #     if (kind == 'vertex') and (self.on_vertex_release is not None):
+    #         self.on_vertex_release(event)
+    #     elif (kind == 'drag') and (self.on_drag_release is not None):
+    #         self.on_drag_release(event)

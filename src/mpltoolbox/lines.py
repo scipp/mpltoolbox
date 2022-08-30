@@ -6,6 +6,7 @@ import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
+import uuid
 from typing import Tuple
 
 
@@ -58,6 +59,7 @@ class Lines(Tool):
         if 'marker' not in kwargs:
             kwargs['marker'] = 'o'
         line, = self._ax.plot(xpos, ypos, **kwargs)
+        line.id = str(uuid.uuid1())
         self.lines.append(line)
         self._artist_counter += 1
 
@@ -99,10 +101,11 @@ class Lines(Tool):
             self.on_create(event)
         self._draw()
 
-    def _remove_line(self, line: Artist):
+    def _remove_line(self, line: Artist, draw: bool = True):
         line.remove()
         self.lines.remove(line)
-        self._draw()
+        if draw:
+            self._draw()
 
     def _on_pick(self, event: Event):
         if self._get_active_tool():
@@ -160,18 +163,19 @@ class Lines(Tool):
             'button_release_event': partial(self._release_line, kind='grab')
         })
 
-        self._grab_artist = event.artist
+        self._grab_artist = getattr(event.artist, '_line', event.artist)
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
         self._grab_artist_origin = self._grab_artist.get_data()
 
-    def _move_line(self, event: Event):
+    def _move_line(self, event: Event, draw: bool = True):
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
         self._grab_artist.set_data(
             (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
-        self._draw()
+        if draw:
+            self._draw()
 
     def _release_line(self, event: Event, kind: str):
         self._disconnect(['motion_notify_event', 'button_release_event'])
