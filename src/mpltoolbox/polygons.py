@@ -37,10 +37,6 @@ class Polygons(Lines):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax, **kwargs)
-        # self.lines = []
-        # self._pick_lock = False
-        # self._moving_vertex_index = None
-        # self._moving_vertex_artist = None
         self._distance_from_first_point = 0.05
         self._first_point_position = None
         self._finalize_polygon = False
@@ -95,28 +91,6 @@ class Polygons(Lines):
             self._finalize_polygon = False
         self._move_vertex(event=event, ind=-1, artist=self.lines[-1])
 
-    # def _after_line_creation(self, event: Event):
-    #     self._connect({'motion_notify_event': self._on_motion_notify})
-    #     self._draw()
-
-    # def _on_button_press(self, event: Event):
-    #     if event.button != 1 or self._pick_lock or self._get_active_tool():
-    #         return
-    #     if event.inaxes != self._ax:
-    #         return
-    #     if 'motion_notify_event' not in self._connections:
-    #         self._make_new_line(x=event.xdata, y=event.ydata)
-    #         self._after_line_creation(event)
-    #     else:
-    #         self._persist_dot(event)
-
-    # def _duplicate_last_vertex(self):
-    #     new_data = self.lines[-1].get_data()
-    #     self.lines[-1].set_data(
-    #         (np.append(new_data[0],
-    #                    new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
-    #     self._draw()
-
     def _persist_dot(self, event: Event):
         if self._finalize_polygon:
             self._disconnect(['motion_notify_event'])
@@ -129,18 +103,9 @@ class Polygons(Lines):
         self.lines[-1]._fill.set_picker(5.0)
         super()._finalize_line(event=event)
 
-    # def _finalize_line(self, event: Event):
-    #     self.lines[-1].set_picker(5.0)
-    #     self.lines[-1]._fill.set_picker(5.0)
-    #     if self.on_create is not None:
-    #         self.on_create(event)
-    #     self._draw()
-
     def _remove_polygon(self, artist: Artist):
         self._remove_line(line=artist._line, draw=False)
         artist.remove()
-        # artist._line.remove()
-        # self.lines.remove(artist._line)
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -174,24 +139,6 @@ class Polygons(Lines):
             if self.on_drag_press is not None:
                 self.on_drag_press({'event': event, 'artist': self._grab_artist})
 
-    # def _grab_vertex(self, event: Event):
-    #     self._connect({
-    #         'motion_notify_event':
-    #         self._on_vertex_motion,
-    #         'button_release_event':
-    #         partial(self._release_polygon, kind='vertex')
-    #     })
-
-    #     self._moving_vertex_index = event.ind[0]
-    #     self._moving_vertex_artist = event.artist
-
-    # def _on_vertex_motion(self, event: Event):
-    #     self._move_vertex(event=event,
-    #                       ind=self._moving_vertex_index,
-    #                       line=self._moving_vertex_artist)
-    #     if self.on_vertex_move is not None:
-    #         self.on_vertex_move(event)
-
     def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:
             return
@@ -204,43 +151,7 @@ class Polygons(Lines):
         artist._fill.set_xy(np.array(new_data).T)
         self._draw()
 
-    # def _grab_polygon(self, event: Event):
-    #     self._connect({
-    #         'motion_notify_event':
-    #         self._move_polygon,
-    #         'button_release_event':
-    #         partial(self._release_polygon, kind='grab')
-    #     })
-    #     self._grab_artist = event.artist._line
-    #     self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
-    #     self._grab_artist_origin = self._grab_artist.get_data()
-
-    # def _move_polygon(self, event: Event):
-    #     if event.inaxes != self._ax:
-    #         return
-    #     dx = event.xdata - self._grab_mouse_origin[0]
-    #     dy = event.ydata - self._grab_mouse_origin[1]
-    #     new_data = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
-    #     self._grab_artist.set_data(new_data)
-    #     self._grab_artist._fill.set_xy(np.array(new_data).T)
-    #     self._draw()
-
     def _move_line(self, event: Event):
         super()._move_line(event=event, draw=False)
-        # if event.inaxes != self._ax:
-        #     return
-        # dx = event.xdata - self._grab_mouse_origin[0]
-        # dy = event.ydata - self._grab_mouse_origin[1]
-        # new_data = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
-        # self._grab_artist.set_data(new_data)
-        # print("MOVING", self._grab_artist.get_data())
         self._grab_artist._fill.set_xy(np.array(self._grab_artist.get_data()).T)
         self._draw()
-
-    # def _release_polygon(self, event: Event, kind: str):
-    #     self._disconnect(['motion_notify_event', 'button_release_event'])
-    #     self._pick_lock = False
-    #     if (kind == 'vertex') and (self.on_vertex_release is not None):
-    #         self.on_vertex_release(event)
-    #     elif (kind == 'drag') and (self.on_drag_release is not None):
-    #         self.on_drag_release(event)
