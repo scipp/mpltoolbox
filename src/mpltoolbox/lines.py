@@ -138,7 +138,12 @@ class Lines(Tool):
                           ind=self._moving_vertex_index,
                           line=self._moving_vertex_artist)
         if self.on_vertex_move is not None:
-            self.on_vertex_move(event)
+            self.on_vertex_move({
+                'event': event,
+                'ind': self._moving_vertex_index,
+                'line': self._moving_vertex_artist,
+                'number': self.lines.index(self._moving_vertex_artist)
+            })
 
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:
