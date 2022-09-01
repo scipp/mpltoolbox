@@ -64,7 +64,7 @@ class Lines(Tool):
         self._artist_counter += 1
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=-1, line=self.lines[-1])
+        self._move_vertex(event=event, ind=-1, artist=self.lines[-1])
 
     def _after_line_creation(self, event: Event):
         self._connect({'motion_notify_event': self._on_motion_notify})
