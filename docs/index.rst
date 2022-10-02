@@ -78,4 +78,10 @@ Example
    :maxdepth: 2
    :hidden:
 
+   callbacks
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
    api

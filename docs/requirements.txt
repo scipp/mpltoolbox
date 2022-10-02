@@ -4,3 +4,4 @@ nbsphinx
 jupyter
 sphinx-copybutton
 sphinx-book-theme
+ipympl
