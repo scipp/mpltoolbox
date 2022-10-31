@@ -162,7 +162,7 @@ class Lines(Tool):
     def _grab_line(self, event: Event):
         self._connect({
             'motion_notify_event': self._move_line,
-            'button_release_event': partial(self._release_line, kind='grab')
+            'button_release_event': partial(self._release_line, kind='drag')
         })
 
         self._grab_artist = getattr(event.artist, '_line', event.artist)
