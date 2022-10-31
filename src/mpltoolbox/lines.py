@@ -183,9 +183,13 @@ class Lines(Tool):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
-            self.on_vertex_release(event)
+            self.on_vertex_release({
+                'event': event,
+                'ind': self._moving_vertex_index,
+                'artist': self._moving_vertex_artist
+            })
         elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.on_drag_release(event)
+            self.on_drag_release({'event': event, 'artist': self._grab_artist})
 
     def _get_line_length(self, ind: int):
         return len(self.lines[ind].get_xydata())
