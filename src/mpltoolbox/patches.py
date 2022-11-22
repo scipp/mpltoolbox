@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
+from functools import partial
 from matplotlib.patches import Patch
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
@@ -96,8 +97,10 @@ class Patches(Tool):
 
     def _grab_vertex(self, event: Event):
         self._connect({
-            'motion_notify_event': self._on_vertex_motion,
-            'button_release_event': self._release_patch
+            'motion_notify_event':
+            self._on_vertex_motion,
+            'button_release_event':
+            partial(self._release_patch, kind='vertex')
         })
 
         self._moving_vertex_index = event.ind[0]
@@ -117,7 +120,7 @@ class Patches(Tool):
     def _grab_patch(self, event: Event):
         self._connect({
             'motion_notify_event': self._move_patch,
-            'button_release_event': self._release_patch
+            'button_release_event': partial(self._release_patch, kind='drag')
         })
         self._grab_artist = event.artist
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
@@ -132,8 +135,14 @@ class Patches(Tool):
         if self.on_drag_move is not None:
             self.on_drag_move({'event': event, 'artist': self._grab_artist})
 
-    def _release_patch(self, event: Event):
-        self._persist_patch()
+    def _release_patch(self, event: Event, kind: str):
+        self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
-        if self.on_drag_release is not None:
-            self.on_drag_release(event)
+        if (kind == 'vertex') and (self.on_vertex_release is not None):
+            self.on_vertex_release({
+                'event': event,
+                'ind': self._moving_vertex_index,
+                'artist': self._moving_vertex_artist
+            })
+        elif (kind == 'drag') and (self.on_drag_release is not None):
+            self.on_drag_release({'event': event, 'artist': self._grab_artist})

@@ -82,8 +82,9 @@ class Tool:
 
     def _disconnect(self, keys: List[str]):
         for key in keys:
-            self._fig.canvas.mpl_disconnect(self._connections[key])
-            del self._connections[key]
+            if key in self._connections:
+                self._fig.canvas.mpl_disconnect(self._connections[key])
+                del self._connections[key]
 
     def _connect(self, connections: dict):
         for key, func in connections.items():
