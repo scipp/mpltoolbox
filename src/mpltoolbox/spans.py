@@ -16,7 +16,8 @@ class HSpan:
 
         # vertical = span == 'axvspan'
         # arg = x if vertical else y
-        self._span = ax.axvspan(x, x, **kwargs)
+        self._ax = ax
+        self._span = self._ax.axvspan(x, x, **kwargs)
         self._vertices = None
         self._span.parent = self
 
@@ -35,6 +36,8 @@ class HSpan:
         else:
             corners += [x, corners[0, 1]]
         self._span.set_xy(corners)
+        if self._vertices is not None:
+            self._vertices.set_xdata([corners[0, 0], corners[2, 0]])
 
     @property
     def right(self):
@@ -46,6 +49,8 @@ class HSpan:
         for i in [2, 3]:
             corners[i, 0] = x
         self._span.set_xy(corners)
+        if self._vertices is not None:
+            self._vertices.set_xdata([corners[0, 0], corners[2, 0]])
 
     @property
     def color(self):
@@ -54,6 +59,18 @@ class HSpan:
     def remove(self):
         self._span.remove()
         self._vertices.remove()
+
+    def add_vertices(self):
+        self._vertices, = self._ax.plot([self.left, self.right], [0.5, 0.5],
+                                        'o',
+                                        ls='None',
+                                        mec=self.color,
+                                        mfc='None',
+                                        picker=5.0,
+                                        transform=self._span.get_transform())
+        self._vertices.parent = self
+        # span._vertices = line
+        # line._span = span
 
 
 class Spans(Tool):
@@ -99,10 +116,31 @@ class Spans(Tool):
     def _persist_span(self, event: Event = None):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         if event is not None:
-            self._add_vertices()
+            # self._add_vertices()
+            self.spans[-1].add_vertices()
             self._draw()
             if self.on_create is not None:
                 self.on_create({'event': event, 'artist': self.spans[-1]})
+
+
+# def _add_vertices(self):
+#         # span = self.spans[-1]
+#         # line, = self._ax.plot([span.left, span.right], [0.5, 0.5],
+#         #                       'o',
+#         #                       ls='None',
+#         #                       mec=span.color,
+#         #                       mfc='None',
+#         #                       picker=5.0,
+#         #                       transform=span._span.get_transform())
+#         # # line, = self._ax.plot(vertices[0],
+#         # #                       vertices[1],
+#         # #                       'o',
+#         # #                       mec=span.get_edgecolor(),
+#         # #                       mfc='None',
+#         # #                       picker=5.0)
+#         # span._vertices = line
+#         # line._span = span
+#         self.spans[-1].add_vertices()
 
     def _remove_span(self, span: Artist):
         span.parent.remove()
@@ -207,20 +245,13 @@ class Vspans(Spans):
         # self.spans[-1].set_xy(corners)
         self._draw()
 
-    def _add_vertices(self):
-        span = self.spans[-1]
-        line, = self._ax.plot([span.left, span.right], [0.5, 0.5],
-                              'o',
-                              ls='None',
-                              mec=span.color,
-                              mfc='None',
-                              picker=5.0,
-                              transform=span._span.get_transform())
-        # line, = self._ax.plot(vertices[0],
-        #                       vertices[1],
-        #                       'o',
-        #                       mec=span.get_edgecolor(),
-        #                       mfc='None',
-        #                       picker=5.0)
-        span._vertices = line
-        line._span = span
+    def _grab_span(self, event: Event):
+        super()._grab_span(event)
+        self._grab_artist_origin = [
+            self._grab_artist.parent.left, self._grab_artist.parent.right
+        ]
+
+    def _update_artist_position(self, dx, dy):
+        span = self._grab_artist.parent
+        span.right = self._grab_artist_origin[0] + dx
+        span.left = self._grab_artist_origin[1] + dx
