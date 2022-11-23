@@ -3,16 +3,56 @@
 
 from .tool import Tool
 from functools import partial
-# from matplotlib.patches import Patch
+# from matplotlib.spanes import span
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
 import uuid
 
 
+class HSpan:
+
+    def __init__(self, x: float, y: float, ax: Axes, **kwargs):
+
+        # vertical = span == 'axvspan'
+        # arg = x if vertical else y
+        self._span = ax.axvspan(x, x, **kwargs)
+
+    @property
+    def left(self):
+        return self._span.get_xy()[0, 0]
+        # return min(corners[0, 0], corners[2, 0])
+
+    @left.setter
+    def left(self, x):
+        corners = self._span.get_xy()
+        for i in [0, 1]:
+            corners[i, 0] = x
+        if len(corners) > 3:
+            corners[4, 0] = x
+        else:
+            corners += [x, corners[0, 1]]
+        self._span.set_xy(corners)
+
+    @property
+    def right(self):
+        return self._span.get_xy()[2, 0]
+
+    @right.setter
+    def right(self, x):
+        corners = self._span.get_xy()
+        for i in [2, 3]:
+            corners[i, 0] = x
+        self._span.set_xy(corners)
+
+    @property
+    def color(self):
+        return self._span.get_edgecolor()
+
+
 class Spans(Tool):
 
-    def __init__(self, ax: Axes, span: str, **kwargs):
+    def __init__(self, ax: Axes, span: HSpan, **kwargs):
         super().__init__(ax=ax, **kwargs)
         self._span = span
         self.spans = []
@@ -43,36 +83,25 @@ class Spans(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.1, )
-        arg = x if self._span == 'axvspan' else y
-        span = getattr(self._ax, self._span)(arg, arg, picker=True, **kwargs)
+        # arg = x if self._span == 'axvspan' else y
+        span = self._span(x, y, ax=self._ax, picker=True, **kwargs)
         span.id = str(uuid.uuid1())
         self.spans.append(span)
         self._artist_counter += 1
-        # self._ax.add_span(patch)
         self._draw()
-
-    # def _resize_patch(self, event: Event):
-    #     if event.inaxes != self._ax:
-    #         return
-    #     x, y = self.patches[-1].xy
-    #     self.patches[-1].update({
-    #         'width': event.xdata - x,
-    #         'height': event.ydata - y,
-    #     })
-    #     self._draw()
 
     def _persist_span(self, event: Event = None):
         self._disconnect(['motion_notify_event', 'button_release_event'])
-        # if event is not None:
-        #     self._add_vertices()
-        #     self._draw()
-        #     if self.on_create is not None:
-        #         self.on_create({'event': event, 'artist': self.spans[-1]})
+        if event is not None:
+            self._add_vertices()
+            self._draw()
+            if self.on_create is not None:
+                self.on_create({'event': event, 'artist': self.spans[-1]})
 
-    def _remove_span(self, patch: Artist):
-        patch.remove()
-        patch._vertices.remove()
-        self.spans.remove(patch)
+    def _remove_span(self, span: Artist):
+        span.remove()
+        span._vertices.remove()
+        self.spans.remove(span)
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -80,7 +109,7 @@ class Spans(Tool):
             return
         if event.mouseevent.inaxes != self._ax:
             return
-        is_span = isinstance(event.artist, Patch)
+        is_span = isinstance(event.artist, span)
         if event.mouseevent.button == 1:
             if is_span:
                 return
@@ -160,13 +189,32 @@ class Spans(Tool):
 class Vspans(Spans):
 
     def __init__(self, ax: Axes, **kwargs):
-        super().__init__(ax=ax, span='axvspan', **kwargs)
+        super().__init__(ax=ax, span=HSpan, **kwargs)
 
     def _resize_span(self, event: Event):
         if event.inaxes != self._ax:
             return
-        corners = self.spans[-1].get_xy()
-        for i in [2, 3]:
-            corners[i, 0] = event.xdata
-        self.spans[-1].set_xy(corners)
+
+        self.spans[-1].right = event.xdata
+        # for i in [2, 3]:
+        #     corners[i, 0] = event.xdata
+        # self.spans[-1].set_xy(corners)
         self._draw()
+
+    def _add_vertices(self):
+        span = self.spans[-1]
+        line, = self._ax.plot([span.left, span.right], [0.5, 0.5],
+                              'o',
+                              ls='None',
+                              mec=span.color,
+                              mfc='None',
+                              picker=5.0,
+                              transform=span._span.get_transform())
+        # line, = self._ax.plot(vertices[0],
+        #                       vertices[1],
+        #                       'o',
+        #                       mec=span.get_edgecolor(),
+        #                       mfc='None',
+        #                       picker=5.0)
+        span._vertices = line
+        line._span = span
