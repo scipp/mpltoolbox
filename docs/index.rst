@@ -78,6 +78,12 @@ Example
    :maxdepth: 2
    :hidden:
 
+   spans
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
    callbacks
 
 .. toctree::
@@ -85,3 +91,8 @@ Example
    :hidden:
 
    api
+
+.. toctree::
+   :hidden:
+
+   Release notes <https://github.com/scipp/mpltoolbox/releases>

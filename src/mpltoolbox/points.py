@@ -15,7 +15,7 @@ class Points(Lines):
       - Left-click and hold on point to move point
       - Middle-click to delete point
 
-    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param ax: The Matplotlib axes to which the Points tool will be attached.
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a point is created.
     :param on_remove: Callback that fires when a point is removed.

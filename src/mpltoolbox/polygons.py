@@ -18,7 +18,7 @@ class Polygons(Lines):
       - Right-click and hold to drag/move the entire polygon
       - Middle-click to delete polygon
 
-    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param ax: The Matplotlib axes to which the Polygons tool will be attached.
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a polygon is created.
     :param on_remove: Callback that fires when a polygon is removed.

@@ -23,7 +23,7 @@ class Ellipses(Patches):
       - Right-click and hold to drag/move ellipse
       - Middle-click to delete ellipse
 
-    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param ax: The Matplotlib axes to which the Ellipses tool will be attached.
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a ellipse is created.
     :param on_remove: Callback that fires when a ellipse is removed.
