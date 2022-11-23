@@ -91,3 +91,8 @@ Example
    :hidden:
 
    api
+
+.. toctree::
+   :hidden:
+
+   Release notes <https://github.com/scipp/mpltoolbox/releases>
