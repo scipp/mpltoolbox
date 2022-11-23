@@ -8,7 +8,9 @@ API Reference
    :toctree: generated
 
    Ellipses
+   Hspans
    Lines
    Points
    Polygons
    Rectangles
+   Vspans
