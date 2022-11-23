@@ -1,14 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .tool import Tool
 from .spans import Spans
-from functools import partial
-from matplotlib.patches import Polygon
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
-from matplotlib.colors import to_rgb
-import uuid
 
 
 class HSpan:
@@ -20,11 +15,11 @@ class HSpan:
         self._span.parent = self
 
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return self._span.get_xy()[0, 1]
 
     @bottom.setter
-    def bottom(self, y):
+    def bottom(self, y: float):
         corners = self._span.get_xy()
         for i in [0, 3]:
             corners[i, 1] = y
@@ -37,11 +32,11 @@ class HSpan:
             self._vertices.set_ydata([corners[0, 1], corners[1, 1]])
 
     @property
-    def top(self):
+    def top(self) -> float:
         return self._span.get_xy()[1, 1]
 
     @top.setter
-    def top(self, y):
+    def top(self, y: float):
         corners = self._span.get_xy()
         for i in [1, 2]:
             corners[i, 1] = y
@@ -50,7 +45,7 @@ class HSpan:
             self._vertices.set_ydata([corners[0, 1], corners[1, 1]])
 
     @property
-    def color(self):
+    def color(self) -> str:
         return self._span.get_edgecolor()
 
     def remove(self):
@@ -117,7 +112,7 @@ class Hspans(Spans):
             self._grab_artist.parent.bottom, self._grab_artist.parent.top
         ]
 
-    def _update_artist_position(self, dx, dy):
+    def _update_artist_position(self, dx: float, dy: float):
         span = self._grab_artist.parent
         span.bottom = self._grab_artist_origin[0] + dy
         span.top = self._grab_artist_origin[1] + dy

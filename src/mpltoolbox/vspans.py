@@ -2,12 +2,8 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .spans import Spans
-from functools import partial
-from matplotlib.patches import Polygon
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
-from matplotlib.colors import to_rgb
-import uuid
 
 
 class VSpan:
@@ -19,11 +15,11 @@ class VSpan:
         self._span.parent = self
 
     @property
-    def left(self):
+    def left(self) -> float:
         return self._span.get_xy()[0, 0]
 
     @left.setter
-    def left(self, x):
+    def left(self, x: float):
         corners = self._span.get_xy()
         for i in [0, 1]:
             corners[i, 0] = x
@@ -36,11 +32,11 @@ class VSpan:
             self._vertices.set_xdata([corners[0, 0], corners[2, 0]])
 
     @property
-    def right(self):
+    def right(self) -> float:
         return self._span.get_xy()[2, 0]
 
     @right.setter
-    def right(self, x):
+    def right(self, x: float):
         corners = self._span.get_xy()
         for i in [2, 3]:
             corners[i, 0] = x
@@ -49,7 +45,7 @@ class VSpan:
             self._vertices.set_xdata([corners[0, 0], corners[2, 0]])
 
     @property
-    def color(self):
+    def color(self) -> str:
         return self._span.get_edgecolor()
 
     def remove(self):
@@ -116,7 +112,7 @@ class Vspans(Spans):
             self._grab_artist.parent.left, self._grab_artist.parent.right
         ]
 
-    def _update_artist_position(self, dx, dy):
+    def _update_artist_position(self, dx: float, dy: float):
         span = self._grab_artist.parent
         span.left = self._grab_artist_origin[0] + dx
         span.right = self._grab_artist_origin[1] + dx
