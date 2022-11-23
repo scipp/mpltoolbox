@@ -3,7 +3,7 @@
 
 from .tool import Tool
 from functools import partial
-# from matplotlib.spanes import span
+from matplotlib.patches import Polygon
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
@@ -17,6 +17,8 @@ class HSpan:
         # vertical = span == 'axvspan'
         # arg = x if vertical else y
         self._span = ax.axvspan(x, x, **kwargs)
+        self._vertices = None
+        self._span.parent = self
 
     @property
     def left(self):
@@ -48,6 +50,10 @@ class HSpan:
     @property
     def color(self):
         return self._span.get_edgecolor()
+
+    def remove(self):
+        self._span.remove()
+        self._vertices.remove()
 
 
 class Spans(Tool):
@@ -99,9 +105,9 @@ class Spans(Tool):
                 self.on_create({'event': event, 'artist': self.spans[-1]})
 
     def _remove_span(self, span: Artist):
-        span.remove()
-        span._vertices.remove()
-        self.spans.remove(span)
+        span.parent.remove()
+        # span._vertices.remove()
+        self.spans.remove(span.parent)
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -109,7 +115,7 @@ class Spans(Tool):
             return
         if event.mouseevent.inaxes != self._ax:
             return
-        is_span = isinstance(event.artist, span)
+        is_span = isinstance(event.artist, Polygon)
         if event.mouseevent.button == 1:
             if is_span:
                 return
