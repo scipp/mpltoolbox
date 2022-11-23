@@ -8,4 +8,5 @@ from .rectangles import Rectangles
 from .ellipses import Ellipses
 from .points import Points
 from .polygons import Polygons
-from .spans import Vspans
+from .hspans import Hspans
+from .vspans import Vspans

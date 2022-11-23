@@ -22,7 +22,7 @@ class Rectangles(Patches):
       - Right-click and hold to drag/move rectangle
       - Middle-click to delete rectangle
 
-    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param ax: The Matplotlib axes to which the Rectangles tool will be attached.
     :param autostart: Automatically activate the tool upon creation if `True`.
     :param on_create: Callback that fires when a rectangle is created.
     :param on_remove: Callback that fires when a rectangle is removed.
