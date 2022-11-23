@@ -78,6 +78,12 @@ Example
    :maxdepth: 2
    :hidden:
 
+   spans
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
    callbacks
 
 .. toctree::
