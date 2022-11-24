@@ -185,21 +185,23 @@ class Lines(Tool):
             return
         if 'motion_notify_event' not in self._connections:
             self._make_new_line(x=event.xdata, y=event.ydata)
-            self._after_line_creation(event)
-        else:
-            self._persist_vertex(event)
+            # self._after_line_creation(event)
+            self._connect({'motion_notify_event': self._on_motion_notify})
+        #     self._draw()
+        # else:
+        self._persist_vertex(event)
 
-    def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
-        return [x, x], [y, y]
+    # def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
+    #     return [x, x], [y, y]
 
     def _make_new_line(self, x: float, y: float):
-        xpos, ypos = self._new_line_pos(x, y)
+        # xpos, ypos = self._new_line_pos(x, y)
         kwargs = self._parse_kwargs()
         if set(['ls', 'linestyle']).isdisjoint(set(kwargs.keys())):
             kwargs['ls'] = 'solid'
         if 'marker' not in kwargs:
             kwargs['marker'] = 'o'
-        line = self._maker(xpos, ypos, ax=self._ax, **kwargs)
+        line = self._maker(x, y, ax=self._ax, **kwargs)
         # line.id = str(uuid.uuid1())
         self.lines.append(line)
         self._artist_counter += 1
@@ -207,9 +209,9 @@ class Lines(Tool):
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=-1, artist=self.lines[-1].artist)
 
-    def _after_line_creation(self, event: Event):
-        self._connect({'motion_notify_event': self._on_motion_notify})
-        self._draw()
+    # def _after_line_creation(self, event: Event):
+    #     self._connect({'motion_notify_event': self._on_motion_notify})
+    #     self._draw()
 
     def _duplicate_last_vertex(self):
         new_data = self.lines[-1].xy

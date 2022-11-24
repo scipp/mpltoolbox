@@ -22,7 +22,7 @@ class Point:
         return repr(self)
 
     def __len__(self):
-        return len(self.x)
+        return 1
 
     @property
     def x(self) -> float:
@@ -133,5 +133,5 @@ class Points(Lines):
     def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
         return [x], [y]
 
-    def _after_line_creation(self, event):
-        self._finalize_line(event)
+    # def _after_line_creation(self, event):
+    #     self._finalize_line(event)

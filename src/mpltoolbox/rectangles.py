@@ -1,21 +1,37 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
+from .event_handler import EventHandler
 from .patches import Patches
+from .utils import parse_kwargs
 from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+from matplotlib.colors import to_rgb
 from typing import Tuple, List
 import uuid
 
 
 class Rectangle:
 
-    def __init__(self, x: float, y: float, width: float, height: float, ax: Axes,
-                 **kwargs):
+    def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         self._ax = ax
-        self._rectangle = mp.Rectangle((x, y), width, height, **kwargs)
-        self._vertices = None
+        kwargs = parse_kwargs(kwargs, number)
+        defaut_color = f'C{number}'
+        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['ec'] = defaut_color
+        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
+        self._rectangle = mp.Rectangle((x, y), 0, 0, **kwargs)
+        # self._vertices = None
+        corners = self._rectangle.get_corners()
+        self._vertices, = self._ax.plot(corners[:, 0],
+                                        corners[:, 1],
+                                        'o',
+                                        ls='None',
+                                        mec=self.edgecolor,
+                                        mfc='None')
+        self._vertices.parent = self
         self._rectangle.parent = self
         self._ax.add_patch(self._rectangle)
         self.id = uuid.uuid1().hex
@@ -79,16 +95,16 @@ class Rectangle:
         self._rectangle.remove()
         self._vertices.remove()
 
-    def add_vertices(self):
-        corners = self._rectangle.get_corners()
-        self._vertices, = self._ax.plot(corners[:, 0],
-                                        corners[:, 1],
-                                        'o',
-                                        ls='None',
-                                        mec=self.edgecolor,
-                                        mfc='None',
-                                        picker=5.0)
-        self._vertices.parent = self
+    # def add_vertices(self):
+    #     corners = self._rectangle.get_corners()
+    #     self._vertices, = self._ax.plot(corners[:, 0],
+    #                                     corners[:, 1],
+    #                                     'o',
+    #                                     ls='None',
+    #                                     mec=self.edgecolor,
+    #                                     mfc='None',
+    #                                     picker=5.0)
+    #     self._vertices.parent = self
 
     def update(self, **kwargs):
         self._rectangle.update(kwargs)
@@ -98,8 +114,12 @@ class Rectangle:
     def vertices(self):
         return self._vertices.get_data()
 
+    def set_picker(self, pick):
+        self._rectangle.set_picker(pick)
+        self._vertices.set_picker(pick)
 
-class Rectangles(Patches):
+
+class Rectangles(EventHandler):
     """
     Add rectangles to the supplied axes.
 
@@ -125,6 +145,7 @@ class Rectangles(Patches):
 
         super().__init__(ax=ax, **kwargs)
         self._maker = Rectangle
+        self._max_clicks = 2
 
     def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:
@@ -134,10 +155,12 @@ class Rectangles(Patches):
         patch.update(width=event.xdata - x, height=event.ydata - y)
         self._draw()
 
-    def _move_vertex(self, event: Event, ind: int, line: Artist):
+    def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:
             return
-        x, y = line.get_data()
+        x, y = artist._vertices.get_data()
+        if ind is None:
+            ind = 2
         x[ind] = event.xdata
         y[ind] = event.ydata
         opp = (ind + 2) % 4
@@ -155,7 +178,7 @@ class Rectangles(Patches):
             height = y[ind] - y[opp]
         xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
               min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
-        self._moving_vertex_artist.parent.update(xy=xy, width=width, height=height)
+        artist.update(xy=xy, width=width, height=height)
         self._draw()
 
     def _grab_patch(self, event: Event):
