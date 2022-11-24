@@ -10,6 +10,131 @@ import uuid
 from typing import Tuple
 
 
+class Line:
+
+    def __init__(self, x: float, y: float, ax: Axes, **kwargs):
+        self._ax = ax
+        self._line, = self._ax.plot(x, y, **kwargs)
+        self._line.parent = self
+        self.id = uuid.uuid1().hex
+
+    def __repr__(self):
+        return (f'Line: x={self.x}, y={self.y}, color={self.color}')
+
+    def __str__(self):
+        return repr(self)
+
+    def __len__(self):
+        return len(self.x)
+
+    @property
+    def x(self) -> float:
+        return self._line.get_xdata()
+
+    @x.setter
+    def x(self, x: float):
+        self._line.set_xdata(x)
+
+    @property
+    def y(self) -> float:
+        return self._line.get_ydata()
+
+    @y.setter
+    def y(self, y: float):
+        self._line.set_ydata(y)
+
+    @property
+    def xy(self) -> float:
+        return self._line.get_data()
+
+    @xy.setter
+    def xy(self, xy: float):
+        self._line.set_data(xy)
+
+    @property
+    def color(self) -> str:
+        return self._line.get_color()
+
+    @color.setter
+    def color(self, c):
+        self._line.color(c)
+
+    @property
+    def markerfacecolor(self) -> str:
+        return self._line.get_markerfacecolor()
+
+    @markerfacecolor.setter
+    def markerfacecolor(self, color):
+        self._line.set_markerfacecolor(color)
+
+    @property
+    def markeredgecolor(self) -> str:
+        return self._line.get_markeredgecolor()
+
+    @markeredgecolor.setter
+    def markerfacecolor(self, color):
+        self._line.set_markeredgecolor(color)
+
+    @property
+    def mfc(self) -> str:
+        return self.markerfacecolor
+
+    @mfc.setter
+    def mfc(self, color):
+        self.markerfacecolor = color
+
+    @property
+    def mec(self) -> str:
+        return self.markeredgecolor
+
+    @mec.setter
+    def mec(self, color):
+        self.markeredgecolor = color
+
+    @property
+    def marker(self) -> str:
+        return self._line.get_marker()
+
+    @marker.setter
+    def marker(self, m):
+        self._line.set_marker(m)
+
+    @property
+    def linestyle(self) -> str:
+        return self._line.get_linestyle()
+
+    @linestyle.setter
+    def linestyle(self, style):
+        self._line.set_linestyle(style)
+
+    @property
+    def ls(self) -> str:
+        return self.linestyle
+
+    @ls.setter
+    def ls(self, style):
+        self.linestyle = style
+
+    @property
+    def linewidth(self) -> str:
+        return self._line.get_linewidth()
+
+    @linewidth.setter
+    def linewidth(self, width):
+        self._line.set_linewidth(width)
+
+    @property
+    def lw(self) -> str:
+        return self.linewidth
+
+    @lw.setter
+    def lw(self, width):
+        self.linewidth = width
+
+    def remove(self):
+        self._line.remove()
+
+
 class Lines(Tool):
     """
     Add lines to the supplied axes.
@@ -39,6 +164,7 @@ class Lines(Tool):
 
     def __init__(self, ax: Axes, n: int = 2, **kwargs):
         super().__init__(ax, **kwargs)
+        self._line_maker = Line
         self._nmax = n
         self.lines = []
         self._pick_lock = False
@@ -58,13 +184,13 @@ class Lines(Tool):
             kwargs['ls'] = 'solid'
         if 'marker' not in kwargs:
             kwargs['marker'] = 'o'
-        line, = self._ax.plot(xpos, ypos, **kwargs)
-        line.id = str(uuid.uuid1())
+        line = self._line_maker(xpos, ypos, ax=self._ax, **kwargs)
+        # line.id = str(uuid.uuid1())
         self.lines.append(line)
         self._artist_counter += 1
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=-1, artist=self.lines[-1])
+        self._move_vertex(event=event, ind=-1, artist=self.lines[-1]._line)
 
     def _after_line_creation(self, event: Event):
         self._connect({'motion_notify_event': self._on_motion_notify})
@@ -82,28 +208,28 @@ class Lines(Tool):
             self._persist_dot(event)
 
     def _duplicate_last_vertex(self):
-        new_data = self.lines[-1].get_data()
-        self.lines[-1].set_data(
-            (np.append(new_data[0],
-                       new_data[0][-1]), np.append(new_data[1], new_data[1][-1])))
+        new_data = self.lines[-1].xy
+        self.lines[-1].xy = (np.append(new_data[0], new_data[0][-1]),
+                             np.append(new_data[1], new_data[1][-1]))
         self._draw()
 
     def _persist_dot(self, event: Event):
-        if self._get_line_length(-1) == self._nmax:
+        # if self._get_line_length(-1) == self._nmax:
+        if len(self.lines[-1]) == self._nmax:
             self._disconnect(['motion_notify_event'])
             self._finalize_line(event)
         else:
             self._duplicate_last_vertex()
 
     def _finalize_line(self, event: Event):
-        self.lines[-1].set_picker(5.0)
+        self.lines[-1]._line.set_picker(5.0)
         if self.on_create is not None:
-            self.on_create({'event': event, 'artist': self.lines[-1]})
+            self.call_on_create({'event': event, 'artist': self.lines[-1]})
         self._draw()
 
     def _remove_line(self, line: Artist, draw: bool = True):
-        line.remove()
-        self.lines.remove(line)
+        line.parent.remove()
+        self.lines.remove(line.parent)
         if draw:
             self._draw()
 
@@ -116,7 +242,7 @@ class Lines(Tool):
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.on_vertex_press({
+                self.call_on_vertex_press({
                     'event': event,
                     'ind': self._moving_vertex_index,
                     'artist': self._moving_vertex_artist
@@ -124,12 +250,12 @@ class Lines(Tool):
         elif event.mouseevent.button == 2:
             self._remove_line(event.artist)
             if self.on_remove is not None:
-                self.on_remove({'event': event, 'artist': event.artist})
+                self.call_on_remove({'event': event, 'artist': event.artist})
         elif event.mouseevent.button == 3:
             self._pick_lock = True
             self._grab_line(event)
             if self.on_drag_press is not None:
-                self.on_drag_press({'event': event, 'artist': self._grab_artist})
+                self.call_on_drag_press({'event': event, 'artist': self._grab_artist})
 
     def _grab_vertex(self, event: Event):
         self._connect({
@@ -148,7 +274,7 @@ class Lines(Tool):
         }
         self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
-            self.on_vertex_move(event_dict)
+            self.call_on_vertex_move(event_dict)
 
     def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:
@@ -156,7 +282,7 @@ class Lines(Tool):
         new_data = artist.get_data()
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
-        artist.set_data(new_data)
+        artist.parent.xy = new_data
         self._draw()
 
     def _grab_line(self, event: Event):
@@ -174,22 +300,26 @@ class Lines(Tool):
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
-        self._grab_artist.set_data(
-            (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy))
+        self._grab_artist.parent.xy = (self._grab_artist_origin[0] + dx,
+                                       self._grab_artist_origin[1] + dy)
         if draw:
             self._draw()
+        if self.on_drag_move is not None:
+            self.call_on_drag_move({'event': event, 'artist': self._grab_artist})
+        if self.on_change is not None:
+            self.call_on_change(self._grab_artist.parent)
 
     def _release_line(self, event: Event, kind: str):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
-            self.on_vertex_release({
+            self.call_on_vertex_release({
                 'event': event,
                 'ind': self._moving_vertex_index,
                 'artist': self._moving_vertex_artist
             })
         elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.on_drag_release({'event': event, 'artist': self._grab_artist})
+            self.call_on_drag_release({'event': event, 'artist': self._grab_artist})
 
-    def _get_line_length(self, ind: int):
-        return len(self.lines[ind].get_xydata())
+    # def _get_line_length(self, ind: int):
+    #     return len(self.lines[ind].get_xydata())

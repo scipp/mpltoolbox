@@ -4,6 +4,7 @@
 from .spans import Spans
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+import uuid
 
 
 class VSpan:
@@ -13,6 +14,7 @@ class VSpan:
         self._span = self._ax.axvspan(x, x, **kwargs)
         self._vertices = None
         self._span.parent = self
+        self.id = uuid.uuid1().hex
 
     def __repr__(self):
         return (f'VSpan: left={self.left}, right={self.right}, '
@@ -111,7 +113,7 @@ class Vspans(Spans):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._span = VSpan
+        self._span_maker = VSpan
 
     def _resize_span(self, event: Event):
         if event.inaxes != self._ax:

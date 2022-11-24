@@ -14,7 +14,7 @@ class Spans(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._span = None
+        self._span_maker = None
         self.spans = []
         self._grab_artist = None
         self._grab_mouse_origin = None
@@ -42,8 +42,8 @@ class Spans(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.1, )
-        span = self._span(x, y, ax=self._ax, picker=True, **kwargs)
-        span.id = str(uuid.uuid1())
+        span = self._span_maker(x, y, ax=self._ax, picker=True, **kwargs)
+        # span.id = str(uuid.uuid1())
         self.spans.append(span)
         self._artist_counter += 1
         self._draw()
@@ -102,15 +102,14 @@ class Spans(Tool):
         self._moving_vertex_artist = event.artist
 
     def _on_vertex_motion(self, event: Event):
-        self._move_vertex(event=event,
-                          ind=self._moving_vertex_index,
-                          line=self._moving_vertex_artist)
+        event_dict = {
+            'event': event,
+            'ind': self._moving_vertex_index,
+            'artist': self._moving_vertex_artist
+        }
+        self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
-            self.call_on_vertex_move({
-                'event': event,
-                'ind': self._moving_vertex_index,
-                'artist': self._moving_vertex_artist
-            })
+            self.call_on_vertex_move(event_dict)
         if self.on_change is not None:
             self.call_on_change(self._moving_vertex_artist.parent)
 

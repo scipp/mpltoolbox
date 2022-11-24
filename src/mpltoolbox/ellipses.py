@@ -6,6 +6,7 @@ from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from typing import Tuple, List
+import uuid
 
 
 def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
@@ -25,6 +26,7 @@ class Ellipse:
         self._vertices = None
         self._ellipse.parent = self
         self._ax.add_patch(self._ellipse)
+        self.id = uuid.uuid1().hex
 
     def __repr__(self):
         return (f'Ellipse: center={self.center}, width={self.width}, '
@@ -130,7 +132,7 @@ class Ellipses(Patches):
     def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
-        self._patch = Ellipse
+        self._patch_maker = Ellipse
         self._new_ellipse_center = None
 
     def _make_new_patch(self, x: float, y: float):

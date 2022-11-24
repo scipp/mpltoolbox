@@ -14,7 +14,7 @@ class Patches(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._patch = None
+        self._patch_maker = None
         self.patches = []
         self._drag_patch = False
         self._grab_artist = None
@@ -43,8 +43,8 @@ class Patches(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        patch = self._patch(x, y, 0, 0, ax=self._ax, picker=True, **kwargs)
-        patch.id = str(uuid.uuid1())
+        patch = self._patch_maker(x, y, 0, 0, ax=self._ax, picker=True, **kwargs)
+        # patch.id = str(uuid.uuid1())
         self.patches.append(patch)
         self._artist_counter += 1
         # self._ax.add_patch(patch)
@@ -106,16 +106,28 @@ class Patches(Tool):
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_artist = event.artist
 
+    # def _on_vertex_motion(self, event: Event):
+    #     self._move_vertex(event=event,
+    #                       ind=self._moving_vertex_index,
+    #                       line=self._moving_vertex_artist)
+    #     if self.on_vertex_move is not None:
+    #         self.call_on_vertex_move({
+    #             'event': event,
+    #             'ind': self._moving_vertex_index,
+    #             'artist': self._moving_vertex_artist
+    #         })
+    #     if self.on_change is not None:
+    #         self.call_on_change(self._moving_vertex_artist.parent)
+
     def _on_vertex_motion(self, event: Event):
-        self._move_vertex(event=event,
-                          ind=self._moving_vertex_index,
-                          line=self._moving_vertex_artist)
+        event_dict = {
+            'event': event,
+            'ind': self._moving_vertex_index,
+            'artist': self._moving_vertex_artist
+        }
+        self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
-            self.call_on_vertex_move({
-                'event': event,
-                'ind': self._moving_vertex_index,
-                'artist': self._moving_vertex_artist
-            })
+            self.call_on_vertex_move(event_dict)
         if self.on_change is not None:
             self.call_on_change(self._moving_vertex_artist.parent)
 

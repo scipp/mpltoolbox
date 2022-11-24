@@ -6,6 +6,7 @@ from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from typing import Tuple, List
+import uuid
 
 
 class Rectangle:
@@ -17,6 +18,7 @@ class Rectangle:
         self._vertices = None
         self._rectangle.parent = self
         self._ax.add_patch(self._rectangle)
+        self.id = uuid.uuid1().hex
 
     def __repr__(self):
         return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
@@ -122,7 +124,7 @@ class Rectangles(Patches):
     def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
-        self._patch = Rectangle
+        self._patch_maker = Rectangle
 
     def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:
