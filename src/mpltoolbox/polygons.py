@@ -3,6 +3,7 @@
 
 from .tool import Tool
 import numpy as np
+from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
 from matplotlib import patches as mp
@@ -32,7 +33,8 @@ class Polygon:
         return len(self.x)
 
     def _update_fill(self):
-        self._fill.set_xy(self._vertices.get_data())
+        # print(self._vertices.get_data())
+        self._fill.set_xy(np.array(self._vertices.get_data()).T)
 
     @property
     def x(self) -> float:
@@ -193,7 +195,7 @@ class Polygons(Tool):
         self._moving_vertex_artist = None
         self._distance_from_first_point = 0.05
         self._first_point_position = None
-        self._finalize_polygon = False
+        self._persist_polygon = False
 
     def __del__(self):
         # super().shutdown(artists=self.polygons + [line._fill for line in self.polygons])
@@ -259,9 +261,9 @@ class Polygons(Tool):
                 event) < self._distance_from_first_point:
             event.xdata = self._first_point_position_data[0]
             event.ydata = self._first_point_position_data[1]
-            self._finalize_polygon = True
+            self._persist_polygon = True
         else:
-            self._finalize_polygon = False
+            self._persist_polygon = False
         self._move_vertex(event=event, ind=-1, artist=self.polygons[-1]._vertices)
 
     def _duplicate_last_vertex(self):
@@ -271,19 +273,19 @@ class Polygons(Tool):
         self._draw()
 
     def _persist_vertex(self, event: Event):
-        if self._finalize_polygon:
+        if self._persist_polygon:
             self._disconnect(['motion_notify_event'])
             self._finalize_polygon(event)
-            self._finalize_polygon = False
+            self._persist_polygon = False
         else:
             self._duplicate_last_vertex()
 
     def _finalize_polygon(self, event: Event):
-        self.polygons[-1]._polygon.set_picker(5.0)
+        self.polygons[-1]._fill.set_picker(5.0)
         self.polygons[-1]._vertices.set_picker(5.0)
         # self.lines[-1].artist.set_picker(5.0)
         if self.on_create is not None:
-            self.call_on_create({'event': event, 'artist': self.lines[-1]})
+            self.call_on_create({'event': event, 'artist': self.polygons[-1]})
         self._draw()
 
     def _remove_polygon(self, artist: Artist):
@@ -326,8 +328,10 @@ class Polygons(Tool):
 
     def _grab_vertex(self, event: Event):
         self._connect({
-            'motion_notify_event': self._on_vertex_motion,
-            'button_release_event': partial(self._release_line, kind='vertex')
+            'motion_notify_event':
+            self._on_vertex_motion,
+            'button_release_event':
+            partial(self._release_polygon, kind='vertex')
         })
 
         self._moving_vertex_index = event.ind[0]
@@ -366,9 +370,12 @@ class Polygons(Tool):
             partial(self._release_polygon, kind='drag')
         })
 
-        self._grab_artist = getattr(event.artist, '_line', event.artist)
+        # self._grab_artist = getattr(event.artist, '_line', event.artist)
+        self._grab_artist = event.artist
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
-        self._grab_artist_origin = self._grab_artist.get_data()
+        self._grab_artist_origin = self._grab_artist.parent.xy
+        # print(self._grab_artist_origin)
+        # assert False
 
     def _move_polygon(self, event: Event):
         if event.inaxes != self._ax:

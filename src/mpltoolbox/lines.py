@@ -297,7 +297,7 @@ class Lines(Tool):
             'button_release_event': partial(self._release_line, kind='drag')
         })
 
-        self._grab_artist = getattr(event.artist, '_line', event.artist)
+        self._grab_artist = event.artist  #._line # getattr(event.artist, '_line', event.artist)
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
         self._grab_artist_origin = self._grab_artist.get_data()
 
