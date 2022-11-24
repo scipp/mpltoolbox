@@ -4,6 +4,104 @@
 from .lines import Lines
 from matplotlib.pyplot import Axes
 from typing import Tuple
+import uuid
+
+
+class Point:
+
+    def __init__(self, x: float, y: float, ax: Axes, **kwargs):
+        self._ax = ax
+        self._point, = self._ax.plot(x, y, **kwargs)
+        self._point.parent = self
+        self.id = uuid.uuid1().hex
+
+    def __repr__(self):
+        return (f'Point: x={self.x}, y={self.y}, color={self.color}')
+
+    def __str__(self):
+        return repr(self)
+
+    def __len__(self):
+        return len(self.x)
+
+    @property
+    def x(self) -> float:
+        return self._point.get_xdata()[0]
+
+    @x.setter
+    def x(self, x: float):
+        self._point.set_xdata(x)
+
+    @property
+    def y(self) -> float:
+        return self._point.get_ydata()[0]
+
+    @y.setter
+    def y(self, y: float):
+        self._point.set_ydata(y)
+
+    @property
+    def xy(self) -> float:
+        return self._point.get_data()[0]
+
+    @xy.setter
+    def xy(self, xy: float):
+        self._point.set_data(xy)
+
+    @property
+    def color(self) -> str:
+        return self._point.get_color()
+
+    @color.setter
+    def color(self, c):
+        self._point.color(c)
+
+    @property
+    def markerfacecolor(self) -> str:
+        return self._point.get_markerfacecolor()
+
+    @markerfacecolor.setter
+    def markerfacecolor(self, color):
+        self._point.set_markerfacecolor(color)
+
+    @property
+    def markeredgecolor(self) -> str:
+        return self._point.get_markeredgecolor()
+
+    @markeredgecolor.setter
+    def markerfacecolor(self, color):
+        self._point.set_markeredgecolor(color)
+
+    @property
+    def mfc(self) -> str:
+        return self.markerfacecolor
+
+    @mfc.setter
+    def mfc(self, color):
+        self.markerfacecolor = color
+
+    @property
+    def mec(self) -> str:
+        return self.markeredgecolor
+
+    @mec.setter
+    def mec(self, color):
+        self.markeredgecolor = color
+
+    @property
+    def marker(self) -> str:
+        return self._point.get_marker()
+
+    @marker.setter
+    def marker(self, m):
+        self._point.set_marker(m)
+
+    def remove(self):
+        self._point.remove()
+
+    @property
+    def artist(self) -> str:
+        return self._point
 
 
 class Points(Lines):
@@ -30,6 +128,7 @@ class Points(Lines):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax, n=1, **kwargs)
+        self._line_maker = Point
 
     def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
         return [x], [y]

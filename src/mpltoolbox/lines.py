@@ -134,6 +134,10 @@ class Line:
     def remove(self):
         self._line.remove()
 
+    @property
+    def artist(self) -> str:
+        return self._line
+
 
 class Lines(Tool):
     """
@@ -190,7 +194,7 @@ class Lines(Tool):
         self._artist_counter += 1
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=-1, artist=self.lines[-1]._line)
+        self._move_vertex(event=event, ind=-1, artist=self.lines[-1].artist)
 
     def _after_line_creation(self, event: Event):
         self._connect({'motion_notify_event': self._on_motion_notify})
@@ -222,7 +226,7 @@ class Lines(Tool):
             self._duplicate_last_vertex()
 
     def _finalize_line(self, event: Event):
-        self.lines[-1]._line.set_picker(5.0)
+        self.lines[-1].artist.set_picker(5.0)
         if self.on_create is not None:
             self.call_on_create({'event': event, 'artist': self.lines[-1]})
         self._draw()
