@@ -19,7 +19,7 @@ class Line:
         self.id = uuid.uuid1().hex
 
     def __repr__(self):
-        return (f'Line: x={self.x}, y={self.y}, color={self.color}')
+        return f'Line: x={self.x}, y={self.y}, color={self.color}'
 
     def __str__(self):
         return repr(self)
@@ -57,7 +57,7 @@ class Line:
 
     @color.setter
     def color(self, c):
-        self._line.color(c)
+        self._line.set_color(c)
 
     @property
     def markerfacecolor(self) -> str:
@@ -168,7 +168,7 @@ class Lines(Tool):
 
     def __init__(self, ax: Axes, n: int = 2, **kwargs):
         super().__init__(ax, **kwargs)
-        self._line_maker = Line
+        self._maker = Line
         self._nmax = n
         self.lines = []
         self._pick_lock = False
@@ -177,6 +177,17 @@ class Lines(Tool):
 
     def __del__(self):
         super().shutdown(artists=self.lines)
+
+    def _on_button_press(self, event: Event):
+        if event.button != 1 or self._pick_lock or self._get_active_tool():
+            return
+        if event.inaxes != self._ax:
+            return
+        if 'motion_notify_event' not in self._connections:
+            self._make_new_line(x=event.xdata, y=event.ydata)
+            self._after_line_creation(event)
+        else:
+            self._persist_vertex(event)
 
     def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
         return [x, x], [y, y]
@@ -188,7 +199,7 @@ class Lines(Tool):
             kwargs['ls'] = 'solid'
         if 'marker' not in kwargs:
             kwargs['marker'] = 'o'
-        line = self._line_maker(xpos, ypos, ax=self._ax, **kwargs)
+        line = self._maker(xpos, ypos, ax=self._ax, **kwargs)
         # line.id = str(uuid.uuid1())
         self.lines.append(line)
         self._artist_counter += 1
@@ -200,24 +211,13 @@ class Lines(Tool):
         self._connect({'motion_notify_event': self._on_motion_notify})
         self._draw()
 
-    def _on_button_press(self, event: Event):
-        if event.button != 1 or self._pick_lock or self._get_active_tool():
-            return
-        if event.inaxes != self._ax:
-            return
-        if 'motion_notify_event' not in self._connections:
-            self._make_new_line(x=event.xdata, y=event.ydata)
-            self._after_line_creation(event)
-        else:
-            self._persist_dot(event)
-
     def _duplicate_last_vertex(self):
         new_data = self.lines[-1].xy
         self.lines[-1].xy = (np.append(new_data[0], new_data[0][-1]),
                              np.append(new_data[1], new_data[1][-1]))
         self._draw()
 
-    def _persist_dot(self, event: Event):
+    def _persist_vertex(self, event: Event):
         # if self._get_line_length(-1) == self._nmax:
         if len(self.lines[-1]) == self._nmax:
             self._disconnect(['motion_notify_event'])
@@ -231,11 +231,11 @@ class Lines(Tool):
             self.call_on_create({'event': event, 'artist': self.lines[-1]})
         self._draw()
 
-    def _remove_line(self, line: Artist, draw: bool = True):
+    def _remove_line(self, line: Artist):
         line.parent.remove()
         self.lines.remove(line.parent)
-        if draw:
-            self._draw()
+        # if draw:
+        self._draw()
 
     def _on_pick(self, event: Event):
         if self._get_active_tool():
@@ -279,6 +279,8 @@ class Lines(Tool):
         self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
             self.call_on_vertex_move(event_dict)
+        if self.on_change is not None:
+            self.call_on_change(self._moving_vertex_artist.parent)
 
     def _move_vertex(self, event: Event, ind: int, artist: Artist):
         if event.inaxes != self._ax:

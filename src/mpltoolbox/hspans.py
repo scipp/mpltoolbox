@@ -113,7 +113,7 @@ class Hspans(Spans):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._span_maker = HSpan
+        self._maker = HSpan
 
     def _resize_span(self, event: Event):
         if event.inaxes != self._ax:

@@ -14,7 +14,7 @@ class Patches(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._patch_maker = None
+        self._maker = None
         self.patches = []
         self._drag_patch = False
         self._grab_artist = None
@@ -43,7 +43,7 @@ class Patches(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        patch = self._patch_maker(x, y, 0, 0, ax=self._ax, picker=True, **kwargs)
+        patch = self._maker(x, y, 0, 0, ax=self._ax, picker=True, **kwargs)
         # patch.id = str(uuid.uuid1())
         self.patches.append(patch)
         self._artist_counter += 1

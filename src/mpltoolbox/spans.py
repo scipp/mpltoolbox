@@ -14,7 +14,7 @@ class Spans(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._span_maker = None
+        self._maker = None
         self.spans = []
         self._grab_artist = None
         self._grab_mouse_origin = None
@@ -42,7 +42,7 @@ class Spans(Tool):
             kwargs['ec'] = defaut_color
         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
             kwargs['fc'] = to_rgb(defaut_color) + (0.1, )
-        span = self._span_maker(x, y, ax=self._ax, picker=True, **kwargs)
+        span = self._maker(x, y, ax=self._ax, picker=True, **kwargs)
         # span.id = str(uuid.uuid1())
         self.spans.append(span)
         self._artist_counter += 1

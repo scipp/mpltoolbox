@@ -16,7 +16,7 @@ class Point:
         self.id = uuid.uuid1().hex
 
     def __repr__(self):
-        return (f'Point: x={self.x}, y={self.y}, color={self.color}')
+        return f'Point: x={self.x}, y={self.y}, color={self.color}'
 
     def __str__(self):
         return repr(self)
@@ -54,7 +54,7 @@ class Point:
 
     @color.setter
     def color(self, c):
-        self._point.color(c)
+        self._point.set_color(c)
 
     @property
     def markerfacecolor(self) -> str:
@@ -128,7 +128,7 @@ class Points(Lines):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax, n=1, **kwargs)
-        self._line_maker = Point
+        self._maker = Point
 
     def _new_line_pos(self, x: float, y: float) -> Tuple[float]:
         return [x], [y]

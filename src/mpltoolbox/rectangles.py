@@ -124,7 +124,7 @@ class Rectangles(Patches):
     def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
-        self._patch_maker = Rectangle
+        self._maker = Rectangle
 
     def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:

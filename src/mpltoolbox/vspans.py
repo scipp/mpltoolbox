@@ -113,7 +113,7 @@ class Vspans(Spans):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._span_maker = VSpan
+        self._maker = VSpan
 
     def _resize_span(self, event: Event):
         if event.inaxes != self._ax:
