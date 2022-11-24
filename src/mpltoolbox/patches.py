@@ -59,9 +59,9 @@ class Patches(Tool):
                 self.call_on_create({'event': event, 'artist': self.patches[-1]})
 
     def _remove_patch(self, patch: Artist):
-        patch.remove()
-        patch._vertices.remove()
-        self.patches.remove(patch)
+        patch.parent.remove()
+        # patch._vertices.remove()
+        self.patches.remove(patch.parent)
         self._draw()
 
     def _on_pick(self, event: Event):

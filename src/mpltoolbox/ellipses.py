@@ -2,16 +2,107 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .patches import Patches
-from matplotlib.patches import Ellipse
+from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from typing import Tuple, List
 
 
-def _vertices_from_ellipse(center: Tuple[float], width: float,
-                           height: float) -> Tuple[List[float]]:
+def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
+    center = ellipse.center
+    width = ellipse.get_width()
+    height = ellipse.get_height()
     return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
             [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
+
+
+class Ellipse:
+
+    def __init__(self, x: float, y: float, width: float, height: float, ax: Axes,
+                 **kwargs):
+        self._ax = ax
+        self._ellipse = mp.Ellipse((x, y), width, height, **kwargs)
+        self._vertices = None
+        self._ellipse.parent = self
+        self._ax.add_patch(self._ellipse)
+
+    def __repr__(self):
+        return (f'Ellipse: center={self.center}, width={self.width}, '
+                f'height={self.height}, '
+                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+
+    def __str__(self):
+        return repr(self)
+
+    def _update_vertices(self):
+        if self._vertices is not None:
+            self._vertices.set_data(*_vertices_from_ellipse(self._ellipse))
+
+    @property
+    def center(self) -> float:
+        return self._ellipse.center
+
+    @center.setter
+    def center(self, xy: float):
+        self._ellipse.center = xy
+        self._update_vertices()
+
+    @property
+    def width(self) -> float:
+        return self._ellipse.get_width()
+
+    @width.setter
+    def width(self, width: float):
+        self._ellipse.set_width(width)
+        self._update_vertices()
+
+    @property
+    def height(self) -> float:
+        return self._ellipse.get_height()
+
+    @height.setter
+    def height(self, height: float):
+        self._ellipse.set_height(height)
+        self._update_vertices()
+
+    @property
+    def edgecolor(self) -> str:
+        return self._ellipse.get_edgecolor()
+
+    @edgecolor.setter
+    def edgecolor(self, color):
+        self._ellipse.set_edgecolor(color)
+        self._vertices.set_edgecolor(color)
+
+    @property
+    def facecolor(self) -> str:
+        return self._ellipse.get_facecolor()
+
+    @facecolor.setter
+    def facecolor(self, color):
+        self._ellipse.set_facecolor(color)
+
+    def remove(self):
+        self._ellipse.remove()
+        self._vertices.remove()
+
+    def add_vertices(self):
+        # corners = self._ellipse.get_corners()
+        self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
+                                        'o',
+                                        ls='None',
+                                        mec=self.edgecolor,
+                                        mfc='None',
+                                        picker=5.0)
+        self._vertices.parent = self
+
+    def update(self, **kwargs):
+        self._ellipse.update(kwargs)
+        self._update_vertices()
+
+    @property
+    def vertices(self):
+        return self._vertices.get_data()
 
 
 class Ellipses(Patches):
@@ -38,7 +129,8 @@ class Ellipses(Patches):
 
     def __init__(self, ax: Axes, **kwargs):
 
-        super().__init__(ax=ax, patch=Ellipse, **kwargs)
+        super().__init__(ax=ax, **kwargs)
+        self._patch = Ellipse
         self._new_ellipse_center = None
 
     def _make_new_patch(self, x: float, y: float):
@@ -51,33 +143,31 @@ class Ellipses(Patches):
         x, y = self._new_ellipse_center
         dx = event.xdata - x
         dy = event.ydata - y
-        self.patches[-1].update({
-            'width': dx,
-            'height': dy,
-            'center': (x + 0.5 * dx, y + 0.5 * dy)
-        })
+        self.patches[-1].update(width=dx,
+                                height=dy,
+                                center=(x + 0.5 * dx, y + 0.5 * dy))
         self._draw()
 
-    def _add_vertices(self):
-        patch = self.patches[-1]
-        vertices = _vertices_from_ellipse(center=patch.center,
-                                          width=patch.get_width(),
-                                          height=patch.get_height())
+    # def _add_vertices(self):
+    #     patch = self.patches[-1]
+    #     vertices = _vertices_from_ellipse(center=patch.center,
+    #                                       width=patch.get_width(),
+    #                                       height=patch.get_height())
 
-        line, = self._ax.plot(vertices[0],
-                              vertices[1],
-                              'o',
-                              mec=patch.get_edgecolor(),
-                              mfc='None',
-                              picker=5.0)
-        patch._vertices = line
-        line._patch = patch
+    #     line, = self._ax.plot(vertices[0],
+    #                           vertices[1],
+    #                           'o',
+    #                           mec=patch.get_edgecolor(),
+    #                           mfc='None',
+    #                           picker=5.0)
+    #     patch._vertices = line
+    #     line._patch = patch
 
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:
             return
         x, y = line.get_data()
-        patch = line._patch
+        patch = self._moving_vertex_artist.parent
         x[ind] = event.xdata
         y[ind] = event.ydata
         opp = (ind + 2) % 4
@@ -87,17 +177,18 @@ class Ellipses(Patches):
                 width = x[opp] - x[ind]
             else:
                 width = x[ind] - x[opp]
-            height = patch.get_height()
+            height = patch.height
             center = (0.5 * (x[ind] + x[opp]), patch.center[1])
         else:
             if ind == 1:
                 height = y[opp] - y[ind]
             else:
                 height = y[ind] - y[opp]
-            width = patch.get_width()
+            width = patch.width
             center = (patch.center[0], 0.5 * (y[ind] + y[opp]))
-        line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
-        line._patch.update({'center': center, 'width': width, 'height': height})
+        patch.update(center=center, width=width, height=height)
+        # line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
+        # line._patch.update({'center': center, 'width': width, 'height': height})
         self._draw()
 
     def _grab_patch(self, event: Event):
@@ -105,10 +196,10 @@ class Ellipses(Patches):
         self._grab_artist_origin = self._grab_artist.center
 
     def _update_artist_position(self, dx: float, dy: float):
-        ell = self._grab_artist
+        ell = self._grab_artist.parent
         ell.center = (self._grab_artist_origin[0] + dx,
                       self._grab_artist_origin[1] + dy)
-        ell._vertices.set_data(
-            _vertices_from_ellipse(center=ell.center,
-                                   width=ell.get_width(),
-                                   height=ell.get_height()))
+        # ell._vertices.set_data(
+        #     _vertices_from_ellipse(center=ell.center,
+        #                            width=ell.get_width(),
+        #                            height=ell.get_height()))

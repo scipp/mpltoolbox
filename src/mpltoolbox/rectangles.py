@@ -19,8 +19,7 @@ class Rectangle:
         self._ax.add_patch(self._rectangle)
 
     def __repr__(self):
-        return (f'Rectangle: bottom={self.bottom}, top={self.top}, '
-                f'left={self.left}, right={self.right},'
+        return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
     def __str__(self):
