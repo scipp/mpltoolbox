@@ -2,15 +2,100 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .patches import Patches
-from matplotlib.patches import Rectangle
+from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from typing import Tuple, List
 
 
-def _vertices_from_rectangle(xy: Tuple[float], width: float,
-                             height: float) -> Tuple[List[float]]:
-    return ([xy[0]] + [xy[0] + width] * 2 + [xy[0]], [xy[1]] * 2 + [xy[1] + height] * 2)
+class Rectangle:
+
+    def __init__(self, x: float, y: float, width: float, height: float, ax: Axes,
+                 **kwargs):
+        self._ax = ax
+        self._rectangle = mp.Rectangle((x, y), width, height, **kwargs)
+        self._vertices = None
+        self._rectangle.parent = self
+        self._ax.add_patch(self._rectangle)
+
+    def __repr__(self):
+        return (f'Rectangle: bottom={self.bottom}, top={self.top}, '
+                f'left={self.left}, right={self.right},'
+                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+
+    def __str__(self):
+        return repr(self)
+
+    def _update_vertices(self):
+        if self._vertices is not None:
+            self._vertices.set_data(self._rectangle.get_corners().T)
+
+    @property
+    def xy(self) -> float:
+        return self._rectangle.get_xy()
+
+    @xy.setter
+    def xy(self, xy: float):
+        self._rectangle.set_xy(xy)
+        self._update_vertices()
+
+    @property
+    def width(self) -> float:
+        return self._rectangle.get_width()
+
+    @width.setter
+    def width(self, width: float):
+        self._rectangle.set_width(width)
+        self._update_vertices()
+
+    @property
+    def height(self) -> float:
+        return self._rectangle.get_height()
+
+    @height.setter
+    def height(self, height: float):
+        self._rectangle.set_height(height)
+        self._update_vertices()
+
+    @property
+    def edgecolor(self) -> str:
+        return self._rectangle.get_edgecolor()
+
+    @edgecolor.setter
+    def edgecolor(self, color):
+        self._rectangle.set_edgecolor(color)
+        self._vertices.set_edgecolor(color)
+
+    @property
+    def facecolor(self) -> str:
+        return self._rectangle.get_facecolor()
+
+    @facecolor.setter
+    def facecolor(self, color):
+        self._rectangle.set_facecolor(color)
+
+    def remove(self):
+        self._rectangle.remove()
+        self._vertices.remove()
+
+    def add_vertices(self):
+        corners = self._rectangle.get_corners()
+        self._vertices, = self._ax.plot(corners[:, 0],
+                                        corners[:, 1],
+                                        'o',
+                                        ls='None',
+                                        mec=self.edgecolor,
+                                        mfc='None',
+                                        picker=5.0)
+        self._vertices.parent = self
+
+    def update(self, **kwargs):
+        self._rectangle.update(kwargs)
+        self._update_vertices()
+
+    @property
+    def vertices(self):
+        return self._vertices.get_data()
 
 
 class Rectangles(Patches):
@@ -37,32 +122,16 @@ class Rectangles(Patches):
 
     def __init__(self, ax: Axes, **kwargs):
 
-        super().__init__(ax=ax, patch=Rectangle, **kwargs)
+        super().__init__(ax=ax, **kwargs)
+        self._patch = Rectangle
 
     def _resize_patch(self, event: Event):
         if event.inaxes != self._ax:
             return
-        x, y = self.patches[-1].xy
-        self.patches[-1].update({
-            'width': event.xdata - x,
-            'height': event.ydata - y,
-        })
-        self._draw()
-
-    def _add_vertices(self):
         patch = self.patches[-1]
-        vertices = _vertices_from_rectangle(xy=patch.xy,
-                                            width=patch.get_width(),
-                                            height=patch.get_height())
-
-        line, = self._ax.plot(vertices[0],
-                              vertices[1],
-                              'o',
-                              mec=patch.get_edgecolor(),
-                              mfc='None',
-                              picker=5.0)
-        patch._vertices = line
-        line._patch = patch
+        x, y = patch.xy
+        patch.update(width=event.xdata - x, height=event.ydata - y)
+        self._draw()
 
     def _move_vertex(self, event: Event, ind: int, line: Artist):
         if event.inaxes != self._ax:
@@ -85,8 +154,7 @@ class Rectangles(Patches):
             height = y[ind] - y[opp]
         xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
               min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
-        line.set_data(_vertices_from_rectangle(xy=xy, width=width, height=height))
-        line._patch.update({'xy': xy, 'width': width, 'height': height})
+        self._moving_vertex_artist.parent.update(xy=xy, width=width, height=height)
         self._draw()
 
     def _grab_patch(self, event: Event):
@@ -94,9 +162,5 @@ class Rectangles(Patches):
         self._grab_artist_origin = self._grab_artist.xy
 
     def _update_artist_position(self, dx: float, dy: float):
-        rect = self._grab_artist
+        rect = self._grab_artist.parent
         rect.xy = (self._grab_artist_origin[0] + dx, self._grab_artist_origin[1] + dy)
-        rect._vertices.set_data(
-            _vertices_from_rectangle(xy=rect.xy,
-                                     width=rect.get_width(),
-                                     height=rect.get_height()))

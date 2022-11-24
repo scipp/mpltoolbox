@@ -14,6 +14,13 @@ class VSpan:
         self._vertices = None
         self._span.parent = self
 
+    def __repr__(self):
+        return (f'VSpan: left={self.left}, right={self.right}, '
+                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+
+    def __str__(self):
+        return repr(self)
+
     @property
     def left(self) -> float:
         return self._span.get_xy()[0, 0]
@@ -45,8 +52,21 @@ class VSpan:
             self._vertices.set_xdata([corners[0, 0], corners[2, 0]])
 
     @property
-    def color(self) -> str:
+    def edgecolor(self) -> str:
         return self._span.get_edgecolor()
+
+    @edgecolor.setter
+    def edgecolor(self, color):
+        self._span.set_edgecolor(color)
+        self._vertices.set_edgecolor(color)
+
+    @property
+    def facecolor(self) -> str:
+        return self._span.get_facecolor()
+
+    @facecolor.setter
+    def facecolor(self, color):
+        self._span.set_facecolor(color)
 
     def remove(self):
         self._span.remove()
@@ -56,11 +76,15 @@ class VSpan:
         self._vertices, = self._ax.plot([self.left, self.right], [0.5, 0.5],
                                         'o',
                                         ls='None',
-                                        mec=self.color,
+                                        mec=self.edgecolor,
                                         mfc='None',
                                         picker=5.0,
                                         transform=self._span.get_transform())
         self._vertices.parent = self
+
+    @property
+    def vertices(self):
+        return self._vertices.get_data()
 
 
 class Vspans(Spans):

@@ -12,6 +12,7 @@ class Tool:
                  autostart: bool = True,
                  on_create: Callable = None,
                  on_remove: Callable = None,
+                 on_change: Callable = None,
                  on_vertex_press: Callable = None,
                  on_vertex_move: Callable = None,
                  on_vertex_release: Callable = None,
@@ -23,8 +24,19 @@ class Tool:
         self._fig = ax.get_figure()
         self._connections = {}
 
+        self._on_create = []
+        self._on_remove = []
+        self._on_change = []
+        self._on_vertex_press = []
+        self._on_vertex_move = []
+        self._on_vertex_release = []
+        self._on_drag_press = []
+        self._on_drag_move = []
+        self._on_drag_release = []
+
         self.on_create = on_create
         self.on_remove = on_remove
+        self.on_change = on_change
         self.on_vertex_press = on_vertex_press
         self.on_vertex_move = on_vertex_move
         self.on_vertex_release = on_vertex_release
@@ -37,6 +49,123 @@ class Tool:
 
         if autostart:
             self.start()
+
+    @property
+    def on_create(self):
+        return self._on_create
+
+    @on_create.setter
+    def on_create(self, func: Callable):
+        if func is not None:
+            self._on_create.append(func)
+
+    def call_on_create(self, event):
+        for func in self._on_create:
+            func(event)
+
+    @property
+    def on_remove(self):
+        return self._on_remove
+
+    @on_remove.setter
+    def on_remove(self, func: Callable):
+        if func is not None:
+            self._on_remove.append(func)
+
+    def call_on_remove(self, event):
+        for func in self._on_remove:
+            func(event)
+
+    @property
+    def on_change(self):
+        return self._on_change
+
+    @on_change.setter
+    def on_change(self, func: Callable):
+        if func is not None:
+            self._on_change.append(func)
+
+    def call_on_change(self, event):
+        for func in self._on_change:
+            func(event)
+
+    @property
+    def on_vertex_press(self):
+        return self._on_vertex_press
+
+    @on_vertex_press.setter
+    def on_vertex_press(self, func: Callable):
+        if func is not None:
+            self._on_vertex_press.append(func)
+
+    def call_on_vertex_press(self, event):
+        for func in self._on_vertex_press:
+            func(event)
+
+    @property
+    def on_vertex_move(self):
+        return self._on_vertex_move
+
+    @on_vertex_move.setter
+    def on_vertex_move(self, func: Callable):
+        if func is not None:
+            self._on_vertex_move.append(func)
+
+    def call_on_vertex_move(self, event):
+        for func in self._on_vertex_move:
+            func(event)
+
+    @property
+    def on_vertex_release(self):
+        return self._on_vertex_release
+
+    @on_vertex_release.setter
+    def on_vertex_release(self, func: Callable):
+        if func is not None:
+            self._on_vertex_release.append(func)
+
+    def call_on_vertex_release(self, event):
+        for func in self._on_vertex_release:
+            func(event)
+
+    @property
+    def on_drag_press(self):
+        return self._on_drag_press
+
+    @on_drag_press.setter
+    def on_drag_press(self, func: Callable):
+        if func is not None:
+            self._on_drag_press.append(func)
+
+    def call_on_drag_press(self, event):
+        for func in self._on_drag_press:
+            func(event)
+
+    @property
+    def on_drag_move(self):
+        return self._on_drag_move
+
+    @on_drag_move.setter
+    def on_drag_move(self, func: Callable):
+        if func is not None:
+            self._on_drag_move.append(func)
+
+    def call_on_drag_move(self, event):
+        for func in self._on_drag_move:
+            func(event)
+
+    @property
+    def on_drag_release(self):
+        return self._on_drag_release
+
+    @on_drag_release.setter
+    def on_drag_release(self, func: Callable):
+        if func is not None:
+            self._on_drag_release.append(func)
+
+    def call_on_drag_release(self, event):
+        for func in self._on_drag_release:
+            func(event)
 
     def _parse_kwargs(self):
         parsed = {}

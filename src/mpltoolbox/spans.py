@@ -54,7 +54,7 @@ class Spans(Tool):
             self.spans[-1].add_vertices()
             self._draw()
             if self.on_create is not None:
-                self.on_create({'event': event, 'artist': self.spans[-1]})
+                self.call_on_create({'event': event, 'artist': self.spans[-1]})
 
     def _remove_span(self, span: Artist):
         span.parent.remove()
@@ -73,7 +73,7 @@ class Spans(Tool):
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.on_vertex_press({
+                self.call_on_vertex_press({
                     'event': event,
                     'ind': self._moving_vertex_index,
                     'artist': self._moving_vertex_artist
@@ -84,13 +84,13 @@ class Spans(Tool):
             self._pick_lock = True
             self._grab_span(event)
             if self.on_drag_press is not None:
-                self.on_drag_press({'event': event, 'artist': self._grab_artist})
+                self.call_on_drag_press({'event': event, 'artist': self._grab_artist})
         elif event.mouseevent.button == 2:
             if not is_span:
                 return
             self._remove_span(event.artist)
             if self.on_remove is not None:
-                self.on_remove({'event': event, 'artist': event.artist})
+                self.call_on_remove({'event': event, 'artist': event.artist})
 
     def _grab_vertex(self, event: Event):
         self._connect({
@@ -106,11 +106,13 @@ class Spans(Tool):
                           ind=self._moving_vertex_index,
                           line=self._moving_vertex_artist)
         if self.on_vertex_move is not None:
-            self.on_vertex_move({
+            self.call_on_vertex_move({
                 'event': event,
                 'ind': self._moving_vertex_index,
                 'artist': self._moving_vertex_artist
             })
+        if self.on_change is not None:
+            self.call_on_change(self._moving_vertex_artist.parent)
 
     def _grab_span(self, event: Event):
         self._connect({
@@ -128,16 +130,18 @@ class Spans(Tool):
         self._update_artist_position(dx, dy)
         self._draw()
         if self.on_drag_move is not None:
-            self.on_drag_move({'event': event, 'artist': self._grab_artist})
+            self.call_on_drag_move({'event': event, 'artist': self._grab_artist})
+        if self.on_change is not None:
+            self.call_on_change(self._grab_artist.parent)
 
     def _release_span(self, event: Event, kind: str):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
-            self.on_vertex_release({
+            self.call_on_vertex_release({
                 'event': event,
                 'ind': self._moving_vertex_index,
                 'artist': self._moving_vertex_artist
             })
         elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.on_drag_release({'event': event, 'artist': self._grab_artist})
+            self.call_on_drag_release({'event': event, 'artist': self._grab_artist})
