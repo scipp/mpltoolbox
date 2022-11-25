@@ -196,14 +196,14 @@ class Tool:
         """
         self._disconnect(list(self._connections.keys()))
 
-    def shutdown(self, artists: List[Artist]):
+    def shutdown(self, children: List[Artist]):
         """
-        Deactivate the tool and remove all artists from the axes.
+        Deactivate the tool and remove all children from the axes.
         """
         self.stop()
-        for a in artists:
+        for a in children:
             a.remove()
-        del artists, self._connections
+        del children, self._connections
         self._draw()
 
     def _get_active_tool(self) -> str:

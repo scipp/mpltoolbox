@@ -2,6 +2,8 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
+from .event_handler import EventHandler
+from .utils import parse_kwargs
 import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
@@ -12,8 +14,14 @@ from typing import Tuple
 
 class Line:
 
-    def __init__(self, x: float, y: float, ax: Axes, **kwargs):
+    def __init__(self, x: float, y: float, number: int, ax: Axes, n=2, **kwargs):
+        self._max_clicks = n
         self._ax = ax
+        kwargs = parse_kwargs(kwargs, number)
+        if set(['ls', 'linestyle']).isdisjoint(set(kwargs.keys())):
+            kwargs['ls'] = 'solid'
+        if 'marker' not in kwargs:
+            kwargs['marker'] = 'o'
         self._line, = self._ax.plot(x, y, **kwargs)
         self._line.parent = self
         self.id = uuid.uuid1().hex
@@ -138,8 +146,110 @@ class Line:
     def artist(self) -> str:
         return self._line
 
+    def set_picker(self, pick):
+        self._line.set_picker(pick)
 
-class Lines(Tool):
+    def is_moveable(self, artist):
+        return True
+
+    def is_draggable(self, artist):
+        return True
+
+    def is_removable(self, artist):
+        return True
+
+    def move_vertex(self, event: Event, ind: int):
+        new_data = self.xy
+        if ind is None:
+            ind = -1
+        new_data[0][ind] = event.xdata
+        new_data[1][ind] = event.ydata
+        self.xy = new_data
+
+    # def move_vertex(self, event: Event, ind: int):
+    #     x, y = self._vertices.get_data()
+    #     if ind is None:
+    #         ind = 2
+    #     x[ind] = event.xdata
+    #     y[ind] = event.ydata
+    #     opp = (ind + 2) % 4
+    #     if ind == 0:
+    #         width = x[opp] - x[ind]
+    #         height = y[opp] - y[ind]
+    #     elif ind == 1:
+    #         width = x[ind] - x[opp]
+    #         height = y[opp] - y[ind]
+    #     elif ind == 2:
+    #         width = x[ind] - x[opp]
+    #         height = y[ind] - y[opp]
+    #     elif ind == 3:
+    #         width = x[opp] - x[ind]
+    #         height = y[ind] - y[opp]
+    #     xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
+    #           min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
+    #     self.update(xy=xy, width=width, height=height)
+
+    def after_persist_vertex(self, event):
+        new_data = self.xy
+        self.xy = (np.append(new_data[0],
+                             new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
+        print(self.xy)
+        # self._draw()
+
+
+Lines = partial(EventHandler, spawner=Line)
+
+
+class LinesOLD(EventHandler):
+    """
+    Add lines to the supplied axes.
+
+    Controls:
+      - Left-click to make new lines
+      - Left-click and hold on line vertex to move vertex
+      - Right-click and hold to drag/move the entire line
+      - Middle-click to delete line
+
+    :param ax: The Matplotlib axes to which the Lines tool will be attached.
+    :param n: The number of vertices for each line. Default is 2.
+    :param autostart: Automatically activate the tool upon creation if `True`.
+    :param on_create: Callback that fires when a line is created.
+    :param on_remove: Callback that fires when a line is removed.
+    :param on_vertex_press: Callback that fires when a vertex is left-clicked.
+    :param on_vertex_move: Callback that fires when a vertex is moved.
+    :param on_vertex_release: Callback that fires when a vertex is released.
+    :param on_drag_press: Callback that fires when a line is right-clicked.
+    :param on_drag_move: Callback that fires when a line is dragged.
+    :param on_drag_release: Callback that fires when a line is released.
+    :param kwargs: Matplotlib line parameters used for customization.
+        Each parameter can be a single item (it will apply to all lines),
+        a list of items (one entry per line), or a callable (which will be
+        called every time a new line is created).
+    """
+
+    def __init__(self, ax: Axes, n: int = 2, **kwargs):
+        super().__init__(ax, **kwargs)
+        self._spawner = Line
+        self._max_clicks = n
+
+        # self._maker = Line
+        # self._nmax = n
+        # self.lines = []
+        # self._pick_lock = False
+        # self._moving_vertex_index = None
+        # self._moving_vertex_artist = None
+
+    def _move_vertex(self, event: Event, ind: int, motif):
+        if event.inaxes != self._ax:
+            return
+        new_data = motif.xy
+        new_data[0][ind] = event.xdata
+        new_data[1][ind] = event.ydata
+        motif.xy = new_data
+        # self._draw()
+
+
+class LinesOLD(Tool):
     """
     Add lines to the supplied axes.
 

@@ -12,9 +12,9 @@ import uuid
 
 class EventHandler(Tool):
 
-    def __init__(self, ax: Axes, **kwargs):
+    def __init__(self, ax: Axes, spawner, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._spawner = None
+        self._spawner = spawner
         self.children = []
         self._drag_patch = False
         self._grabbed_child = None
@@ -45,7 +45,7 @@ class EventHandler(Tool):
             self._spawn_new_motif(x=event.xdata, y=event.ydata)
             self._connect({'motion_notify_event': self._on_motion_notify})
         self._nclicks += 1
-        self._persist_vertex(event)
+        self._persist_vertex(event=event, motif=self.children[-1])
 
     def _spawn_new_motif(self, x: float, y: float):
         # kwargs = self._parse_kwargs()
@@ -66,14 +66,22 @@ class EventHandler(Tool):
         self._draw()
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=None, owner=self.children[-1])
+        self._move_vertex(event=event, ind=None, motif=self.children[-1])
 
-    def _persist_vertex(self, event: Event = None):
+    def _move_vertex(self, event: Event, ind: int, motif):
+        if event.inaxes != self._ax:
+            return
+        motif.move_vertex(event=event, ind=ind)
+
+    def _persist_vertex(self, event: Event, motif):
         # if len(self.lines[-1]) == self._nclicks:
         # print(self._nclicks, self._max_clicks)
-        if self._nclicks == self._max_clicks:
+        if self._nclicks == motif._max_clicks:
             self._disconnect(['motion_notify_event'])
             self._finalize_motif(event)
+        else:
+            motif.after_persist_vertex(event)
+        self._draw()
 
         # self._disconnect(['motion_notify_event', 'button_release_event'])
         # if event is not None:
@@ -86,7 +94,7 @@ class EventHandler(Tool):
         self.children[-1].set_picker(5.0)
         if self.on_create is not None:
             self.call_on_create({'event': event, 'owner': self.children[-1]})
-        self._draw()
+        # self._draw()
 
     def _on_pick(self, event: Event):
         if self._get_active_tool():
@@ -107,14 +115,14 @@ class EventHandler(Tool):
                     'motif': self._moving_vertex_motif
                 })
         if event.mouseevent.button == 3:
-            if art.parent.is_draggable(art):
+            if not art.parent.is_draggable(art):
                 return
             self._pick_lock = True
             self._grab_motif(event)
             if self.on_drag_press is not None:
                 self.call_on_drag_press({'event': event, 'motif': self._grabbed_motif})
         elif event.mouseevent.button == 2:
-            if art.parent.is_removable(art):
+            if not art.parent.is_removable(art):
                 return
             self._remove_motif(art.parent)
             if self.on_remove is not None:
@@ -143,6 +151,7 @@ class EventHandler(Tool):
             'motif': self._moving_vertex_motif
         }
         self._move_vertex(**event_dict)
+        self._draw()
         if self.on_vertex_move is not None:
             self.call_on_vertex_move(event_dict)
         if self.on_change is not None:
@@ -155,13 +164,16 @@ class EventHandler(Tool):
         })
         self._grabbed_motif = event.artist.parent
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
+        self._grabbed_motif_origin = self._grabbed_motif.xy
 
     def _move_motif(self, event: Event):
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
-        self._update_motif_position(dx, dy)
+        # self._update_motif_position(dx, dy)
+        self._grabbed_motif.xy = (self._grabbed_motif_origin[0] + dx,
+                                  self._grabbed_motif_origin[1] + dy)
         self._draw()
         if self.on_drag_move is not None:
             self.call_on_drag_move({'event': event, 'motif': self._grabbed_motif})
