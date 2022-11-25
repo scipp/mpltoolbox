@@ -14,17 +14,17 @@ class EventHandler(Tool):
 
     def __init__(self, ax: Axes, **kwargs):
         super().__init__(ax=ax, **kwargs)
-        self._maker = None
-        self.artists = []
+        self._spawner = None
+        self.children = []
         self._drag_patch = False
-        self._grab_artist = None
+        self._grabbed_child = None
         self._grab_mouse_origin = None
-        self._grab_artist_origin = None
+        self._grabbed_artist_origin = None
         self._pick_lock = False
         self._nclicks = 0
 
     def __del__(self):
-        super().shutdown(artists=self.artists)
+        super().shutdown(children=self.children)
 
     def _on_button_press(self, event: Event):
         # if event.button != 1 or self._pick_lock or self._get_active_tool():
@@ -42,38 +42,38 @@ class EventHandler(Tool):
             return
         if 'motion_notify_event' not in self._connections:
             self._nclicks = 0
-            self._make_new_artist(x=event.xdata, y=event.ydata)
+            self._spawn_new_motif(x=event.xdata, y=event.ydata)
             self._connect({'motion_notify_event': self._on_motion_notify})
         self._nclicks += 1
         self._persist_vertex(event)
 
-    def _make_new_artist(self, x: float, y: float):
+    def _spawn_new_motif(self, x: float, y: float):
         # kwargs = self._parse_kwargs()
         # defaut_color = f'C{self._artist_counter}'
         # if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
         #     kwargs['ec'] = defaut_color
         # if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
         #     kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        artist = self._maker(x=x,
-                             y=y,
-                             number=self._artist_counter,
-                             ax=self._ax,
-                             **self._kwargs)
+        motif = self._spawner(x=x,
+                              y=y,
+                              number=self._motif_counter,
+                              ax=self._ax,
+                              **self._kwargs)
         # patch.id = str(uuid.uuid1())
-        self.artists.append(artist)
-        self._artist_counter += 1
+        self.children.append(motif)
+        self._motif_counter += 1
         # self._ax.add_patch(patch)
         self._draw()
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=None, artist=self.artists[-1])
+        self._move_vertex(event=event, ind=None, owner=self.children[-1])
 
     def _persist_vertex(self, event: Event = None):
         # if len(self.lines[-1]) == self._nclicks:
-        print(self._nclicks, self._max_clicks)
+        # print(self._nclicks, self._max_clicks)
         if self._nclicks == self._max_clicks:
             self._disconnect(['motion_notify_event'])
-            self._finalize_artist(event)
+            self._finalize_motif(event)
 
         # self._disconnect(['motion_notify_event', 'button_release_event'])
         # if event is not None:
@@ -82,16 +82,10 @@ class EventHandler(Tool):
         #     if self.on_create is not None:
         #         self.call_on_create({'event': event, 'artist': self.artists[-1]})
 
-    def _finalize_artist(self, event: Event):
-        self.artists[-1].set_picker(5.0)
+    def _finalize_motif(self, event: Event):
+        self.children[-1].set_picker(5.0)
         if self.on_create is not None:
-            self.call_on_create({'event': event, 'artist': self.artists[-1]})
-        self._draw()
-
-    def _remove_patch(self, patch: Artist):
-        patch.parent.remove()
-        # patch._vertices.remove()
-        self.artists.remove(patch.parent)
+            self.call_on_create({'event': event, 'owner': self.children[-1]})
         self._draw()
 
     def _on_pick(self, event: Event):
@@ -110,71 +104,78 @@ class EventHandler(Tool):
                 self.call_on_vertex_press({
                     'event': event,
                     'ind': self._moving_vertex_index,
-                    'artist': self._moving_vertex_artist
+                    'motif': self._moving_vertex_motif
                 })
         if event.mouseevent.button == 3:
             if art.parent.is_draggable(art):
                 return
             self._pick_lock = True
-            self._grab_patch(event)
+            self._grab_motif(event)
             if self.on_drag_press is not None:
-                self.call_on_drag_press({'event': event, 'artist': self._grab_artist})
+                self.call_on_drag_press({'event': event, 'motif': self._grabbed_motif})
         elif event.mouseevent.button == 2:
             if art.parent.is_removable(art):
                 return
-            self._remove_patch(event.artist)
+            self._remove_motif(art.parent)
             if self.on_remove is not None:
-                self.call_on_remove({'event': event, 'artist': event.artist})
+                self.call_on_remove({'event': event, 'motif': art.parent})
+
+    def _remove_motif(self, motif):
+        motif.remove()
+        self.children.remove(motif)
+        self._draw()
 
     def _grab_vertex(self, event: Event):
         self._connect({
-            'motion_notify_event': self._on_vertex_motion,
-            'button_release_event': partial(self._release, kind='vertex')
+            'motion_notify_event':
+            self._on_vertex_motion,
+            'button_release_event':
+            partial(self._release_motif, kind='vertex')
         })
 
         self._moving_vertex_index = event.ind[0]
-        self._moving_vertex_artist = event.artist
+        self._moving_vertex_motif = event.artist.parent
 
     def _on_vertex_motion(self, event: Event):
         event_dict = {
             'event': event,
             'ind': self._moving_vertex_index,
-            'artist': self._moving_vertex_artist
+            'motif': self._moving_vertex_motif
         }
         self._move_vertex(**event_dict)
         if self.on_vertex_move is not None:
             self.call_on_vertex_move(event_dict)
         if self.on_change is not None:
-            self.call_on_change(self._moving_vertex_artist.parent)
+            self.call_on_change(self._moving_vertex_motif)
 
-    def _grab_patch(self, event: Event):
+    def _grab_motif(self, event: Event):
         self._connect({
-            'motion_notify_event': self._move_patch,
-            'button_release_event': partial(self._release_patch, kind='drag')
+            'motion_notify_event': self._move_motif,
+            'button_release_event': partial(self._release_motif, kind='drag')
         })
-        self._grab_artist = event.artist
+        self._grabbed_motif = event.artist.parent
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
 
-    def _move_patch(self, event: Event):
+    def _move_motif(self, event: Event):
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
-        self._update_artist_position(dx, dy)
+        self._update_motif_position(dx, dy)
         self._draw()
         if self.on_drag_move is not None:
-            self.call_on_drag_move({'event': event, 'artist': self._grab_artist})
+            self.call_on_drag_move({'event': event, 'motif': self._grabbed_motif})
         if self.on_change is not None:
-            self.call_on_change(self._grab_artist.parent)
+            self.call_on_change(self._grabbed_motif)
 
-    def _release_patch(self, event: Event, kind: str):
+    def _release_motif(self, event: Event, kind: str):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
             self.call_on_vertex_release({
                 'event': event,
                 'ind': self._moving_vertex_index,
-                'artist': self._moving_vertex_artist
+                'motif': self._moving_vertex_motif
             })
         elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.call_on_drag_release({'event': event, 'artist': self._grab_artist})
+            self.call_on_drag_release({'event': event, 'motif': self._grabbed_motif})

@@ -132,7 +132,7 @@ class Ellipses(Patches):
     def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
-        self._maker = Ellipse
+        self._spawner = Ellipse
         self._new_ellipse_center = None
 
     def _make_new_patch(self, x: float, y: float):

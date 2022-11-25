@@ -153,7 +153,7 @@ class Rectangles(EventHandler):
     def __init__(self, ax: Axes, **kwargs):
 
         super().__init__(ax=ax, **kwargs)
-        self._maker = Rectangle
+        self._spawner = Rectangle
         self._max_clicks = 2
 
     def _resize_patch(self, event: Event):

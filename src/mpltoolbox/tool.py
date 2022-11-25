@@ -45,7 +45,7 @@ class Tool:
         self.on_drag_release = on_drag_release
 
         self._kwargs = kwargs
-        self._artist_counter = 0
+        self._motif_counter = 0
 
         if autostart:
             self.start()
