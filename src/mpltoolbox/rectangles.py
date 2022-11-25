@@ -118,6 +118,15 @@ class Rectangle:
         self._rectangle.set_picker(pick)
         self._vertices.set_picker(pick)
 
+    def is_moveable(self, artist):
+        return artist is self._vertices
+
+    def is_draggable(self, artist):
+        return artist is self._rectangle
+
+    def is_removable(self, artist):
+        return artist is self._rectangle
+
 
 class Rectangles(EventHandler):
     """

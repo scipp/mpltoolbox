@@ -99,9 +99,10 @@ class EventHandler(Tool):
             return
         if event.mouseevent.inaxes != self._ax:
             return
-        is_patch = isinstance(event.artist, Patch)
+        # is_patch = isinstance(event.artist, Patch)
+        art = event.artist
         if event.mouseevent.button == 1:
-            if is_patch:
+            if not art.parent.is_moveable(art):
                 return
             self._pick_lock = True
             self._grab_vertex(event)
@@ -112,14 +113,14 @@ class EventHandler(Tool):
                     'artist': self._moving_vertex_artist
                 })
         if event.mouseevent.button == 3:
-            if not is_patch:
+            if art.parent.is_draggable(art):
                 return
             self._pick_lock = True
             self._grab_patch(event)
             if self.on_drag_press is not None:
                 self.call_on_drag_press({'event': event, 'artist': self._grab_artist})
         elif event.mouseevent.button == 2:
-            if not is_patch:
+            if art.parent.is_removable(art):
                 return
             self._remove_patch(event.artist)
             if self.on_remove is not None:
@@ -127,27 +128,12 @@ class EventHandler(Tool):
 
     def _grab_vertex(self, event: Event):
         self._connect({
-            'motion_notify_event':
-            self._on_vertex_motion,
-            'button_release_event':
-            partial(self._release_patch, kind='vertex')
+            'motion_notify_event': self._on_vertex_motion,
+            'button_release_event': partial(self._release, kind='vertex')
         })
 
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_artist = event.artist
-
-    # def _on_vertex_motion(self, event: Event):
-    #     self._move_vertex(event=event,
-    #                       ind=self._moving_vertex_index,
-    #                       line=self._moving_vertex_artist)
-    #     if self.on_vertex_move is not None:
-    #         self.call_on_vertex_move({
-    #             'event': event,
-    #             'ind': self._moving_vertex_index,
-    #             'artist': self._moving_vertex_artist
-    #         })
-    #     if self.on_change is not None:
-    #         self.call_on_change(self._moving_vertex_artist.parent)
 
     def _on_vertex_motion(self, event: Event):
         event_dict = {
