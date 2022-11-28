@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 # from .event_handler import EventHandler
-# from .patches import Patches
+from .patch import Patch
 from .tool import Tool
 from .utils import parse_kwargs
 from functools import partial
@@ -22,39 +22,20 @@ import uuid
 #             [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
 
 
-class Rectangle:
+class Rectangle(Patch):
 
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
-        self._max_clicks = 2
-        self._ax = ax
-        kwargs = parse_kwargs(kwargs, number)
-        defaut_color = f'C{number}'
-        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['ec'] = defaut_color
-        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        self._rectangle = mp.Rectangle((x, y), 0, 0, **kwargs)
-        # self._vertices = None
-        # corners = self._rectangle.get_corners()
-        self._vertices, = self._ax.plot(*self._make_vertices(),
-                                        'o',
-                                        ls='None',
-                                        mec=self.edgecolor,
-                                        mfc='None')
-        self._vertices.parent = self
-        self._rectangle.parent = self
-        self._ax.add_patch(self._rectangle)
-        self.id = uuid.uuid1().hex
+        super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
+
+    def _make_patch(self, x, y, **kwargs):
+        self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
 
     def __repr__(self):
         return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    def __str__(self):
-        return repr(self)
-
     def _make_vertices(self):
-        corners = self._rectangle.get_corners()
+        corners = self._patch.get_corners()
         xc = np.concatenate([corners[:, 0], [corners[0, 0]]])
         yc = np.concatenate([corners[:, 1], [corners[0, 1]]])
         x_mid = 0.5 * (xc[1:] + xc[:-1])
@@ -66,148 +47,13 @@ class Rectangle:
         y[0:-1:2] = yc[:-1]
         y[1::2] = y_mid
         return (x, y)
-        # x = np.array([corners[0, 0], corners[0, 0], corners[0, 0], ])
-        # return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
-        #         [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
-
-    def _update_vertices(self):
-        # if self._vertices is not None:
-        self._vertices.set_data(*self._make_vertices())
-
-    @property
-    def xy(self) -> float:
-        return self._rectangle.get_xy()
-
-    @xy.setter
-    def xy(self, xy: float):
-        self._rectangle.set_xy(xy)
-        self._update_vertices()
-
-    @property
-    def width(self) -> float:
-        return self._rectangle.get_width()
-
-    @width.setter
-    def width(self, width: float):
-        self._rectangle.set_width(width)
-        self._update_vertices()
-
-    @property
-    def height(self) -> float:
-        return self._rectangle.get_height()
-
-    @height.setter
-    def height(self, height: float):
-        self._rectangle.set_height(height)
-        self._update_vertices()
-
-    @property
-    def edgecolor(self) -> str:
-        return self._rectangle.get_edgecolor()
-
-    @edgecolor.setter
-    def edgecolor(self, color):
-        self._rectangle.set_edgecolor(color)
-        self._vertices.set_edgecolor(color)
-
-    @property
-    def facecolor(self) -> str:
-        return self._rectangle.get_facecolor()
-
-    @facecolor.setter
-    def facecolor(self, color):
-        self._rectangle.set_facecolor(color)
-
-    def remove(self):
-        self._rectangle.remove()
-        self._vertices.remove()
-
-    # def add_vertices(self):
-    #     corners = self._rectangle.get_corners()
-    #     self._vertices, = self._ax.plot(corners[:, 0],
-    #                                     corners[:, 1],
-    #                                     'o',
-    #                                     ls='None',
-    #                                     mec=self.edgecolor,
-    #                                     mfc='None',
-    #                                     picker=5.0)
-    #     self._vertices.parent = self
-
-    def update(self, **kwargs):
-        self._rectangle.update(kwargs)
-        self._update_vertices()
-
-    # def _update_from_new_vertices(self, vertices):
-    #     xy = vertices[0]
-    #     width = vertices[2, 0] - vertices[0, 0]
-    #     height = vertices[4, 1] - vertices[0, 1]
-    #     self.update(xy=xy, width=width, height=height)
-
-    @property
-    def vertices(self):
-        return self._vertices.get_data()
-
-    def set_picker(self, pick):
-        self._rectangle.set_picker(pick)
-        self._vertices.set_picker(pick)
-
-    def is_moveable(self, artist):
-        return artist is self._vertices
-
-    def is_draggable(self, artist):
-        return artist is self._rectangle
-
-    def is_removable(self, artist):
-        return artist is self._rectangle
 
     def move_vertex(self, event: Event, ind: int):
-        x = event.xdata
-        y = event.ydata
-        verts = self.vertices
-        if ind is None:
-            ind = 4
-        opp = (ind + 4) % 8
-        xopp = verts[0][opp]
-        yopp = verts[1][opp]
-        width = None
-        height = None
-        xy = [verts[0][0], verts[1][0]]
-        if ind == 0:
-            width = xopp - x
-            height = yopp - y
-            xy = [x, y]
-        elif ind == 1:
-            height = yopp - y
-            xy[1] = y
-        elif ind == 2:
-            width = x - xopp
-            height = yopp - y
-            xy[1] = y
-        elif ind == 3:
-            width = x - xopp
-        elif ind == 4:
-            width = x - xopp
-            height = y - yopp
-        elif ind == 5:
-            height = y - yopp
-        elif ind == 6:
-            width = xopp - x
-            height = y - yopp
-            xy[0] = x
-        elif ind == 7:
-            width = xopp - x
-            xy[0] = x
-        # xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
-        #       min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
-        updates = {'xy': xy}
-        if width is not None:
-            updates['width'] = width
-        if height is not None:
-            updates['height'] = height
-        self.update(**updates)
+        props = super().get_new_patch_props(event=event, ind=ind)
+        self.update(**props)
 
-    def after_persist_vertex(self, event):
-        return
+    # def after_persist_vertex(self, event):
+    #     return
 
 
 Rectangles = partial(Tool, spawner=Rectangle)

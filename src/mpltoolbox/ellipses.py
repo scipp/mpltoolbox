@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 # from .patches import Patches
+from .patch import Patch
 from .tool import Tool
 from .utils import parse_kwargs
 from functools import partial
@@ -9,168 +10,224 @@ from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
+import numpy as np
 from typing import Tuple, List
 import uuid
 
 
-def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
-    center = ellipse.center
-    width = ellipse.get_width()
-    height = ellipse.get_height()
-    return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
-            [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
-
-
-class Ellipse:
+class Ellipse(Patch):
 
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
-        self._max_clicks = 2
-        self._ax = ax
-        kwargs = parse_kwargs(kwargs, number)
-        defaut_color = f'C{number}'
-        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['ec'] = defaut_color
-        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
-        self._ellipse = mp.Ellipse((x, y), 0, 0, **kwargs)
-        # self._vertices = None
-        self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
-                                        'o',
-                                        ls='None',
-                                        mec=self.edgecolor,
-                                        mfc='None')
-        self._vertices.parent = self
-        self._ellipse.parent = self
-        self._ax.add_patch(self._ellipse)
-        self.id = uuid.uuid1().hex
+        super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
+
+    def _make_patch(self, x, y, **kwargs):
+        self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
 
     def __repr__(self):
         return (f'Ellipse: center={self.center}, width={self.width}, '
                 f'height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    def __str__(self):
-        return repr(self)
-
-    def _update_vertices(self):
-        if self._vertices is not None:
-            self._vertices.set_data(*_vertices_from_ellipse(self._ellipse))
-
-    @property
-    def center(self) -> float:
-        return self._ellipse.center
-
-    @center.setter
-    def center(self, xy: float):
-        self._ellipse.center = xy
-        self._update_vertices()
-
-    @property
-    def xy(self) -> float:
-        return self.center
-
-    @xy.setter
-    def xy(self, xy: float):
-        self.center = xy
-
-    @property
-    def width(self) -> float:
-        return self._ellipse.get_width()
-
-    @width.setter
-    def width(self, width: float):
-        self._ellipse.set_width(width)
-        self._update_vertices()
-
-    @property
-    def height(self) -> float:
-        return self._ellipse.get_height()
-
-    @height.setter
-    def height(self, height: float):
-        self._ellipse.set_height(height)
-        self._update_vertices()
-
-    @property
-    def edgecolor(self) -> str:
-        return self._ellipse.get_edgecolor()
-
-    @edgecolor.setter
-    def edgecolor(self, color):
-        self._ellipse.set_edgecolor(color)
-        self._vertices.set_edgecolor(color)
-
-    @property
-    def facecolor(self) -> str:
-        return self._ellipse.get_facecolor()
-
-    @facecolor.setter
-    def facecolor(self, color):
-        self._ellipse.set_facecolor(color)
-
-    def remove(self):
-        self._ellipse.remove()
-        self._vertices.remove()
-
-    # def add_vertices(self):
-    #     # corners = self._ellipse.get_corners()
-    #     self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
-    #                                     'o',
-    #                                     ls='None',
-    #                                     mec=self.edgecolor,
-    #                                     mfc='None',
-    #                                     picker=5.0)
-    #     self._vertices.parent = self
-
-    def update(self, **kwargs):
-        self._ellipse.update(kwargs)
-        self._update_vertices()
-
-    @property
-    def vertices(self):
-        return self._vertices.get_data()
-
-    def set_picker(self, pick):
-        self._ellipse.set_picker(pick)
-        self._vertices.set_picker(pick)
-
-    def is_moveable(self, artist):
-        return artist is self._vertices
-
-    def is_draggable(self, artist):
-        return artist is self._ellipse
-
-    def is_removable(self, artist):
-        return artist is self._ellipse
+    def _make_vertices(self):
+        # ellipse = self._patch
+        center = self.center
+        width = self.width
+        height = self.height
+        l = center[0] - 0.5 * width
+        c = center[0]
+        r = center[0] + 0.5 * width
+        b = center[1] - 0.5 * height
+        m = center[1]
+        t = center[1] + 0.5 * height
+        return (np.array([l, c, r, r, r, c, l, l]), np.array([b, b, b, m, t, t, t, m]))
 
     def move_vertex(self, event: Event, ind: int):
-        x, y = self._vertices.get_data()
-        if ind is None:
-            ind = 2
-        # patch = self._moving_vertex_artist.parent
-        x[ind] = event.xdata
-        y[ind] = event.ydata
-        opp = (ind + 2) % 4
-        even_ind = (ind % 2) == 0
-        if even_ind:
-            if ind == 0:
-                width = x[opp] - x[ind]
-            else:
-                width = x[ind] - x[opp]
-            height = self.height
-            center = (0.5 * (x[ind] + x[opp]), self.center[1])
-        else:
-            if ind == 1:
-                height = y[opp] - y[ind]
-            else:
-                height = y[ind] - y[opp]
-            width = self.width
-            center = (self.center[0], 0.5 * (y[ind] + y[opp]))
-        self.update(center=center, width=width, height=height)
+        props = super().get_new_patch_props(event=event, ind=ind)
+        center = self.center
+        center = (props['corner'][0] + 0.5 * props['width'],
+                  props['corner'][1] + 0.5 * props['height'])
+        self.update(center=center, width=props['width'], height=props['height'])
 
-    def after_persist_vertex(self, event):
-        return
 
+# def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
+#     center = ellipse.center
+#     width = ellipse.get_width()
+#     height = ellipse.get_height()
+#     return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
+#             [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
+
+# class Ellipse:
+
+#     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
+#         self._max_clicks = 2
+#         self._ax = ax
+#         kwargs = parse_kwargs(kwargs, number)
+#         defaut_color = f'C{number}'
+#         if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
+#             kwargs['ec'] = defaut_color
+#         if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
+#             kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
+#         self._ellipse = mp.Ellipse((x, y), 0, 0, **kwargs)
+#         # self._vertices = None
+#         self._vertices, = self._ax.plot(*self._make_vertices(),
+#                                         'o',
+#                                         ls='None',
+#                                         mec=self.edgecolor,
+#                                         mfc='None')
+#         self._vertices.parent = self
+#         self._ellipse.parent = self
+#         self._ax.add_patch(self._ellipse)
+#         self.id = uuid.uuid1().hex
+
+#     def __repr__(self):
+#         return (f'Ellipse: center={self.center}, width={self.width}, '
+#                 f'height={self.height}, '
+#                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+
+#     def __str__(self):
+#         return repr(self)
+
+#     def _make_vertices(self):
+#         center = ellipse.center
+#         width = ellipse.get_width()
+#         height = ellipse.get_height()
+#         l = center[0] - 0.5 * width
+#         c = center[0]
+#         r = center[0] + 0.5 * width
+#         b = center[1] - 0.5 * height
+#         m = center[1]
+#         t = center[1] + 0.5 * height
+#         return (np.array([l, c, r, r, r, c, l, l]), np.array([b, b, b, m, t, t, t, m]))
+
+#     def _update_vertices(self):
+#         self._vertices.set_data(*self._make_vertices())
+
+#     @property
+#     def center(self) -> float:
+#         return self._ellipse.center
+
+#     @center.setter
+#     def center(self, xy: float):
+#         self._ellipse.center = xy
+#         self._update_vertices()
+
+#     @property
+#     def xy(self) -> float:
+#         return self.center
+
+#     @xy.setter
+#     def xy(self, xy: float):
+#         self.center = xy
+
+#     @property
+#     def width(self) -> float:
+#         return self._ellipse.get_width()
+
+#     @width.setter
+#     def width(self, width: float):
+#         self._ellipse.set_width(width)
+#         self._update_vertices()
+
+#     @property
+#     def height(self) -> float:
+#         return self._ellipse.get_height()
+
+#     @height.setter
+#     def height(self, height: float):
+#         self._ellipse.set_height(height)
+#         self._update_vertices()
+
+#     @property
+#     def edgecolor(self) -> str:
+#         return self._ellipse.get_edgecolor()
+
+#     @edgecolor.setter
+#     def edgecolor(self, color):
+#         self._ellipse.set_edgecolor(color)
+#         self._vertices.set_edgecolor(color)
+
+#     @property
+#     def facecolor(self) -> str:
+#         return self._ellipse.get_facecolor()
+
+#     @facecolor.setter
+#     def facecolor(self, color):
+#         self._ellipse.set_facecolor(color)
+
+#     def remove(self):
+#         self._ellipse.remove()
+#         self._vertices.remove()
+
+#     # def add_vertices(self):
+#     #     # corners = self._ellipse.get_corners()
+#     #     self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
+#     #                                     'o',
+#     #                                     ls='None',
+#     #                                     mec=self.edgecolor,
+#     #                                     mfc='None',
+#     #                                     picker=5.0)
+#     #     self._vertices.parent = self
+
+#     def update(self, **kwargs):
+#         self._ellipse.update(kwargs)
+#         self._update_vertices()
+
+#     @property
+#     def vertices(self):
+#         return self._vertices.get_data()
+
+#     def set_picker(self, pick):
+#         self._ellipse.set_picker(pick)
+#         self._vertices.set_picker(pick)
+
+#     def is_moveable(self, artist):
+#         return artist is self._vertices
+
+#     def is_draggable(self, artist):
+#         return artist is self._ellipse
+
+#     def is_removable(self, artist):
+#         return artist is self._ellipse
+
+#     def move_vertex(self, event: Event, ind: int):
+#         x = event.xdata
+#         y = event.ydata
+#         verts = self.vertices
+
+#         # x, y = self._vertices.get_data()
+#         if ind is None:
+#             ind = 4
+#         opp = (ind + 4) % 8
+#         xopp = verts[0][opp]
+#         yopp = verts[1][opp]
+#         width = None
+#         height = None
+#         center = self.center
+
+#         # patch = self._moving_vertex_artist.parent
+#         x[ind] = event.xdata
+#         y[ind] = event.ydata
+#         opp = (ind + 2) % 4
+
+#         even_ind = (ind % 2) == 0
+#         if even_ind:
+#             if ind == 0:
+#                 width = x[opp] - x[ind]
+#             else:
+#                 width = x[ind] - x[opp]
+#             height = self.height
+#             center = (0.5 * (x[ind] + x[opp]), self.center[1])
+#         else:
+#             if ind == 1:
+#                 height = y[opp] - y[ind]
+#             else:
+#                 height = y[ind] - y[opp]
+#             width = self.width
+#             center = (self.center[0], 0.5 * (y[ind] + y[opp]))
+#         self.update(center=center, width=width, height=height)
+
+#     def after_persist_vertex(self, event):
+#         return
 
 Ellipses = partial(Tool, spawner=Ellipse)
 """
