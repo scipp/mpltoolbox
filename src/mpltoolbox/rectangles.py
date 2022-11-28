@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .event_handler import EventHandler
+# from .event_handler import EventHandler
 from .patches import Patches
+from .tool import Tool
 from .utils import parse_kwargs
 from functools import partial
 from matplotlib import patches as mp
@@ -156,7 +157,7 @@ class Rectangle:
         return
 
 
-Rectangles = partial(EventHandler, spawner=Rectangle)
+Rectangles = partial(Tool, spawner=Rectangle)
 """
 Add rectangles to the supplied axes.
 

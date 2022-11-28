@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 from .tool import Tool
-from .event_handler import EventHandler
+# from .event_handler import EventHandler
 from .utils import parse_kwargs
 import numpy as np
 from functools import partial
@@ -165,6 +165,7 @@ class Line:
         new_data[0][ind] = event.xdata
         new_data[1][ind] = event.ydata
         self.xy = new_data
+        # assert False
 
     # def move_vertex(self, event: Event, ind: int):
     #     x, y = self._vertices.get_data()
@@ -197,7 +198,7 @@ class Line:
         # self._draw()
 
 
-Lines = partial(EventHandler, spawner=Line)
+Lines = partial(Tool, spawner=Line)
 """
 Add lines to the supplied axes.
 
