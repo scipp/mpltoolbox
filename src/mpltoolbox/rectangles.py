@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
 # from .event_handler import EventHandler
-from .patches import Patches
+# from .patches import Patches
 from .tool import Tool
 from .utils import parse_kwargs
 from functools import partial
@@ -10,8 +10,16 @@ from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
+import numpy as np
 from typing import Tuple, List
 import uuid
+
+# def _vertices_from_rectangle(rectangle: mp.Patch) -> Tuple[List[float]]:
+#     center = ellipse.center
+#     width = ellipse.get_width()
+#     height = ellipse.get_height()
+#     return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
+#             [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
 
 
 class Rectangle:
@@ -27,9 +35,8 @@ class Rectangle:
             kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
         self._rectangle = mp.Rectangle((x, y), 0, 0, **kwargs)
         # self._vertices = None
-        corners = self._rectangle.get_corners()
-        self._vertices, = self._ax.plot(corners[:, 0],
-                                        corners[:, 1],
+        # corners = self._rectangle.get_corners()
+        self._vertices, = self._ax.plot(*self._make_vertices(),
                                         'o',
                                         ls='None',
                                         mec=self.edgecolor,
@@ -46,9 +53,26 @@ class Rectangle:
     def __str__(self):
         return repr(self)
 
+    def _make_vertices(self):
+        corners = self._rectangle.get_corners()
+        xc = np.concatenate([corners[:, 0], [corners[0, 0]]])
+        yc = np.concatenate([corners[:, 1], [corners[0, 1]]])
+        x_mid = 0.5 * (xc[1:] + xc[:-1])
+        y_mid = 0.5 * (yc[1:] + yc[:-1])
+        x = np.empty(xc.size + x_mid.size - 1, dtype=float)
+        y = np.empty(yc.size + y_mid.size - 1, dtype=float)
+        x[0:-1:2] = xc[:-1]
+        x[1::2] = x_mid
+        y[0:-1:2] = yc[:-1]
+        y[1::2] = y_mid
+        return (x, y)
+        # x = np.array([corners[0, 0], corners[0, 0], corners[0, 0], ])
+        # return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
+        #         [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
+
     def _update_vertices(self):
-        if self._vertices is not None:
-            self._vertices.set_data(self._rectangle.get_corners().T)
+        # if self._vertices is not None:
+        self._vertices.set_data(*self._make_vertices())
 
     @property
     def xy(self) -> float:
@@ -113,6 +137,12 @@ class Rectangle:
         self._rectangle.update(kwargs)
         self._update_vertices()
 
+    # def _update_from_new_vertices(self, vertices):
+    #     xy = vertices[0]
+    #     width = vertices[2, 0] - vertices[0, 0]
+    #     height = vertices[4, 1] - vertices[0, 1]
+    #     self.update(xy=xy, width=width, height=height)
+
     @property
     def vertices(self):
         return self._vertices.get_data()
@@ -131,27 +161,50 @@ class Rectangle:
         return artist is self._rectangle
 
     def move_vertex(self, event: Event, ind: int):
-        x, y = self._vertices.get_data()
+        x = event.xdata
+        y = event.ydata
+        verts = self.vertices
         if ind is None:
-            ind = 2
-        x[ind] = event.xdata
-        y[ind] = event.ydata
-        opp = (ind + 2) % 4
+            ind = 4
+        opp = (ind + 4) % 8
+        xopp = verts[0][opp]
+        yopp = verts[1][opp]
+        width = None
+        height = None
+        xy = [verts[0][0], verts[1][0]]
         if ind == 0:
-            width = x[opp] - x[ind]
-            height = y[opp] - y[ind]
+            width = xopp - x
+            height = yopp - y
+            xy = [x, y]
         elif ind == 1:
-            width = x[ind] - x[opp]
-            height = y[opp] - y[ind]
+            height = yopp - y
+            xy[1] = y
         elif ind == 2:
-            width = x[ind] - x[opp]
-            height = y[ind] - y[opp]
+            width = x - xopp
+            height = yopp - y
+            xy[1] = y
         elif ind == 3:
-            width = x[opp] - x[ind]
-            height = y[ind] - y[opp]
-        xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
-              min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
-        self.update(xy=xy, width=width, height=height)
+            width = x - xopp
+        elif ind == 4:
+            width = x - xopp
+            height = y - yopp
+        elif ind == 5:
+            height = y - yopp
+        elif ind == 6:
+            width = xopp - x
+            height = y - yopp
+            xy[0] = x
+        elif ind == 7:
+            width = xopp - x
+            xy[0] = x
+        # xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
+        #       min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
+        updates = {'xy': xy}
+        if width is not None:
+            updates['width'] = width
+        if height is not None:
+            updates['height'] = height
+        self.update(**updates)
 
     def after_persist_vertex(self, event):
         return

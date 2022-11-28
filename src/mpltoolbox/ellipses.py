@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .patches import Patches
+# from .patches import Patches
+from .tool import Tool
+from .utils import parse_kwargs
+from functools import partial
 from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
+from matplotlib.colors import to_rgb
 from typing import Tuple, List
 import uuid
 
@@ -19,11 +23,23 @@ def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
 
 class Ellipse:
 
-    def __init__(self, x: float, y: float, width: float, height: float, ax: Axes,
-                 **kwargs):
+    def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
+        self._max_clicks = 2
         self._ax = ax
-        self._ellipse = mp.Ellipse((x, y), width, height, **kwargs)
-        self._vertices = None
+        kwargs = parse_kwargs(kwargs, number)
+        defaut_color = f'C{number}'
+        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['ec'] = defaut_color
+        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
+            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
+        self._ellipse = mp.Ellipse((x, y), 0, 0, **kwargs)
+        # self._vertices = None
+        self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
+                                        'o',
+                                        ls='None',
+                                        mec=self.edgecolor,
+                                        mfc='None')
+        self._vertices.parent = self
         self._ellipse.parent = self
         self._ax.add_patch(self._ellipse)
         self.id = uuid.uuid1().hex
@@ -48,6 +64,14 @@ class Ellipse:
     def center(self, xy: float):
         self._ellipse.center = xy
         self._update_vertices()
+
+    @property
+    def xy(self) -> float:
+        return self.center
+
+    @xy.setter
+    def xy(self, xy: float):
+        self.center = xy
 
     @property
     def width(self) -> float:
@@ -88,15 +112,15 @@ class Ellipse:
         self._ellipse.remove()
         self._vertices.remove()
 
-    def add_vertices(self):
-        # corners = self._ellipse.get_corners()
-        self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
-                                        'o',
-                                        ls='None',
-                                        mec=self.edgecolor,
-                                        mfc='None',
-                                        picker=5.0)
-        self._vertices.parent = self
+    # def add_vertices(self):
+    #     # corners = self._ellipse.get_corners()
+    #     self._vertices, = self._ax.plot(*_vertices_from_ellipse(self._ellipse),
+    #                                     'o',
+    #                                     ls='None',
+    #                                     mec=self.edgecolor,
+    #                                     mfc='None',
+    #                                     picker=5.0)
+    #     self._vertices.parent = self
 
     def update(self, **kwargs):
         self._ellipse.update(kwargs)
@@ -106,70 +130,24 @@ class Ellipse:
     def vertices(self):
         return self._vertices.get_data()
 
+    def set_picker(self, pick):
+        self._ellipse.set_picker(pick)
+        self._vertices.set_picker(pick)
 
-class Ellipses(Patches):
-    """
-    Add ellipses to the supplied axes.
+    def is_moveable(self, artist):
+        return artist is self._vertices
 
-    Controls:
-      - Left-click and hold to make new ellipses
-      - Right-click and hold to drag/move ellipse
-      - Middle-click to delete ellipse
+    def is_draggable(self, artist):
+        return artist is self._ellipse
 
-    :param ax: The Matplotlib axes to which the Ellipses tool will be attached.
-    :param autostart: Automatically activate the tool upon creation if `True`.
-    :param on_create: Callback that fires when a ellipse is created.
-    :param on_remove: Callback that fires when a ellipse is removed.
-    :param on_drag_press: Callback that fires when a ellipse is right-clicked.
-    :param on_drag_move: Callback that fires when a ellipse is dragged.
-    :param on_drag_release: Callback that fires when a ellipse is released.
-    :param kwargs: Matplotlib parameters used for customization.
-        Each parameter can be a single item (it will apply to all ellipses),
-        a list of items (one entry per ellipse), or a callable (which will be
-        called every time a new ellipse is created).
-    """
+    def is_removable(self, artist):
+        return artist is self._ellipse
 
-    def __init__(self, ax: Axes, **kwargs):
-
-        super().__init__(ax=ax, **kwargs)
-        self._spawner = Ellipse
-        self._new_ellipse_center = None
-
-    def _make_new_patch(self, x: float, y: float):
-        super()._make_new_patch(x, y)
-        self._new_ellipse_center = (x, y)
-
-    def _resize_patch(self, event: Event):
-        if event.inaxes != self._ax:
-            return
-        x, y = self._new_ellipse_center
-        dx = event.xdata - x
-        dy = event.ydata - y
-        self.patches[-1].update(width=dx,
-                                height=dy,
-                                center=(x + 0.5 * dx, y + 0.5 * dy))
-        self._draw()
-
-    # def _add_vertices(self):
-    #     patch = self.patches[-1]
-    #     vertices = _vertices_from_ellipse(center=patch.center,
-    #                                       width=patch.get_width(),
-    #                                       height=patch.get_height())
-
-    #     line, = self._ax.plot(vertices[0],
-    #                           vertices[1],
-    #                           'o',
-    #                           mec=patch.get_edgecolor(),
-    #                           mfc='None',
-    #                           picker=5.0)
-    #     patch._vertices = line
-    #     line._patch = patch
-
-    def _move_vertex(self, event: Event, ind: int, line: Artist):
-        if event.inaxes != self._ax:
-            return
-        x, y = line.get_data()
-        patch = self._moving_vertex_artist.parent
+    def move_vertex(self, event: Event, ind: int):
+        x, y = self._vertices.get_data()
+        if ind is None:
+            ind = 2
+        # patch = self._moving_vertex_artist.parent
         x[ind] = event.xdata
         y[ind] = event.ydata
         opp = (ind + 2) % 4
@@ -179,29 +157,116 @@ class Ellipses(Patches):
                 width = x[opp] - x[ind]
             else:
                 width = x[ind] - x[opp]
-            height = patch.height
-            center = (0.5 * (x[ind] + x[opp]), patch.center[1])
+            height = self.height
+            center = (0.5 * (x[ind] + x[opp]), self.center[1])
         else:
             if ind == 1:
                 height = y[opp] - y[ind]
             else:
                 height = y[ind] - y[opp]
-            width = patch.width
-            center = (patch.center[0], 0.5 * (y[ind] + y[opp]))
-        patch.update(center=center, width=width, height=height)
-        # line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
-        # line._patch.update({'center': center, 'width': width, 'height': height})
-        self._draw()
+            width = self.width
+            center = (self.center[0], 0.5 * (y[ind] + y[opp]))
+        self.update(center=center, width=width, height=height)
 
-    def _grab_patch(self, event: Event):
-        super()._grab_patch(event)
-        self._grab_artist_origin = self._grab_artist.center
+    def after_persist_vertex(self, event):
+        return
 
-    def _update_artist_position(self, dx: float, dy: float):
-        ell = self._grab_artist.parent
-        ell.center = (self._grab_artist_origin[0] + dx,
-                      self._grab_artist_origin[1] + dy)
-        # ell._vertices.set_data(
-        #     _vertices_from_ellipse(center=ell.center,
-        #                            width=ell.get_width(),
-        #                            height=ell.get_height()))
+
+Ellipses = partial(Tool, spawner=Ellipse)
+"""
+Add ellipses to the supplied axes.
+
+Controls:
+  - Left-click and hold to make new ellipses
+  - Right-click and hold to drag/move ellipse
+  - Middle-click to delete ellipse
+
+:param ax: The Matplotlib axes to which the Ellipses tool will be attached.
+:param autostart: Automatically activate the tool upon creation if `True`.
+:param on_create: Callback that fires when a ellipse is created.
+:param on_remove: Callback that fires when a ellipse is removed.
+:param on_drag_press: Callback that fires when a ellipse is right-clicked.
+:param on_drag_move: Callback that fires when a ellipse is dragged.
+:param on_drag_release: Callback that fires when a ellipse is released.
+:param kwargs: Matplotlib parameters used for customization.
+    Each parameter can be a single item (it will apply to all ellipses),
+    a list of items (one entry per ellipse), or a callable (which will be
+    called every time a new ellipse is created).
+"""
+
+# def __init__(self, ax: Axes, **kwargs):
+
+#     super().__init__(ax=ax, **kwargs)
+#     self._spawner = Ellipse
+#     self._new_ellipse_center = None
+
+# def _make_new_patch(self, x: float, y: float):
+#     super()._make_new_patch(x, y)
+#     self._new_ellipse_center = (x, y)
+
+# def _resize_patch(self, event: Event):
+#     if event.inaxes != self._ax:
+#         return
+#     x, y = self._new_ellipse_center
+#     dx = event.xdata - x
+#     dy = event.ydata - y
+#     self.patches[-1].update(width=dx,
+#                             height=dy,
+#                             center=(x + 0.5 * dx, y + 0.5 * dy))
+#     self._draw()
+
+# # def _add_vertices(self):
+# #     patch = self.patches[-1]
+# #     vertices = _vertices_from_ellipse(center=patch.center,
+# #                                       width=patch.get_width(),
+# #                                       height=patch.get_height())
+
+# #     line, = self._ax.plot(vertices[0],
+# #                           vertices[1],
+# #                           'o',
+# #                           mec=patch.get_edgecolor(),
+# #                           mfc='None',
+# #                           picker=5.0)
+# #     patch._vertices = line
+# #     line._patch = patch
+
+# def _move_vertex(self, event: Event, ind: int, line: Artist):
+#     if event.inaxes != self._ax:
+#         return
+#     x, y = line.get_data()
+#     patch = self._moving_vertex_artist.parent
+#     x[ind] = event.xdata
+#     y[ind] = event.ydata
+#     opp = (ind + 2) % 4
+#     even_ind = (ind % 2) == 0
+#     if even_ind:
+#         if ind == 0:
+#             width = x[opp] - x[ind]
+#         else:
+#             width = x[ind] - x[opp]
+#         height = patch.height
+#         center = (0.5 * (x[ind] + x[opp]), patch.center[1])
+#     else:
+#         if ind == 1:
+#             height = y[opp] - y[ind]
+#         else:
+#             height = y[ind] - y[opp]
+#         width = patch.width
+#         center = (patch.center[0], 0.5 * (y[ind] + y[opp]))
+#     patch.update(center=center, width=width, height=height)
+#     # line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
+#     # line._patch.update({'center': center, 'width': width, 'height': height})
+#     self._draw()
+
+# def _grab_patch(self, event: Event):
+#     super()._grab_patch(event)
+#     self._grab_artist_origin = self._grab_artist.center
+
+# def _update_artist_position(self, dx: float, dy: float):
+#     ell = self._grab_artist.parent
+#     ell.center = (self._grab_artist_origin[0] + dx,
+#                   self._grab_artist_origin[1] + dy)
+#     # ell._vertices.set_data(
+#     #     _vertices_from_ellipse(center=ell.center,
+#     #                            width=ell.get_width(),
+#     #                            height=ell.get_height()))
