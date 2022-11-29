@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-# from .event_handler import EventHandler
-# from .patches import Patches
 from .tool import Tool
 from .utils import parse_kwargs
 from functools import partial
@@ -34,14 +32,12 @@ class Patch:
                                         mfc='None')
         self._vertices.parent = self
         self._patch.parent = self
-        # self._ax.add_patch(self._patch)
         self.id = uuid.uuid1().hex
 
     def __str__(self):
         return repr(self)
 
     def _update_vertices(self):
-        # if self._vertices is not None:
         self._vertices.set_data(*self._make_vertices())
 
     @property
@@ -83,26 +79,9 @@ class Patch:
         self._patch.remove()
         self._vertices.remove()
 
-    # def add_vertices(self):
-    #     corners = self._patch.get_corners()
-    #     self._vertices, = self._ax.plot(corners[:, 0],
-    #                                     corners[:, 1],
-    #                                     'o',
-    #                                     ls='None',
-    #                                     mec=self.edgecolor,
-    #                                     mfc='None',
-    #                                     picker=5.0)
-    #     self._vertices.parent = self
-
     def update(self, **kwargs):
         self._patch.update(kwargs)
         self._update_vertices()
-
-    # def _update_from_new_vertices(self, vertices):
-    #     xy = vertices[0]
-    #     width = vertices[2, 0] - vertices[0, 0]
-    #     height = vertices[4, 1] - vertices[0, 1]
-    #     self.update(xy=xy, width=width, height=height)
 
     @property
     def vertices(self):
@@ -158,8 +137,6 @@ class Patch:
         elif ind == 7:
             width = xopp - x
             corner[0] = x
-        # xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
-        #       min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
         out = {'corner': corner}
         if width is not None:
             out['width'] = width
@@ -169,26 +146,3 @@ class Patch:
 
     def after_persist_vertex(self, event):
         return
-
-
-# Rectangles = partial(Tool, spawner=Rectangle)
-"""
-Add rectangles to the supplied axes.
-
-Controls:
-  - Left-click and hold to make new rectangles
-  - Right-click and hold to drag/move rectangle
-  - Middle-click to delete rectangle
-
-:param ax: The Matplotlib axes to which the Rectangles tool will be attached.
-:param autostart: Automatically activate the tool upon creation if `True`.
-:param on_create: Callback that fires when a rectangle is created.
-:param on_remove: Callback that fires when a rectangle is removed.
-:param on_drag_press: Callback that fires when a rectangle is right-clicked.
-:param on_drag_move: Callback that fires when a rectangle is dragged.
-:param on_drag_release: Callback that fires when a rectangle is released.
-:param kwargs: Matplotlib parameters used for customization.
-    Each parameter can be a single item (it will apply to all rectangles),
-    a list of items (one entry per rectangle), or a callable (which will be
-    called every time a new rectangle is created).
-"""
