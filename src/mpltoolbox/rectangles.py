@@ -43,6 +43,7 @@ class Rectangle(Patch):
 
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)
+        props['xy'] = props.pop('corner')
         self.update(**props)
 
     @property
