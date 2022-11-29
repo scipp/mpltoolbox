@@ -25,9 +25,11 @@ class Rectangle(Patch):
         self._ax.add_patch(self._patch)
 
     def _make_vertices(self) -> Tuple[np.ndarray]:
-        corners = self._patch.get_corners()
-        xc = np.concatenate([corners[:, 0], [corners[0, 0]]])
-        yc = np.concatenate([corners[:, 1], [corners[0, 1]]])
+        xy = self.xy
+        w = self.width
+        h = self.height
+        xc = np.array([xy[0], xy[0] + w, xy[0] + w, xy[0], xy[0]])
+        yc = np.array([xy[1], xy[1], xy[1] + h, xy[1] + h, xy[1]])
         x_mid = 0.5 * (xc[1:] + xc[:-1])
         y_mid = 0.5 * (yc[1:] + yc[:-1])
         x = np.empty(xc.size + x_mid.size - 1, dtype=float)
