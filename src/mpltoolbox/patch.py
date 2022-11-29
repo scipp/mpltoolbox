@@ -34,7 +34,7 @@ class Patch:
                                         mfc='None')
         self._vertices.parent = self
         self._patch.parent = self
-        self._ax.add_patch(self._patch)
+        # self._ax.add_patch(self._patch)
         self.id = uuid.uuid1().hex
 
     def __str__(self):

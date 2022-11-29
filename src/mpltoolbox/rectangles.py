@@ -33,6 +33,7 @@ class Rectangle(Patch):
 
     def _make_patch(self, x, y, **kwargs):
         self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
+        self._ax.add_patch(self._patch)
 
     def _make_vertices(self):
         corners = self._patch.get_corners()
@@ -53,11 +54,11 @@ class Rectangle(Patch):
         self.update(**props)
 
     @property
-    def xy(self) -> float:
+    def xy(self) -> Tuple[float]:
         return self._patch.get_xy()
 
     @xy.setter
-    def xy(self, xy: float):
+    def xy(self, xy: Tuple[float]):
         self._patch.set_xy(xy)
         self._update_vertices()
 

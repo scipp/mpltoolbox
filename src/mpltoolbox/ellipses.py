@@ -27,6 +27,7 @@ class Ellipse(Patch):
 
     def _make_patch(self, x, y, **kwargs):
         self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
+        self._ax.add_patch(self._patch)
 
     def _make_vertices(self):
         # ellipse = self._patch
@@ -53,20 +54,20 @@ class Ellipse(Patch):
         self.update(**props)
 
     @property
-    def center(self) -> float:
+    def center(self) -> Tuple[float]:
         return self._patch.get_center()
 
     @center.setter
-    def center(self, center: float):
+    def center(self, center: Tuple[float]):
         self._patch.set_center(center)
         self._update_vertices()
 
     @property
-    def xy(self) -> float:
+    def xy(self) -> Tuple[float]:
         return self.center
 
     @xy.setter
-    def xy(self, xy: float):
+    def xy(self, xy: Tuple[float]):
         self.center = xy
 
 

@@ -60,27 +60,27 @@ class Line:
         # self._draw()
 
     @property
-    def x(self) -> float:
+    def x(self) -> np.ndarray:
         return self._line.get_xdata()
 
     @x.setter
-    def x(self, x: float):
+    def x(self, x: np.ndarray):
         self._line.set_xdata(x)
 
     @property
-    def y(self) -> float:
+    def y(self) -> np.ndarray:
         return self._line.get_ydata()
 
     @y.setter
-    def y(self, y: float):
+    def y(self, y: np.ndarray):
         self._line.set_ydata(y)
 
     @property
-    def xy(self) -> float:
+    def xy(self) -> Tuple[np.ndarray]:
         return self._line.get_data()
 
     @xy.setter
-    def xy(self, xy: float):
+    def xy(self, xy: Tuple[np.ndarray]):
         self._line.set_data(xy)
 
     @property
@@ -170,7 +170,7 @@ class Line:
     # def artist(self) -> str:
     #     return self._line
 
-    def set_picker(self, pick):
+    def set_picker(self, pick: float):
         self._line.set_picker(pick)
 
     def is_moveable(self, artist):
