@@ -233,8 +233,8 @@ class Polygon:
 
 
 Polygons = partial(Tool, spawner=Polygon)
-"""
-Add closed polygons to the supplied axes.
+Polygons.__doc__ = """
+Polygons: Add closed polygons to the supplied axes.
 
 Controls:
   - Left-click to make new polygons
@@ -246,6 +246,7 @@ Controls:
 :param autostart: Automatically activate the tool upon creation if `True`.
 :param hide_vertices: Hide vertices if `True`.
 :param on_create: Callback that fires when a polygon is created.
+:param on_change: Callback that fires when a polygon is modified.
 :param on_remove: Callback that fires when a polygon is removed.
 :param on_vertex_press: Callback that fires when a vertex is left-clicked.
 :param on_vertex_move: Callback that fires when a vertex is moved.

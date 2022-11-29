@@ -37,18 +37,18 @@ class Tool:
         self._on_drag_move = []
         self._on_drag_release = []
 
-        self.on_create = on_create
-        self.on_remove = on_remove
-        self.on_change = on_change
-        self.on_vertex_press = on_vertex_press
-        self.on_vertex_move = on_vertex_move
-        self.on_vertex_release = on_vertex_release
-        self.on_drag_press = on_drag_press
-        self.on_drag_move = on_drag_move
-        self.on_drag_release = on_drag_release
+        self.on_create(on_create)
+        self.on_remove(on_remove)
+        self.on_change(on_change)
+        self.on_vertex_press(on_vertex_press)
+        self.on_vertex_move(on_vertex_move)
+        self.on_vertex_release(on_vertex_release)
+        self.on_drag_press(on_drag_press)
+        self.on_drag_move(on_drag_move)
+        self.on_drag_release(on_drag_release)
 
         self._kwargs = kwargs
-        self._motif_counter = 0
+        self._owner_counter = 0
 
         self._spawner = spawner
         self.children = []
@@ -65,11 +65,6 @@ class Tool:
     def __del__(self):
         self.shutdown()
 
-    @property
-    def on_create(self):
-        return self._on_create
-
-    @on_create.setter
     def on_create(self, func: Callable):
         if func is not None:
             self._on_create.append(func)
@@ -78,11 +73,6 @@ class Tool:
         for func in self._on_create:
             func(event)
 
-    @property
-    def on_remove(self):
-        return self._on_remove
-
-    @on_remove.setter
     def on_remove(self, func: Callable):
         if func is not None:
             self._on_remove.append(func)
@@ -91,11 +81,6 @@ class Tool:
         for func in self._on_remove:
             func(event)
 
-    @property
-    def on_change(self):
-        return self._on_change
-
-    @on_change.setter
     def on_change(self, func: Callable):
         if func is not None:
             self._on_change.append(func)
@@ -104,11 +89,6 @@ class Tool:
         for func in self._on_change:
             func(event)
 
-    @property
-    def on_vertex_press(self):
-        return self._on_vertex_press
-
-    @on_vertex_press.setter
     def on_vertex_press(self, func: Callable):
         if func is not None:
             self._on_vertex_press.append(func)
@@ -117,11 +97,6 @@ class Tool:
         for func in self._on_vertex_press:
             func(event)
 
-    @property
-    def on_vertex_move(self):
-        return self._on_vertex_move
-
-    @on_vertex_move.setter
     def on_vertex_move(self, func: Callable):
         if func is not None:
             self._on_vertex_move.append(func)
@@ -130,11 +105,6 @@ class Tool:
         for func in self._on_vertex_move:
             func(event)
 
-    @property
-    def on_vertex_release(self):
-        return self._on_vertex_release
-
-    @on_vertex_release.setter
     def on_vertex_release(self, func: Callable):
         if func is not None:
             self._on_vertex_release.append(func)
@@ -143,11 +113,6 @@ class Tool:
         for func in self._on_vertex_release:
             func(event)
 
-    @property
-    def on_drag_press(self):
-        return self._on_drag_press
-
-    @on_drag_press.setter
     def on_drag_press(self, func: Callable):
         if func is not None:
             self._on_drag_press.append(func)
@@ -156,11 +121,6 @@ class Tool:
         for func in self._on_drag_press:
             func(event)
 
-    @property
-    def on_drag_move(self):
-        return self._on_drag_move
-
-    @on_drag_move.setter
     def on_drag_move(self, func: Callable):
         if func is not None:
             self._on_drag_move.append(func)
@@ -169,11 +129,6 @@ class Tool:
         for func in self._on_drag_move:
             func(event)
 
-    @property
-    def on_drag_release(self):
-        return self._on_drag_release
-
-    @on_drag_release.setter
     def on_drag_release(self, func: Callable):
         if func is not None:
             self._on_drag_release.append(func)
@@ -242,42 +197,43 @@ class Tool:
             return
         if 'motion_notify_event' not in self._connections:
             self._nclicks = 0
-            self._spawn_new_motif(x=event.xdata, y=event.ydata)
+            self._spawn_new_owner(x=event.xdata, y=event.ydata)
             self._connect({'motion_notify_event': self._on_motion_notify})
         self._nclicks += 1
-        self._persist_vertex(event=event, motif=self.children[-1])
+        self._persist_vertex(event=event, owner=self.children[-1])
 
-    def _spawn_new_motif(self, x: float, y: float):
-        motif = self._spawner(x=x,
+    def _spawn_new_owner(self, x: float, y: float):
+        owner = self._spawner(x=x,
                               y=y,
-                              number=self._motif_counter,
+                              number=self._owner_counter,
                               ax=self._ax,
                               **self._kwargs)
-        self.children.append(motif)
-        self._motif_counter += 1
+        self.children.append(owner)
+        self._owner_counter += 1
         self._draw()
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=None, motif=self.children[-1])
+        self._move_vertex(event=event, ind=None, owner=self.children[-1])
 
-    def _move_vertex(self, event: Event, ind: int, motif):
+    def _move_vertex(self, event: Event, ind: int, owner):
         if event.inaxes != self._ax:
             return
-        motif.move_vertex(event=event, ind=ind)
+        owner.move_vertex(event=event, ind=ind)
         self._draw()
 
-    def _persist_vertex(self, event: Event, motif):
-        if self._nclicks == motif._max_clicks:
+    def _persist_vertex(self, event: Event, owner):
+        if self._nclicks == owner._max_clicks:
             self._disconnect(['motion_notify_event'])
-            self._finalize_motif(event)
+            self._finalize_owner()
         else:
-            motif.after_persist_vertex(event)
+            owner.after_persist_vertex(event)
         self._draw()
 
-    def _finalize_motif(self, event: Event):
-        self.children[-1].set_picker(5.0)
+    def _finalize_owner(self):
+        child = self.children[-1]
+        child.set_picker(5.0)
         if self.on_create is not None:
-            self.call_on_create({'event': event, 'owner': self.children[-1]})
+            self.call_on_create(child)
 
     def _on_pick(self, event: Event):
         if self._get_active_tool():
@@ -291,28 +247,24 @@ class Tool:
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
-                self.call_on_vertex_press({
-                    'event': event,
-                    'ind': self._moving_vertex_index,
-                    'motif': self._moving_vertex_motif
-                })
+                self.call_on_vertex_press(self._moving_vertex_owner)
         if event.mouseevent.button == 3:
             if not art.parent.is_draggable(art):
                 return
             self._pick_lock = True
-            self._grab_motif(event)
+            self._grab_owner(event)
             if self.on_drag_press is not None:
-                self.call_on_drag_press({'event': event, 'motif': self._grabbed_motif})
+                self.call_on_drag_press(self._grabbed_owner)
         elif event.mouseevent.button == 2:
             if not art.parent.is_removable(art):
                 return
-            self._remove_motif(art.parent)
+            self._remove_owner(art.parent)
             if self.on_remove is not None:
-                self.call_on_remove({'event': event, 'motif': art.parent})
+                self.call_on_remove(art.parent)
 
-    def _remove_motif(self, motif):
-        motif.remove()
-        self.children.remove(motif)
+    def _remove_owner(self, owner):
+        owner.remove()
+        self.children.remove(owner)
         self._draw()
 
     def _grab_vertex(self, event: Event):
@@ -320,54 +272,47 @@ class Tool:
             'motion_notify_event':
             self._on_vertex_motion,
             'button_release_event':
-            partial(self._release_motif, kind='vertex')
+            partial(self._release_owner, kind='vertex')
         })
 
         self._moving_vertex_index = event.ind[0]
-        self._moving_vertex_motif = event.artist.parent
+        self._moving_vertex_owner = event.artist.parent
 
     def _on_vertex_motion(self, event: Event):
-        event_dict = {
-            'event': event,
-            'ind': self._moving_vertex_index,
-            'motif': self._moving_vertex_motif
-        }
-        self._move_vertex(**event_dict)
+        self._move_vertex(event=event,
+                          ind=self._moving_vertex_index,
+                          owner=self._moving_vertex_owner)
         if self.on_vertex_move is not None:
-            self.call_on_vertex_move(event_dict)
+            self.call_on_vertex_move(self._moving_vertex_owner)
         if self.on_change is not None:
-            self.call_on_change(self._moving_vertex_motif)
+            self.call_on_change(self._moving_vertex_owner)
 
-    def _grab_motif(self, event: Event):
+    def _grab_owner(self, event: Event):
         self._connect({
-            'motion_notify_event': self._move_motif,
-            'button_release_event': partial(self._release_motif, kind='drag')
+            'motion_notify_event': self._move_owner,
+            'button_release_event': partial(self._release_owner, kind='drag')
         })
-        self._grabbed_motif = event.artist.parent
+        self._grabbed_owner = event.artist.parent
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
-        self._grabbed_motif_origin = self._grabbed_motif.xy
+        self._grabbed_owner_origin = self._grabbed_owner.xy
 
-    def _move_motif(self, event: Event):
+    def _move_owner(self, event: Event):
         if event.inaxes != self._ax:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
-        self._grabbed_motif.xy = (self._grabbed_motif_origin[0] + dx,
-                                  self._grabbed_motif_origin[1] + dy)
+        self._grabbed_owner.xy = (self._grabbed_owner_origin[0] + dx,
+                                  self._grabbed_owner_origin[1] + dy)
         self._draw()
         if self.on_drag_move is not None:
-            self.call_on_drag_move({'event': event, 'motif': self._grabbed_motif})
+            self.call_on_drag_move(self._grabbed_owner)
         if self.on_change is not None:
-            self.call_on_change(self._grabbed_motif)
+            self.call_on_change(self._grabbed_owner)
 
-    def _release_motif(self, event: Event, kind: str):
+    def _release_owner(self, event: Event, kind: str):
         self._disconnect(['motion_notify_event', 'button_release_event'])
         self._pick_lock = False
         if (kind == 'vertex') and (self.on_vertex_release is not None):
-            self.call_on_vertex_release({
-                'event': event,
-                'ind': self._moving_vertex_index,
-                'motif': self._moving_vertex_motif
-            })
+            self.call_on_vertex_release(self._moving_vertex_owner)
         elif (kind == 'drag') and (self.on_drag_release is not None):
-            self.call_on_drag_release({'event': event, 'motif': self._grabbed_motif})
+            self.call_on_drag_release(self._grabbed_owner)

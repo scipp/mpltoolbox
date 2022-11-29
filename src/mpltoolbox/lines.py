@@ -179,8 +179,8 @@ class Line:
 
 
 Lines = partial(Tool, spawner=Line)
-"""
-Add lines to the supplied axes.
+Lines.__doc__ = """
+Lines: Add lines to the supplied axes.
 
 Controls:
   - Left-click to make new lines

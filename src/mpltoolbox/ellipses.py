@@ -68,8 +68,8 @@ class Ellipse(Patch):
 
 
 Ellipses = partial(Tool, spawner=Ellipse)
-"""
-Add ellipses to the supplied axes.
+Ellipses.__doc__ = """
+Ellipses: Add ellipses to the supplied axes.
 
 Controls:
   - Left-click and hold to make new ellipses
@@ -82,6 +82,9 @@ Controls:
 :param on_create: Callback that fires when an ellipse is created.
 :param on_change: Callback that fires when an ellipse is modified.
 :param on_remove: Callback that fires when an ellipse is removed.
+:param on_vertex_press: Callback that fires when a vertex is left-clicked.
+:param on_vertex_move: Callback that fires when a vertex is moved.
+:param on_vertex_release: Callback that fires when a vertex is released.
 :param on_drag_press: Callback that fires when a ellipse is right-clicked.
 :param on_drag_move: Callback that fires when a ellipse is dragged.
 :param on_drag_release: Callback that fires when a ellipse is released.

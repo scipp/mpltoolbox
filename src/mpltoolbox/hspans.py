@@ -98,8 +98,8 @@ class Hspan(Patch):
 
 
 Hspans = partial(Tool, spawner=Hspan)
-"""
-Add horizontal spans to the supplied axes.
+Hspans.__doc__ = """
+Hspans: Add horizontal spans to the supplied axes.
 
 Controls:
   - Left-click and hold to make new spans
@@ -111,7 +111,11 @@ Controls:
 :param hide_vertices: Hide vertices if `True`.
 :param hide_median: Hide median line if `True`.
 :param on_create: Callback that fires when a span is created.
+:param on_change: Callback that fires when a span is modified.
 :param on_remove: Callback that fires when a span is removed.
+:param on_vertex_press: Callback that fires when a vertex is left-clicked.
+:param on_vertex_move: Callback that fires when a vertex is moved.
+:param on_vertex_release: Callback that fires when a vertex is released.
 :param on_drag_press: Callback that fires when a span is right-clicked.
 :param on_drag_move: Callback that fires when a span is dragged.
 :param on_drag_release: Callback that fires when a span is released.

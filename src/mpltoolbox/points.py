@@ -57,8 +57,8 @@ class Point(Line):
 
 
 Points = partial(Tool, spawner=Point)
-"""
-Add points to the supplied axes.
+Points.__doc__ = """
+Points: Add points to the supplied axes.
 
 Controls:
   - Left-click to make new points
@@ -68,6 +68,7 @@ Controls:
 :param ax: The Matplotlib axes to which the Points tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
 :param on_create: Callback that fires when a point is created.
+:param on_change: Callback that fires when a point is modified.
 :param on_remove: Callback that fires when a point is removed.
 :param on_vertex_press: Callback that fires when a point is left-clicked.
 :param on_vertex_move: Callback that fires when a point is moved.

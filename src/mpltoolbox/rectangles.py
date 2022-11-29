@@ -54,8 +54,8 @@ class Rectangle(Patch):
 
 
 Rectangles = partial(Tool, spawner=Rectangle)
-"""
-Add rectangles to the supplied axes.
+Rectangles.__doc__ = """
+Rectangles: Add rectangles to the supplied axes.
 
 Controls:
   - Left-click and hold to make new rectangles
@@ -68,6 +68,9 @@ Controls:
 :param on_create: Callback that fires when a rectangle is created.
 :param on_change: Callback that fires when a rectangle is modified.
 :param on_remove: Callback that fires when a rectangle is removed.
+:param on_vertex_press: Callback that fires when a vertex is left-clicked.
+:param on_vertex_move: Callback that fires when a vertex is moved.
+:param on_vertex_release: Callback that fires when a vertex is released.
 :param on_drag_press: Callback that fires when a rectangle is right-clicked.
 :param on_drag_move: Callback that fires when a rectangle is dragged.
 :param on_drag_release: Callback that fires when a rectangle is released.
