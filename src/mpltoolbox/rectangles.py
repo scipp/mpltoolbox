@@ -27,21 +27,12 @@ class Rectangle(Patch):
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
 
-    def _make_patch(self, x, y, **kwargs):
-        self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
-
     def __repr__(self):
         return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    @property
-    def xy(self) -> float:
-        return self._patch.get_xy()
-
-    @xy.setter
-    def xy(self, xy: float):
-        self._patch.set_xy(xy)
-        self._update_vertices()
+    def _make_patch(self, x, y, **kwargs):
+        self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
 
     def _make_vertices(self):
         corners = self._patch.get_corners()
@@ -60,6 +51,15 @@ class Rectangle(Patch):
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)
         self.update(**props)
+
+    @property
+    def xy(self) -> float:
+        return self._patch.get_xy()
+
+    @xy.setter
+    def xy(self, xy: float):
+        self._patch.set_xy(xy)
+        self._update_vertices()
 
     # def after_persist_vertex(self, event):
     #     return

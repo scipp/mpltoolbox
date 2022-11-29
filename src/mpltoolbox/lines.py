@@ -35,6 +35,30 @@ class Line:
     def __len__(self):
         return len(self.x)
 
+    # def _finalize_kwargs(self, kwargs, number):
+    #     kwargs = parse_kwargs(kwargs, number)
+    #     if set(['ls', 'linestyle']).isdisjoint(set(kwargs.keys())):
+    #         kwargs['ls'] = 'solid'
+    #     if 'marker' not in kwargs:
+    #         kwargs['marker'] = 'o'
+    #     return kwargs
+
+    def move_vertex(self, event: Event, ind: int):
+        new_data = self.xy
+        if ind is None:
+            ind = -1
+        new_data[0][ind] = event.xdata
+        new_data[1][ind] = event.ydata
+        self.xy = new_data
+
+    def after_persist_vertex(self, event):
+        # Duplicate the last vertex
+        new_data = self.xy
+        self.xy = (np.append(new_data[0],
+                             new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
+        # print(self.xy)
+        # self._draw()
+
     @property
     def x(self) -> float:
         return self._line.get_xdata()
@@ -142,9 +166,9 @@ class Line:
     def remove(self):
         self._line.remove()
 
-    @property
-    def artist(self) -> str:
-        return self._line
+    # @property
+    # def artist(self) -> str:
+    #     return self._line
 
     def set_picker(self, pick):
         self._line.set_picker(pick)
@@ -157,45 +181,6 @@ class Line:
 
     def is_removable(self, artist):
         return True
-
-    def move_vertex(self, event: Event, ind: int):
-        new_data = self.xy
-        if ind is None:
-            ind = -1
-        new_data[0][ind] = event.xdata
-        new_data[1][ind] = event.ydata
-        self.xy = new_data
-        # assert False
-
-    # def move_vertex(self, event: Event, ind: int):
-    #     x, y = self._vertices.get_data()
-    #     if ind is None:
-    #         ind = 2
-    #     x[ind] = event.xdata
-    #     y[ind] = event.ydata
-    #     opp = (ind + 2) % 4
-    #     if ind == 0:
-    #         width = x[opp] - x[ind]
-    #         height = y[opp] - y[ind]
-    #     elif ind == 1:
-    #         width = x[ind] - x[opp]
-    #         height = y[opp] - y[ind]
-    #     elif ind == 2:
-    #         width = x[ind] - x[opp]
-    #         height = y[ind] - y[opp]
-    #     elif ind == 3:
-    #         width = x[opp] - x[ind]
-    #         height = y[ind] - y[opp]
-    #     xy = (min(x[ind], x[opp]) if width > 0 else max(x[ind], x[opp]),
-    #           min(y[ind], y[opp]) if height > 0 else max(y[ind], y[opp]))
-    #     self.update(xy=xy, width=width, height=height)
-
-    def after_persist_vertex(self, event):
-        new_data = self.xy
-        self.xy = (np.append(new_data[0],
-                             new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
-        print(self.xy)
-        # self._draw()
 
 
 Lines = partial(Tool, spawner=Line)

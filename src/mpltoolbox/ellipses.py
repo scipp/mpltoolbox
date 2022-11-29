@@ -20,30 +20,13 @@ class Ellipse(Patch):
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
 
-    def _make_patch(self, x, y, **kwargs):
-        self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
-
     def __repr__(self):
         return (f'Ellipse: center={self.center}, width={self.width}, '
                 f'height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    @property
-    def center(self) -> float:
-        return self._patch.get_center()
-
-    @center.setter
-    def center(self, center: float):
-        self._patch.set_center(center)
-        self._update_vertices()
-
-    @property
-    def xy(self) -> float:
-        return self.center
-
-    @xy.setter
-    def xy(self, xy: float):
-        self.center = xy
+    def _make_patch(self, x, y, **kwargs):
+        self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
 
     def _make_vertices(self):
         # ellipse = self._patch
@@ -69,6 +52,45 @@ class Ellipse(Patch):
         del props['corner']
         self.update(**props)
 
+    @property
+    def center(self) -> float:
+        return self._patch.get_center()
+
+    @center.setter
+    def center(self, center: float):
+        self._patch.set_center(center)
+        self._update_vertices()
+
+    @property
+    def xy(self) -> float:
+        return self.center
+
+    @xy.setter
+    def xy(self, xy: float):
+        self.center = xy
+
+
+Ellipses = partial(Tool, spawner=Ellipse)
+"""
+Add ellipses to the supplied axes.
+
+Controls:
+  - Left-click and hold to make new ellipses
+  - Right-click and hold to drag/move ellipse
+  - Middle-click to delete ellipse
+
+:param ax: The Matplotlib axes to which the Ellipses tool will be attached.
+:param autostart: Automatically activate the tool upon creation if `True`.
+:param on_create: Callback that fires when a ellipse is created.
+:param on_remove: Callback that fires when a ellipse is removed.
+:param on_drag_press: Callback that fires when a ellipse is right-clicked.
+:param on_drag_move: Callback that fires when a ellipse is dragged.
+:param on_drag_release: Callback that fires when a ellipse is released.
+:param kwargs: Matplotlib parameters used for customization.
+    Each parameter can be a single item (it will apply to all ellipses),
+    a list of items (one entry per ellipse), or a callable (which will be
+    called every time a new ellipse is created).
+"""
 
 # def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:
 #     center = ellipse.center
@@ -249,28 +271,6 @@ class Ellipse(Patch):
 
 #     def after_persist_vertex(self, event):
 #         return
-
-Ellipses = partial(Tool, spawner=Ellipse)
-"""
-Add ellipses to the supplied axes.
-
-Controls:
-  - Left-click and hold to make new ellipses
-  - Right-click and hold to drag/move ellipse
-  - Middle-click to delete ellipse
-
-:param ax: The Matplotlib axes to which the Ellipses tool will be attached.
-:param autostart: Automatically activate the tool upon creation if `True`.
-:param on_create: Callback that fires when a ellipse is created.
-:param on_remove: Callback that fires when a ellipse is removed.
-:param on_drag_press: Callback that fires when a ellipse is right-clicked.
-:param on_drag_move: Callback that fires when a ellipse is dragged.
-:param on_drag_release: Callback that fires when a ellipse is released.
-:param kwargs: Matplotlib parameters used for customization.
-    Each parameter can be a single item (it will apply to all ellipses),
-    a list of items (one entry per ellipse), or a callable (which will be
-    called every time a new ellipse is created).
-"""
 
 # def __init__(self, ax: Axes, **kwargs):
 
