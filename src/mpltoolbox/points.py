@@ -32,7 +32,7 @@ class Point(Line):
 
     @x.setter
     def x(self, x: float):
-        self._line.set_xdata(x)
+        self._line.set_xdata([x])
 
     @property
     def y(self) -> float:
@@ -40,15 +40,16 @@ class Point(Line):
 
     @y.setter
     def y(self, y: float):
-        self._line.set_ydata(y)
+        self._line.set_ydata([y])
 
     @property
     def xy(self) -> float:
-        return self._line.get_data()[0]
+        data = self._line.get_data()
+        return (data[0][0], data[1][0])
 
     @xy.setter
     def xy(self, xy: float):
-        self._line.set_data(xy)
+        self._line.set_data([xy[0]], [xy[1]])
 
     def move_vertex(self, event: Event, ind: int):
         self.x = event.xdata
