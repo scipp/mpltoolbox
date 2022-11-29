@@ -3,15 +3,12 @@
 
 from .patch import Patch
 from .tool import Tool
-from .utils import parse_kwargs
 from functools import partial
 from matplotlib import patches as mp
-from matplotlib.pyplot import Axes, Artist
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from matplotlib.colors import to_rgb
 import numpy as np
-from typing import Tuple, List
-import uuid
+from typing import Tuple
 
 
 class Rectangle(Patch):
@@ -23,7 +20,7 @@ class Rectangle(Patch):
         return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    def _make_patch(self, x, y, **kwargs):
+    def _make_patch(self, x: float, y: float, **kwargs):
         self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
         self._ax.add_patch(self._patch)
 
@@ -67,6 +64,7 @@ Controls:
 
 :param ax: The Matplotlib axes to which the Rectangles tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
 :param on_create: Callback that fires when a rectangle is created.
 :param on_change: Callback that fires when a rectangle is modified.
 :param on_remove: Callback that fires when a rectangle is removed.

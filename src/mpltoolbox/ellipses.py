@@ -80,6 +80,7 @@ Controls:
 
 :param ax: The Matplotlib axes to which the Ellipses tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
 :param on_create: Callback that fires when an ellipse is created.
 :param on_change: Callback that fires when an ellipse is modified.
 :param on_remove: Callback that fires when an ellipse is removed.

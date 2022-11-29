@@ -15,7 +15,13 @@ import uuid
 
 class Patch:
 
-    def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
+    def __init__(self,
+                 x: float,
+                 y: float,
+                 number: int,
+                 ax: Axes,
+                 hide_vertices: bool = False,
+                 **kwargs):
         self._max_clicks = 2
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
@@ -30,6 +36,8 @@ class Patch:
                                         ls='None',
                                         mec=self.edgecolor,
                                         mfc='None')
+        if hide_vertices:
+            self._vertices.set_visible(False)
         self._vertices.parent = self
         self._patch.parent = self
         self.id = uuid.uuid1().hex
@@ -87,17 +95,17 @@ class Patch:
     def vertices(self):
         return self._vertices.get_data()
 
-    def set_picker(self, pick):
+    def set_picker(self, pick: float):
         self._patch.set_picker(pick)
         self._vertices.set_picker(pick)
 
-    def is_moveable(self, artist):
+    def is_moveable(self, artist: Artist):
         return artist is self._vertices
 
-    def is_draggable(self, artist):
+    def is_draggable(self, artist: Artist):
         return artist is self._patch
 
-    def is_removable(self, artist):
+    def is_removable(self, artist: Artist):
         return artist is self._patch
 
     def get_new_patch_props(self, event: Event, ind: int):

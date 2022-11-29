@@ -110,6 +110,8 @@ Controls:
 
 :param ax: The Matplotlib axes to which the Hspans tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
+:param hide_median: Hide median line if `True`.
 :param on_create: Callback that fires when a span is created.
 :param on_remove: Callback that fires when a span is removed.
 :param on_drag_press: Callback that fires when a span is right-clicked.

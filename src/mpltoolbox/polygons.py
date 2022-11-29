@@ -13,7 +13,13 @@ import uuid
 
 class Polygon:
 
-    def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
+    def __init__(self,
+                 x: float,
+                 y: float,
+                 number: int,
+                 ax: Axes,
+                 hide_vertices: bool = False,
+                 **kwargs):
         self._max_clicks = 0
         self._ax = ax
         line_kwargs = parse_kwargs(kwargs, number)
@@ -36,10 +42,12 @@ class Polygon:
         if fill_kwargs['fc'] is None:
             fill_kwargs['fc'] = self._vertices.get_color()
         self._fill, = self._ax.fill(x, y, **fill_kwargs)
+        if hide_vertices:
+            self.mec = 'None'
+            self.mfc = 'None'
         self._fill.parent = self
         self._vertices.parent = self
         self.id = uuid.uuid1().hex
-
         self._distance_from_first_point = 0.05
         self._first_point_position_data = (x, y)
         self._first_point_position_axes = self._data_to_axes_transform(x, y)
@@ -147,7 +155,7 @@ class Polygon:
         return self._vertices.get_markeredgecolor()
 
     @markeredgecolor.setter
-    def markerfacecolor(self, color):
+    def markeredgecolor(self, color):
         self._vertices.set_markeredgecolor(color)
 
     @property
@@ -236,6 +244,7 @@ Controls:
 
 :param ax: The Matplotlib axes to which the Polygons tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
 :param on_create: Callback that fires when a polygon is created.
 :param on_remove: Callback that fires when a polygon is removed.
 :param on_vertex_press: Callback that fires when a vertex is left-clicked.

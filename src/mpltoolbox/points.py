@@ -3,12 +3,9 @@
 
 from .lines import Line
 from .tool import Tool
-from .utils import parse_kwargs
 from functools import partial
 from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Tuple
-import uuid
 
 
 class Point(Line):

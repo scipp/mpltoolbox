@@ -13,7 +13,14 @@ from typing import Tuple
 
 class Line:
 
-    def __init__(self, x: float, y: float, number: int, ax: Axes, n=2, **kwargs):
+    def __init__(self,
+                 x: float,
+                 y: float,
+                 number: int,
+                 ax: Axes,
+                 n=2,
+                 hide_vertices: bool = False,
+                 **kwargs):
         self._max_clicks = n
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
@@ -22,6 +29,9 @@ class Line:
         if 'marker' not in kwargs:
             kwargs['marker'] = 'o'
         self._line, = self._ax.plot(x, y, **kwargs)
+        if hide_vertices:
+            self.mec = 'None'
+            self.mfc = 'None'
         self._line.parent = self
         self.id = uuid.uuid1().hex
 
@@ -93,7 +103,7 @@ class Line:
         return self._line.get_markeredgecolor()
 
     @markeredgecolor.setter
-    def markerfacecolor(self, color):
+    def markeredgecolor(self, color):
         self._line.set_markeredgecolor(color)
 
     @property
@@ -181,6 +191,7 @@ Controls:
 :param ax: The Matplotlib axes to which the Lines tool will be attached.
 :param n: The number of vertices for each line. Default is 2.
 :param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
 :param on_create: Callback that fires when a line is created.
 :param on_change: Callback that fires when a line is modified.
 :param on_remove: Callback that fires when a line is removed.
