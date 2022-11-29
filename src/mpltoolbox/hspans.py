@@ -4,11 +4,9 @@
 from .patch import Patch
 from .tool import Tool
 from functools import partial
-from matplotlib.pyplot import Axes, Artist
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-import numpy as np
-from typing import Tuple, List
-import uuid
+from typing import Tuple
 
 
 class Hspan(Patch):
@@ -39,7 +37,7 @@ class Hspan(Patch):
     def _make_patch(self, x, y, **kwargs):
         self._patch = self._ax.axhspan(y, y, **kwargs)
 
-    def _make_vertices(self):
+    def _make_vertices(self) -> Tuple[float]:
         return ([0.5, 0.5], [self.bottom, self.top])
 
     def move_vertex(self, event: Event, ind: int):

@@ -3,15 +3,12 @@
 
 from .patch import Patch
 from .tool import Tool
-from .utils import parse_kwargs
 from functools import partial
 from matplotlib import patches as mp
-from matplotlib.pyplot import Axes, Artist
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from matplotlib.colors import to_rgb
 import numpy as np
-from typing import Tuple, List
-import uuid
+from typing import Tuple
 
 
 class Ellipse(Patch):
@@ -24,21 +21,22 @@ class Ellipse(Patch):
                 f'height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
-    def _make_patch(self, x, y, **kwargs):
+    def _make_patch(self, x: float, y: float, **kwargs):
         self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
         self._ax.add_patch(self._patch)
 
-    def _make_vertices(self):
+    def _make_vertices(self) -> Tuple[np.ndarray]:
         center = self.center
         width = self.width
         height = self.height
-        l = center[0] - 0.5 * width
-        c = center[0]
-        r = center[0] + 0.5 * width
-        b = center[1] - 0.5 * height
-        m = center[1]
-        t = center[1] + 0.5 * height
-        return (np.array([l, c, r, r, r, c, l, l]), np.array([b, b, b, m, t, t, t, m]))
+        lft = center[0] - 0.5 * width
+        cen = center[0]
+        rgt = center[0] + 0.5 * width
+        btm = center[1] - 0.5 * height
+        mid = center[1]
+        top = center[1] + 0.5 * height
+        return (np.array([lft, cen, rgt, rgt, rgt, cen, lft,
+                          lft]), np.array([btm, btm, btm, mid, top, top, top, mid]))
 
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)

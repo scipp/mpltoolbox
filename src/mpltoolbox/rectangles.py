@@ -24,7 +24,7 @@ class Rectangle(Patch):
         self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
         self._ax.add_patch(self._patch)
 
-    def _make_vertices(self):
+    def _make_vertices(self) -> Tuple[np.ndarray]:
         corners = self._patch.get_corners()
         xc = np.concatenate([corners[:, 0], [corners[0, 0]]])
         yc = np.concatenate([corners[:, 1], [corners[0, 1]]])

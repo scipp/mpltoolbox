@@ -52,7 +52,7 @@ class Point(Line):
         self.x = event.xdata
         self.y = event.ydata
 
-    def after_persist_vertex(self, event):
+    def after_persist_vertex(self, event: Event):
         return
 
 

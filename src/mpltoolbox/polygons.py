@@ -7,7 +7,7 @@ import numpy as np
 from functools import partial
 from matplotlib.pyplot import Artist, Axes
 from matplotlib.backend_bases import Event
-from matplotlib import patches as mp
+from typing import Tuple
 import uuid
 
 
@@ -62,16 +62,16 @@ class Polygon:
     def __len__(self):
         return len(self.x)
 
-    def after_persist_vertex(self, event):
+    def after_persist_vertex(self, event: Event):
         new_data = self.xy
         self.xy = (np.append(new_data[0],
                              new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
 
-    def _data_to_axes_transform(self, x, y):
+    def _data_to_axes_transform(self, x: float, y: float) -> Tuple[float]:
         trans = self._ax.transData.transform((x, y))
         return self._ax.transAxes.inverted().transform(trans)
 
-    def _get_distance_from_first_point(self, x, y):
+    def _get_distance_from_first_point(self, x: float, y: float) -> float:
         xdisplay, ydisplay = self._data_to_axes_transform(x, y)
         dist = np.sqrt((xdisplay - self._first_point_position_axes[0])**2 +
                        (ydisplay - self._first_point_position_axes[1])**2)
@@ -100,29 +100,29 @@ class Polygon:
         self._fill.set_xy(np.array(self._vertices.get_data()).T)
 
     @property
-    def x(self) -> float:
+    def x(self) -> np.ndarray:
         return self._vertices.get_xdata()
 
     @x.setter
-    def x(self, x: float):
+    def x(self, x: np.ndarray):
         self._vertices.set_xdata(x)
         self._update_fill()
 
     @property
-    def y(self) -> float:
+    def y(self) -> np.ndarray:
         return self._vertices.get_ydata()
 
     @y.setter
-    def y(self, y: float):
+    def y(self, y: np.ndarray):
         self._vertices.set_ydata(y)
         self._update_fill()
 
     @property
-    def xy(self) -> float:
+    def xy(self) -> Tuple[np.ndarray]:
         return self._vertices.get_data()
 
     @xy.setter
-    def xy(self, xy: float):
+    def xy(self, xy: Tuple[np.ndarray]):
         self._vertices.set_data(xy)
         self._update_fill()
 
@@ -131,7 +131,7 @@ class Polygon:
         return self._vertices.get_color()
 
     @edgecolor.setter
-    def edgecolor(self, c):
+    def edgecolor(self, c: str):
         self._vertices.set_color(c)
 
     @property
@@ -139,7 +139,7 @@ class Polygon:
         return self._fill.get_facecolor()
 
     @facecolor.setter
-    def facecolor(self, c):
+    def facecolor(self, c: str):
         self._fill.set_facecolor(c)
 
     @property
@@ -147,7 +147,7 @@ class Polygon:
         return self._vertices.get_markerfacecolor()
 
     @markerfacecolor.setter
-    def markerfacecolor(self, color):
+    def markerfacecolor(self, color: str):
         self._vertices.set_markerfacecolor(color)
 
     @property
@@ -155,7 +155,7 @@ class Polygon:
         return self._vertices.get_markeredgecolor()
 
     @markeredgecolor.setter
-    def markeredgecolor(self, color):
+    def markeredgecolor(self, color: str):
         self._vertices.set_markeredgecolor(color)
 
     @property
@@ -163,7 +163,7 @@ class Polygon:
         return self.markerfacecolor
 
     @mfc.setter
-    def mfc(self, color):
+    def mfc(self, color: str):
         self.markerfacecolor = color
 
     @property
@@ -171,7 +171,7 @@ class Polygon:
         return self.markeredgecolor
 
     @mec.setter
-    def mec(self, color):
+    def mec(self, color: str):
         self.markeredgecolor = color
 
     @property
@@ -179,7 +179,7 @@ class Polygon:
         return self._vertices.get_marker()
 
     @marker.setter
-    def marker(self, m):
+    def marker(self, m: str):
         self._vertices.set_marker(m)
 
     @property
@@ -187,7 +187,7 @@ class Polygon:
         return self._vertices.get_linestyle()
 
     @linestyle.setter
-    def linestyle(self, style):
+    def linestyle(self, style: str):
         self._vertices.set_linestyle(style)
 
     @property
@@ -195,40 +195,40 @@ class Polygon:
         return self.linestyle
 
     @ls.setter
-    def ls(self, style):
+    def ls(self, style: str):
         self.linestyle = style
 
     @property
-    def linewidth(self) -> str:
+    def linewidth(self) -> float:
         return self._vertices.get_linewidth()
 
     @linewidth.setter
-    def linewidth(self, width):
+    def linewidth(self, width: float):
         self._vertices.set_linewidth(width)
 
     @property
-    def lw(self) -> str:
+    def lw(self) -> float:
         return self.linewidth
 
     @lw.setter
-    def lw(self, width):
+    def lw(self, width: float):
         self.linewidth = width
 
     def remove(self):
         self._fill.remove()
         self._vertices.remove()
 
-    def set_picker(self, pick):
+    def set_picker(self, pick: float):
         self._fill.set_picker(pick)
         self._vertices.set_picker(pick)
 
-    def is_moveable(self, artist):
+    def is_moveable(self, artist: Artist):
         return artist is self._vertices
 
-    def is_draggable(self, artist):
+    def is_draggable(self, artist: Artist):
         return artist is self._fill
 
-    def is_removable(self, artist):
+    def is_removable(self, artist: Artist):
         return artist is self._fill
 
 

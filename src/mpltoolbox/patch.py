@@ -1,15 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .tool import Tool
 from .utils import parse_kwargs
-from functools import partial
-from matplotlib import patches as mp
 from matplotlib.pyplot import Axes, Artist
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
-import numpy as np
-from typing import Tuple, List
+from typing import Dict
 import uuid
 
 
@@ -71,7 +67,7 @@ class Patch:
         return self._patch.get_edgecolor()
 
     @edgecolor.setter
-    def edgecolor(self, color):
+    def edgecolor(self, color: str):
         self._patch.set_edgecolor(color)
         self._vertices.set_edgecolor(color)
 
@@ -80,7 +76,7 @@ class Patch:
         return self._patch.get_facecolor()
 
     @facecolor.setter
-    def facecolor(self, color):
+    def facecolor(self, color: str):
         self._patch.set_facecolor(color)
 
     def remove(self):
@@ -108,7 +104,7 @@ class Patch:
     def is_removable(self, artist: Artist):
         return artist is self._patch
 
-    def get_new_patch_props(self, event: Event, ind: int):
+    def get_new_patch_props(self, event: Event, ind: int) -> Dict[str, float]:
         x = event.xdata
         y = event.ydata
         verts = self.vertices
@@ -152,5 +148,5 @@ class Patch:
             out['height'] = height
         return out
 
-    def after_persist_vertex(self, event):
+    def after_persist_vertex(self, event: Event):
         return

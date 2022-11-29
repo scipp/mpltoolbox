@@ -6,9 +6,7 @@ from .tool import Tool
 from functools import partial
 from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-import numpy as np
-from typing import Tuple, List
-import uuid
+from typing import Tuple
 
 
 class Vspan(Patch):
@@ -36,10 +34,10 @@ class Vspan(Patch):
         mid = 0.5 * (corners[0, 0] + corners[2, 0])
         self._median.set_xdata([mid, mid])
 
-    def _make_patch(self, x, y, **kwargs):
+    def _make_patch(self, x: float, y: float, **kwargs):
         self._patch = self._ax.axvspan(x, x, **kwargs)
 
-    def _make_vertices(self):
+    def _make_vertices(self) -> Tuple[float]:
         return ([self.left, self.right], [0.5, 0.5])
 
     def move_vertex(self, event: Event, ind: int):
@@ -111,6 +109,7 @@ Controls:
 :param ax: The Matplotlib axes to which the Vspans tool will be attached.
 :param autostart: Automatically activate the tool upon creation if `True`.
 :param hide_vertices: Hide vertices if `True`.
+:param hide_median: Hide median line if `True`.
 :param on_create: Callback that fires when a span is created.
 :param on_remove: Callback that fires when a span is removed.
 :param on_drag_press: Callback that fires when a span is right-clicked.

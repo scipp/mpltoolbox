@@ -52,7 +52,7 @@ class Line:
         new_data[1][ind] = event.ydata
         self.xy = new_data
 
-    def after_persist_vertex(self, event):
+    def after_persist_vertex(self, event: Event):
         # Duplicate the last vertex
         new_data = self.xy
         self.xy = (np.append(new_data[0],
@@ -87,7 +87,7 @@ class Line:
         return self._line.get_color()
 
     @color.setter
-    def color(self, c):
+    def color(self, c: str):
         self._line.set_color(c)
 
     @property
@@ -95,7 +95,7 @@ class Line:
         return self._line.get_markerfacecolor()
 
     @markerfacecolor.setter
-    def markerfacecolor(self, color):
+    def markerfacecolor(self, color: str):
         self._line.set_markerfacecolor(color)
 
     @property
@@ -103,7 +103,7 @@ class Line:
         return self._line.get_markeredgecolor()
 
     @markeredgecolor.setter
-    def markeredgecolor(self, color):
+    def markeredgecolor(self, color: str):
         self._line.set_markeredgecolor(color)
 
     @property
@@ -111,7 +111,7 @@ class Line:
         return self.markerfacecolor
 
     @mfc.setter
-    def mfc(self, color):
+    def mfc(self, color: str):
         self.markerfacecolor = color
 
     @property
@@ -119,7 +119,7 @@ class Line:
         return self.markeredgecolor
 
     @mec.setter
-    def mec(self, color):
+    def mec(self, color: str):
         self.markeredgecolor = color
 
     @property
@@ -127,7 +127,7 @@ class Line:
         return self._line.get_marker()
 
     @marker.setter
-    def marker(self, m):
+    def marker(self, m: str):
         self._line.set_marker(m)
 
     @property
@@ -135,7 +135,7 @@ class Line:
         return self._line.get_linestyle()
 
     @linestyle.setter
-    def linestyle(self, style):
+    def linestyle(self, style: str):
         self._line.set_linestyle(style)
 
     @property
@@ -143,23 +143,23 @@ class Line:
         return self.linestyle
 
     @ls.setter
-    def ls(self, style):
+    def ls(self, style: str):
         self.linestyle = style
 
     @property
-    def linewidth(self) -> str:
+    def linewidth(self) -> float:
         return self._line.get_linewidth()
 
     @linewidth.setter
-    def linewidth(self, width):
+    def linewidth(self, width: float):
         self._line.set_linewidth(width)
 
     @property
-    def lw(self) -> str:
+    def lw(self) -> float:
         return self.linewidth
 
     @lw.setter
-    def lw(self, width):
+    def lw(self, width: float):
         self.linewidth = width
 
     def remove(self):
@@ -168,13 +168,13 @@ class Line:
     def set_picker(self, pick: float):
         self._line.set_picker(pick)
 
-    def is_moveable(self, artist):
+    def is_moveable(self, artist: Artist):
         return True
 
-    def is_draggable(self, artist):
+    def is_draggable(self, artist: Artist):
         return True
 
-    def is_removable(self, artist):
+    def is_removable(self, artist: Artist):
         return True
 
 

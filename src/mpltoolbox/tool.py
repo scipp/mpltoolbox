@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 from functools import partial
-from matplotlib.pyplot import Artist, Axes
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
 from typing import Callable, List
 
