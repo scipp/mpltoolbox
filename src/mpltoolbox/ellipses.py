@@ -1,114 +1,95 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
 
-from .patches import Patches
-from matplotlib.patches import Ellipse
-from matplotlib.pyplot import Axes, Artist
+from .patch import Patch
+from .tool import Tool
+from functools import partial
+from matplotlib import patches as mp
+from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Tuple, List
+import numpy as np
+from typing import Tuple
 
 
-def _vertices_from_ellipse(center: Tuple[float], width: float,
-                           height: float) -> Tuple[List[float]]:
-    return ([center[0] - 0.5 * width, center[0], center[0] + 0.5 * width, center[0]],
-            [center[1], center[1] - 0.5 * height, center[1], center[1] + 0.5 * height])
+class Ellipse(Patch):
+
+    def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
+        super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
+
+    def __repr__(self):
+        return (f'Ellipse: center={self.center}, width={self.width}, '
+                f'height={self.height}, '
+                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+
+    def _make_patch(self, x: float, y: float, **kwargs):
+        self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
+        self._ax.add_patch(self._patch)
+
+    def _make_vertices(self) -> Tuple[np.ndarray]:
+        center = self.center
+        width = self.width
+        height = self.height
+        lft = center[0] - 0.5 * width
+        cen = center[0]
+        rgt = center[0] + 0.5 * width
+        btm = center[1] - 0.5 * height
+        mid = center[1]
+        top = center[1] + 0.5 * height
+        return (np.array([lft, cen, rgt, rgt, rgt, cen, lft,
+                          lft]), np.array([btm, btm, btm, mid, top, top, top, mid]))
+
+    def move_vertex(self, event: Event, ind: int):
+        props = super().get_new_patch_props(event=event, ind=ind)
+        center = list(self.center)
+        if 'width' in props:
+            center[0] = props['corner'][0] + 0.5 * props['width']
+        if 'height' in props:
+            center[1] = props['corner'][1] + 0.5 * props['height']
+        props['center'] = center
+        del props['corner']
+        self.update(**props)
+
+    @property
+    def center(self) -> Tuple[float]:
+        return self._patch.get_center()
+
+    @center.setter
+    def center(self, center: Tuple[float]):
+        self._patch.set_center(center)
+        self._update_vertices()
+
+    @property
+    def xy(self) -> Tuple[float]:
+        return self.center
+
+    @xy.setter
+    def xy(self, xy: Tuple[float]):
+        self.center = xy
 
 
-class Ellipses(Patches):
-    """
-    Add ellipses to the supplied axes.
+Ellipses = partial(Tool, spawner=Ellipse)
+Ellipses.__doc__ = """
+Ellipses: Add ellipses to the supplied axes.
 
-    Controls:
-      - Left-click and hold to make new ellipses
-      - Right-click and hold to drag/move ellipse
-      - Middle-click to delete ellipse
+Controls:
+  - Left-click and hold to make new ellipses
+  - Right-click and hold to drag/move ellipse
+  - Middle-click to delete ellipse
 
-    :param ax: The Matplotlib axes to which the Ellipses tool will be attached.
-    :param autostart: Automatically activate the tool upon creation if `True`.
-    :param on_create: Callback that fires when a ellipse is created.
-    :param on_remove: Callback that fires when a ellipse is removed.
-    :param on_drag_press: Callback that fires when a ellipse is right-clicked.
-    :param on_drag_move: Callback that fires when a ellipse is dragged.
-    :param on_drag_release: Callback that fires when a ellipse is released.
-    :param kwargs: Matplotlib parameters used for customization.
-        Each parameter can be a single item (it will apply to all ellipses),
-        a list of items (one entry per ellipse), or a callable (which will be
-        called every time a new ellipse is created).
-    """
-
-    def __init__(self, ax: Axes, **kwargs):
-
-        super().__init__(ax=ax, patch=Ellipse, **kwargs)
-        self._new_ellipse_center = None
-
-    def _make_new_patch(self, x: float, y: float):
-        super()._make_new_patch(x, y)
-        self._new_ellipse_center = (x, y)
-
-    def _resize_patch(self, event: Event):
-        if event.inaxes != self._ax:
-            return
-        x, y = self._new_ellipse_center
-        dx = event.xdata - x
-        dy = event.ydata - y
-        self.patches[-1].update({
-            'width': dx,
-            'height': dy,
-            'center': (x + 0.5 * dx, y + 0.5 * dy)
-        })
-        self._draw()
-
-    def _add_vertices(self):
-        patch = self.patches[-1]
-        vertices = _vertices_from_ellipse(center=patch.center,
-                                          width=patch.get_width(),
-                                          height=patch.get_height())
-
-        line, = self._ax.plot(vertices[0],
-                              vertices[1],
-                              'o',
-                              mec=patch.get_edgecolor(),
-                              mfc='None',
-                              picker=5.0)
-        patch._vertices = line
-        line._patch = patch
-
-    def _move_vertex(self, event: Event, ind: int, line: Artist):
-        if event.inaxes != self._ax:
-            return
-        x, y = line.get_data()
-        patch = line._patch
-        x[ind] = event.xdata
-        y[ind] = event.ydata
-        opp = (ind + 2) % 4
-        even_ind = (ind % 2) == 0
-        if even_ind:
-            if ind == 0:
-                width = x[opp] - x[ind]
-            else:
-                width = x[ind] - x[opp]
-            height = patch.get_height()
-            center = (0.5 * (x[ind] + x[opp]), patch.center[1])
-        else:
-            if ind == 1:
-                height = y[opp] - y[ind]
-            else:
-                height = y[ind] - y[opp]
-            width = patch.get_width()
-            center = (patch.center[0], 0.5 * (y[ind] + y[opp]))
-        line.set_data(_vertices_from_ellipse(center=center, width=width, height=height))
-        line._patch.update({'center': center, 'width': width, 'height': height})
-        self._draw()
-
-    def _grab_patch(self, event: Event):
-        super()._grab_patch(event)
-        self._grab_artist_origin = self._grab_artist.center
-
-    def _update_artist_position(self, dx: float, dy: float):
-        ell = self._grab_artist
-        ell.center = (self._grab_artist_origin[0] + dx,
-                      self._grab_artist_origin[1] + dy)
-        ell._vertices.set_data(
-            _vertices_from_ellipse(center=ell.center,
-                                   width=ell.get_width(),
-                                   height=ell.get_height()))
+:param ax: The Matplotlib axes to which the Ellipses tool will be attached.
+:param autostart: Automatically activate the tool upon creation if `True`.
+:param hide_vertices: Hide vertices if `True`.
+:param on_create: Callback that fires when an ellipse is created.
+:param on_change: Callback that fires when an ellipse is modified.
+:param on_remove: Callback that fires when an ellipse is removed.
+:param on_vertex_press: Callback that fires when a vertex is left-clicked.
+:param on_vertex_move: Callback that fires when a vertex is moved.
+:param on_vertex_release: Callback that fires when a vertex is released.
+:param on_drag_press: Callback that fires when a ellipse is right-clicked.
+:param on_drag_move: Callback that fires when a ellipse is dragged.
+:param on_drag_release: Callback that fires when a ellipse is released.
+:param kwargs: Matplotlib parameters used for customization.
+    Each parameter can be a single item (it will apply to all ellipses),
+    a list of items (one entry per ellipse), or a callable (which will be
+    called every time a new ellipse is created).
+"""
