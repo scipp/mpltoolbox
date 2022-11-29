@@ -28,6 +28,23 @@ class Ellipse(Patch):
                 f'height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
+    @property
+    def center(self) -> float:
+        return self._patch.get_center()
+
+    @center.setter
+    def center(self, center: float):
+        self._patch.set_center(center)
+        self._update_vertices()
+
+    @property
+    def xy(self) -> float:
+        return self.center
+
+    @xy.setter
+    def xy(self, xy: float):
+        self.center = xy
+
     def _make_vertices(self):
         # ellipse = self._patch
         center = self.center
@@ -43,10 +60,14 @@ class Ellipse(Patch):
 
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)
-        center = self.center
-        center = (props['corner'][0] + 0.5 * props['width'],
-                  props['corner'][1] + 0.5 * props['height'])
-        self.update(center=center, width=props['width'], height=props['height'])
+        center = list(self.center)
+        if 'width' in props:
+            center[0] = props['corner'][0] + 0.5 * props['width']
+        if 'height' in props:
+            center[1] = props['corner'][1] + 0.5 * props['height']
+        props['center'] = center
+        del props['corner']
+        self.update(**props)
 
 
 # def _vertices_from_ellipse(ellipse: mp.Patch) -> Tuple[List[float]]:

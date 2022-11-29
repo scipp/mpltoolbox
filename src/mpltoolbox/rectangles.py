@@ -34,6 +34,15 @@ class Rectangle(Patch):
         return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
                 f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
 
+    @property
+    def xy(self) -> float:
+        return self._patch.get_xy()
+
+    @xy.setter
+    def xy(self, xy: float):
+        self._patch.set_xy(xy)
+        self._update_vertices()
+
     def _make_vertices(self):
         corners = self._patch.get_corners()
         xc = np.concatenate([corners[:, 0], [corners[0, 0]]])

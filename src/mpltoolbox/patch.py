@@ -45,24 +45,6 @@ class Patch:
         self._vertices.set_data(*self._make_vertices())
 
     @property
-    def xy(self) -> float:
-        return self._patch.get_xy()
-
-    @xy.setter
-    def xy(self, xy: float):
-        self._patch.set_xy(xy)
-        self._update_vertices()
-
-    @property
-    def center(self) -> float:
-        return self._patch.get_center()
-
-    @center.setter
-    def center(self, center: float):
-        self._patch.set_center(center)
-        self._update_vertices()
-
-    @property
     def width(self) -> float:
         return self._patch.get_width()
 
