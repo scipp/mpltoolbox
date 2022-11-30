@@ -23,6 +23,12 @@ You can install from ``pip`` using
 
    pip install mpltoolbox
 
+or from ``conda`` with
+
+.. code-block:: sh
+
+   conda install -c conda-forge mpltoolbox
+
 Example
 =======
 
@@ -38,11 +44,24 @@ Example
        ax.set_ylim(0, 100)
 
    points = tbx.Points(ax=axes[0, 0])
-   lines = tbx.Lines(ax=axes[1, 1], n=2)
+   lines = tbx.Lines(ax=axes[1, 1])
    rects = tbx.Rectangles(ax=axes[0, 1])
    ells = tbx.Ellipses(ax=axes[1, 0])
 
-.. image:: images/preview.png
+|points| |rectangles|
+|ellipses| |lines|
+
+.. |points| image:: _images/points_4_0.png
+   :width: 49%
+
+.. |rectangles| image:: _images/rectangles_4_0.png
+   :width: 49%
+
+.. |ellipses| image:: _images/ellipses_4_0.png
+   :width: 49%
+
+.. |lines| image:: _images/lines_4_0.png
+   :width: 49%
 
 .. toctree::
    :maxdepth: 2
