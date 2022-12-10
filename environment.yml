@@ -8,3 +8,4 @@ channels:
 
 dependencies:
   - ipympl
+  - mpltoolbox
