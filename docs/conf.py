@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
 import os
 import sys
@@ -11,7 +11,7 @@ sys.path.insert(0, src)
 # -- Project information -----------------------------------------------------
 
 project = 'mpltoolbox'
-copyright = '2022, Mpltoolbox contributors'
+copyright = '2022, Scipp contributors'
 author = 'Neil Vaytet'
 
 # -- General configuration ---------------------------------------------------
@@ -51,7 +51,7 @@ master_doc = 'index'
 html_theme = 'sphinx_book_theme'
 html_theme_options = {
     'logo_only': True,
-    "repository_url": "https://github.com/mpltoolbox/mpltoolbox",
+    "repository_url": "https://github.com/scipp/mpltoolbox",
     "repository_branch": "main",
     "use_repository_button": True,
     "use_issues_button": True,
