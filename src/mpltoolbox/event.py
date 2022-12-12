@@ -3,7 +3,10 @@ from matplotlib.pyplot import Axes
 
 
 @dataclass
-class Event:
+class DummyEvent:
+    """
+    A dummy event class for simulating clicks on figures.
+    """
     button: int
     inaxes: Axes
     xdata: float

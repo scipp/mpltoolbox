@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+from .event import DummyEvent
+
 from functools import partial
 from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Callable, List
+from typing import Callable, List, Union
 
 
 class Tool:
@@ -69,7 +71,7 @@ class Tool:
         if func is not None:
             self._on_create.append(func)
 
-    def call_on_create(self, event):
+    def call_on_create(self, event: Event):
         for func in self._on_create:
             func(event)
 
@@ -77,7 +79,7 @@ class Tool:
         if func is not None:
             self._on_remove.append(func)
 
-    def call_on_remove(self, event):
+    def call_on_remove(self, event: Event):
         for func in self._on_remove:
             func(event)
 
@@ -85,7 +87,7 @@ class Tool:
         if func is not None:
             self._on_change.append(func)
 
-    def call_on_change(self, event):
+    def call_on_change(self, event: Event):
         for func in self._on_change:
             func(event)
 
@@ -93,7 +95,7 @@ class Tool:
         if func is not None:
             self._on_vertex_press.append(func)
 
-    def call_on_vertex_press(self, event):
+    def call_on_vertex_press(self, event: Event):
         for func in self._on_vertex_press:
             func(event)
 
@@ -101,7 +103,7 @@ class Tool:
         if func is not None:
             self._on_vertex_move.append(func)
 
-    def call_on_vertex_move(self, event):
+    def call_on_vertex_move(self, event: Event):
         for func in self._on_vertex_move:
             func(event)
 
@@ -109,7 +111,7 @@ class Tool:
         if func is not None:
             self._on_vertex_release.append(func)
 
-    def call_on_vertex_release(self, event):
+    def call_on_vertex_release(self, event: Event):
         for func in self._on_vertex_release:
             func(event)
 
@@ -117,7 +119,7 @@ class Tool:
         if func is not None:
             self._on_drag_press.append(func)
 
-    def call_on_drag_press(self, event):
+    def call_on_drag_press(self, event: Event):
         for func in self._on_drag_press:
             func(event)
 
@@ -125,7 +127,7 @@ class Tool:
         if func is not None:
             self._on_drag_move.append(func)
 
-    def call_on_drag_move(self, event):
+    def call_on_drag_move(self, event: Event):
         for func in self._on_drag_move:
             func(event)
 
@@ -133,7 +135,7 @@ class Tool:
         if func is not None:
             self._on_drag_release.append(func)
 
-    def call_on_drag_release(self, event):
+    def call_on_drag_release(self, event: Event):
         for func in self._on_drag_release:
             func(event)
 
@@ -317,7 +319,37 @@ class Tool:
         elif (kind == 'drag') and (self.on_drag_release is not None):
             self.call_on_drag_release(self._grabbed_owner)
 
+    def click(self, x: Union[float, Tuple[float]], y: float = None, *, button: int = 1):
+        """
+        Simulate a click on the figure.
+
+        :param x: If only a float is given: the x coordinate for the click event. If a
+            tuple of length 2 is given, it contains both the x and y coordinates for
+            the event.
+        :param y: The y coordinate for the event. Can be `None` if `x` is a tuple of
+            length 2.
+        : param button: 1 is for left-click, 2 is for middle-click, 3 is for
+            right-click.
+        """
+        if y is None:
+            y = x[1]
+            x = x[0]
+        ev = DummyEvent(xdata=x, ydata=y, inaxes=self._ax, button=button)
+        if 'motion_notify_event' in self._connections:
+            self._on_motion_notify(ev)
+        self._on_button_press(ev)
+
     def remove(self, child):
+        """
+        Remove an artist from the figure.
+
+        :param child: The item to be removed. Can be supplied as:
+            - an integer, in which case the artist with the corresponding position in
+              the list of children will be removed
+            - an artist (using `tool.children` will give a list of all artists the tool
+              is responsible for)
+            - a string, which should be the `id` (uuid) of the artist to be removed
+        """
         if isinstance(child, int):
             self._remove_owner(self.children[child])
         elif isinstance(child, str):
