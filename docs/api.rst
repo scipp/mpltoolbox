@@ -13,4 +13,5 @@ API Reference
    Points
    Polygons
    Rectangles
+   Tool
    Vspans
