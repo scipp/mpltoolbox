@@ -5,7 +5,7 @@ from .event import DummyEvent
 from functools import partial
 from matplotlib.pyplot import Axes
 from matplotlib.backend_bases import Event
-from typing import Callable, List, Union
+from typing import Callable, List, Tuple, Union
 
 
 class Tool:
