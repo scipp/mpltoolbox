@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
 from .tool import Tool
 from .utils import parse_kwargs
