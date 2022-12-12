@@ -4,6 +4,7 @@
 # flake8: noqa
 
 from .event import DummyEvent
+from .tool import Tool
 from .lines import Lines
 from .rectangles import Rectangles
 from .ellipses import Ellipses
