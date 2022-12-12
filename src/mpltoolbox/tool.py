@@ -316,3 +316,13 @@ class Tool:
             self.call_on_vertex_release(self._moving_vertex_owner)
         elif (kind == 'drag') and (self.on_drag_release is not None):
             self.call_on_drag_release(self._grabbed_owner)
+
+    def remove(self, child):
+        if isinstance(child, int):
+            self._remove_owner(self.children[child])
+        elif isinstance(child, str):
+            for c in self.children:
+                if c.id == child:
+                    self._remove_owner(c)
+        else:
+            self._remove_owner(child)
