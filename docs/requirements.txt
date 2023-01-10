@@ -1,5 +1,5 @@
 matplotlib
-sphinx
+sphinx<6
 nbsphinx
 jupyter
 sphinx-copybutton
