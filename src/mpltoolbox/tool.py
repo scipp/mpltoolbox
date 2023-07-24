@@ -9,22 +9,23 @@ from typing import Callable, List, Tuple, Union
 
 
 class Tool:
-
-    def __init__(self,
-                 ax: Axes,
-                 spawner,
-                 *,
-                 autostart: bool = True,
-                 on_create: Callable = None,
-                 on_remove: Callable = None,
-                 on_change: Callable = None,
-                 on_vertex_press: Callable = None,
-                 on_vertex_move: Callable = None,
-                 on_vertex_release: Callable = None,
-                 on_drag_press: Callable = None,
-                 on_drag_move: Callable = None,
-                 on_drag_release: Callable = None,
-                 **kwargs):
+    def __init__(
+        self,
+        ax: Axes,
+        spawner,
+        *,
+        autostart: bool = True,
+        on_create: Callable = None,
+        on_remove: Callable = None,
+        on_change: Callable = None,
+        on_vertex_press: Callable = None,
+        on_vertex_move: Callable = None,
+        on_vertex_release: Callable = None,
+        on_drag_press: Callable = None,
+        on_drag_move: Callable = None,
+        on_drag_release: Callable = None,
+        **kwargs
+    ):
         self._ax = ax
         self._fig = ax.get_figure()
         self._connections = {}
@@ -157,10 +158,12 @@ class Tool:
         """
         Activate the tool.
         """
-        self._connections['button_press_event'] = self._fig.canvas.mpl_connect(
-            'button_press_event', self._on_button_press)
-        self._connections['pick_event'] = self._fig.canvas.mpl_connect(
-            'pick_event', self._on_pick)
+        self._connections["button_press_event"] = self._fig.canvas.mpl_connect(
+            "button_press_event", self._on_button_press
+        )
+        self._connections["pick_event"] = self._fig.canvas.mpl_connect(
+            "pick_event", self._on_pick
+        )
 
     def stop(self):
         """
@@ -193,23 +196,26 @@ class Tool:
             self._connections[key] = self._fig.canvas.mpl_connect(key, func)
 
     def _on_button_press(self, event: Event):
-        if event.button != 1 or self._pick_lock or self._get_active_tool():
+        if (
+            event.button != 1
+            or self._pick_lock
+            or self._get_active_tool()
+            or event.modifiers
+        ):
             return
         if event.inaxes != self._ax:
             return
-        if 'motion_notify_event' not in self._connections:
+        if "motion_notify_event" not in self._connections:
             self._nclicks = 0
             self._spawn_new_owner(x=event.xdata, y=event.ydata)
-            self._connect({'motion_notify_event': self._on_motion_notify})
+            self._connect({"motion_notify_event": self._on_motion_notify})
         self._nclicks += 1
         self._persist_vertex(event=event, owner=self.children[-1])
 
     def _spawn_new_owner(self, x: float, y: float):
-        owner = self._spawner(x=x,
-                              y=y,
-                              number=self._owner_counter,
-                              ax=self._ax,
-                              **self._kwargs)
+        owner = self._spawner(
+            x=x, y=y, number=self._owner_counter, ax=self._ax, **self._kwargs
+        )
         self.children.append(owner)
         self._owner_counter += 1
         self._draw()
@@ -225,7 +231,7 @@ class Tool:
 
     def _persist_vertex(self, event: Event, owner):
         if self._nclicks == owner._max_clicks:
-            self._disconnect(['motion_notify_event'])
+            self._disconnect(["motion_notify_event"])
             self._finalize_owner()
         else:
             owner.after_persist_vertex(event)
@@ -238,26 +244,27 @@ class Tool:
             self.call_on_create(child)
 
     def _on_pick(self, event: Event):
+        mev = event.mouseevent
         if self._get_active_tool():
             return
-        if event.mouseevent.inaxes != self._ax:
+        if mev.inaxes != self._ax:
             return
         art = event.artist
-        if event.mouseevent.button == 1:
+        if (mev.button == 1) and ("ctrl" not in mev.modifiers):
             if not art.parent.is_moveable(art):
                 return
             self._pick_lock = True
             self._grab_vertex(event)
             if self.on_vertex_press is not None:
                 self.call_on_vertex_press(self._moving_vertex_owner)
-        if event.mouseevent.button == 3:
+        if mev.button == 3:
             if not art.parent.is_draggable(art):
                 return
             self._pick_lock = True
             self._grab_owner(event)
             if self.on_drag_press is not None:
                 self.call_on_drag_press(self._grabbed_owner)
-        elif event.mouseevent.button == 2:
+        if (mev.button == 2) or ((mev.button == 1) and ("ctrl" in mev.modifiers)):
             if not art.parent.is_removable(art):
                 return
             self._remove_owner(art.parent)
@@ -270,30 +277,32 @@ class Tool:
         self._draw()
 
     def _grab_vertex(self, event: Event):
-        self._connect({
-            'motion_notify_event':
-            self._on_vertex_motion,
-            'button_release_event':
-            partial(self._release_owner, kind='vertex')
-        })
+        self._connect(
+            {
+                "motion_notify_event": self._on_vertex_motion,
+                "button_release_event": partial(self._release_owner, kind="vertex"),
+            }
+        )
 
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_owner = event.artist.parent
 
     def _on_vertex_motion(self, event: Event):
-        self._move_vertex(event=event,
-                          ind=self._moving_vertex_index,
-                          owner=self._moving_vertex_owner)
+        self._move_vertex(
+            event=event, ind=self._moving_vertex_index, owner=self._moving_vertex_owner
+        )
         if self.on_vertex_move is not None:
             self.call_on_vertex_move(self._moving_vertex_owner)
         if self.on_change is not None:
             self.call_on_change(self._moving_vertex_owner)
 
     def _grab_owner(self, event: Event):
-        self._connect({
-            'motion_notify_event': self._move_owner,
-            'button_release_event': partial(self._release_owner, kind='drag')
-        })
+        self._connect(
+            {
+                "motion_notify_event": self._move_owner,
+                "button_release_event": partial(self._release_owner, kind="drag"),
+            }
+        )
         self._grabbed_owner = event.artist.parent
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
         self._grabbed_owner_origin = self._grabbed_owner.xy
@@ -303,8 +312,10 @@ class Tool:
             return
         dx = event.xdata - self._grab_mouse_origin[0]
         dy = event.ydata - self._grab_mouse_origin[1]
-        self._grabbed_owner.xy = (self._grabbed_owner_origin[0] + dx,
-                                  self._grabbed_owner_origin[1] + dy)
+        self._grabbed_owner.xy = (
+            self._grabbed_owner_origin[0] + dx,
+            self._grabbed_owner_origin[1] + dy,
+        )
         self._draw()
         if self.on_drag_move is not None:
             self.call_on_drag_move(self._grabbed_owner)
@@ -312,11 +323,11 @@ class Tool:
             self.call_on_change(self._grabbed_owner)
 
     def _release_owner(self, event: Event, kind: str):
-        self._disconnect(['motion_notify_event', 'button_release_event'])
+        self._disconnect(["motion_notify_event", "button_release_event"])
         self._pick_lock = False
-        if (kind == 'vertex') and (self.on_vertex_release is not None):
+        if (kind == "vertex") and (self.on_vertex_release is not None):
             self.call_on_vertex_release(self._moving_vertex_owner)
-        elif (kind == 'drag') and (self.on_drag_release is not None):
+        elif (kind == "drag") and (self.on_drag_release is not None):
             self.call_on_drag_release(self._grabbed_owner)
 
     def click(self, x: Union[float, Tuple[float]], y: float = None, *, button: int = 1):
@@ -335,7 +346,7 @@ class Tool:
             y = x[1]
             x = x[0]
         ev = DummyEvent(xdata=x, ydata=y, inaxes=self._ax, button=button)
-        if 'motion_notify_event' in self._connections:
+        if "motion_notify_event" in self._connections:
             self._on_motion_notify(ev)
         self._on_button_press(ev)
 

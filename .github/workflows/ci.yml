@@ -19,20 +19,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
       with:
-        python-version: 3.9
+        python-version: '3.10'
     - name: Install dependencies
       run: |
         which python
         python -m pip install --upgrade pip
-        python -m pip install flake8 toml yapf==0.32 build pytest
+        python -m pip install flake8 toml black build pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Check yapf formatting
+    - name: Check black formatting
       run: |
-        yapf --diff --recursive .
+        black --diff .
     - name: Lint with flake8
       run: |
         flake8 . --count --statistics
@@ -48,7 +48,7 @@ jobs:
       run: |
         sphinx-build -b html docs/. docs/build
     - name: Archive documentation artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: DocumentationHTML
         path: docs/build
