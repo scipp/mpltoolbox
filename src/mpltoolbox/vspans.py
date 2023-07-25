@@ -10,23 +10,26 @@ from typing import Tuple
 
 
 class Vspan(Patch):
-
-    def __init__(self,
-                 x: float,
-                 y: float,
-                 number: int,
-                 ax: Axes,
-                 hide_median: bool = False,
-                 **kwargs):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        number: int,
+        ax: Axes,
+        hide_median: bool = False,
+        **kwargs,
+    ):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
         self._vertices.set_transform(self._patch.get_transform())
-        self._median = self._ax.axvline(x, ls='dashed', color=self.edgecolor)
+        self._median = self._ax.axvline(x, ls="dashed", color=self.edgecolor)
         if hide_median:
             self._median.set_visible(False)
 
     def __repr__(self):
-        return (f'VSpan: left={self.left}, right={self.right}, '
-                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+        return (
+            f"VSpan: left={self.left}, right={self.right}, "
+            f"edgecolor={self.edgecolor}, facecolor={self.facecolor}"
+        )
 
     def _update_vertices(self):
         super()._update_vertices()

@@ -12,14 +12,15 @@ from typing import Tuple
 
 
 class Ellipse(Patch):
-
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
 
     def __repr__(self):
-        return (f'Ellipse: center={self.center}, width={self.width}, '
-                f'height={self.height}, '
-                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+        return (
+            f"Ellipse: center={self.center}, width={self.width}, "
+            f"height={self.height}, "
+            f"edgecolor={self.edgecolor}, facecolor={self.facecolor}"
+        )
 
     def _make_patch(self, x: float, y: float, **kwargs):
         self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
@@ -35,18 +36,20 @@ class Ellipse(Patch):
         btm = center[1] - 0.5 * height
         mid = center[1]
         top = center[1] + 0.5 * height
-        return (np.array([lft, cen, rgt, rgt, rgt, cen, lft,
-                          lft]), np.array([btm, btm, btm, mid, top, top, top, mid]))
+        return (
+            np.array([lft, cen, rgt, rgt, rgt, cen, lft, lft]),
+            np.array([btm, btm, btm, mid, top, top, top, mid]),
+        )
 
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)
         center = list(self.center)
-        if 'width' in props:
-            center[0] = props['corner'][0] + 0.5 * props['width']
-        if 'height' in props:
-            center[1] = props['corner'][1] + 0.5 * props['height']
-        props['center'] = center
-        del props['corner']
+        if "width" in props:
+            center[0] = props["corner"][0] + 0.5 * props["width"]
+        if "height" in props:
+            center[1] = props["corner"][1] + 0.5 * props["height"]
+        props["center"] = center
+        del props["corner"]
         self.update(**props)
 
     @property
