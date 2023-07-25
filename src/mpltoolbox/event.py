@@ -1,4 +1,8 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+
 from dataclasses import dataclass
+from typing import List, Optional
 from matplotlib.pyplot import Axes
 
 
@@ -7,7 +11,9 @@ class DummyEvent:
     """
     A dummy event class for simulating clicks on figures.
     """
-    button: int
-    inaxes: Axes
+
     xdata: float
     ydata: float
+    inaxes: Axes
+    button: int
+    modifiers: Optional[List[str]]

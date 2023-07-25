@@ -330,7 +330,14 @@ class Tool:
         elif (kind == "drag") and (self.on_drag_release is not None):
             self.call_on_drag_release(self._grabbed_owner)
 
-    def click(self, x: Union[float, Tuple[float]], y: float = None, *, button: int = 1):
+    def click(
+        self,
+        x: Union[float, Tuple[float]],
+        y: float = None,
+        *,
+        button: int = 1,
+        modifiers: List[str] = None
+    ):
         """
         Simulate a click on the figure.
 
@@ -339,13 +346,16 @@ class Tool:
             the event.
         :param y: The y coordinate for the event. Can be `None` if `x` is a tuple of
             length 2.
-        : param button: 1 is for left-click, 2 is for middle-click, 3 is for
+        :param button: 1 is for left-click, 2 is for middle-click, 3 is for
             right-click.
+        :param modifiers: A list of modifier keys that were pressed during the click.
         """
         if y is None:
             y = x[1]
             x = x[0]
-        ev = DummyEvent(xdata=x, ydata=y, inaxes=self._ax, button=button)
+        ev = DummyEvent(
+            xdata=x, ydata=y, inaxes=self._ax, button=button, modifiers=modifiers
+        )
         if "motion_notify_event" in self._connections:
             self._on_motion_notify(ev)
         self._on_button_press(ev)

@@ -28,11 +28,11 @@ jobs:
       run: |
         which python
         python -m pip install --upgrade pip
-        python -m pip install flake8 toml black build pytest
+        python -m pip install flake8 toml black[jupyter] build pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Check black formatting
       run: |
-        black --diff .
+        black --check --diff .
     - name: Lint with flake8
       run: |
         flake8 . --count --statistics
