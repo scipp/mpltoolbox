@@ -283,7 +283,6 @@ class Tool:
                 "button_release_event": partial(self._release_owner, kind="vertex"),
             }
         )
-
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_owner = event.artist.parent
 
