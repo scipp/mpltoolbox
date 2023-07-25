@@ -9,13 +9,12 @@ from matplotlib.backend_bases import Event
 
 
 class Point(Line):
-
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
         self._max_clicks = 1
 
     def __repr__(self):
-        return f'Point: x={self.x}, y={self.y}, color={self.color}'
+        return f"Point: x={self.x}, y={self.y}, color={self.color}"
 
     def __str__(self):
         return repr(self)
