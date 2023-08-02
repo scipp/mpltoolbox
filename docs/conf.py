@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import os
 import sys
@@ -11,7 +11,7 @@ sys.path.insert(0, src)
 # -- Project information -----------------------------------------------------
 
 project = "mpltoolbox"
-copyright = "2022, Scipp contributors"
+copyright = "2023, Scipp contributors"
 author = "Neil Vaytet"
 
 # -- General configuration ---------------------------------------------------
