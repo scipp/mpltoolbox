@@ -229,13 +229,13 @@ class Polygon:
         self._fill.set_picker(pick)
         self._vertices.set_picker(pick)
 
-    def is_moveable(self, artist: Artist):
+    def is_moveable(self, artist: Artist) -> bool:
         return artist is self._vertices
 
-    def is_draggable(self, artist: Artist):
+    def is_draggable(self, artist: Artist) -> bool:
         return artist is self._fill
 
-    def is_removable(self, artist: Artist):
+    def is_removable(self, artist: Artist) -> bool:
         return artist is self._fill
 
 

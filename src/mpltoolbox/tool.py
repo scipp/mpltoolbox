@@ -255,26 +255,22 @@ class Tool:
                 return
             self._pick_lock = True
             self._grab_vertex(event)
-            if self.on_vertex_press is not None:
-                self.call_on_vertex_press(self._moving_vertex_owner)
         if mev.button == 3:
             if not art.parent.is_draggable(art):
                 return
             self._pick_lock = True
             self._grab_owner(event)
-            if self.on_drag_press is not None:
-                self.call_on_drag_press(self._grabbed_owner)
         if (mev.button == 2) or ((mev.button == 1) and ("ctrl" in mev.modifiers)):
             if not art.parent.is_removable(art):
                 return
             self._remove_owner(art.parent)
-            if self.on_remove is not None:
-                self.call_on_remove(art.parent)
 
     def _remove_owner(self, owner):
         owner.remove()
         self.children.remove(owner)
         self._draw()
+        if self.on_remove is not None:
+            self.call_on_remove(owner)
 
     def _grab_vertex(self, event: Event):
         self._connect(
@@ -285,6 +281,8 @@ class Tool:
         )
         self._moving_vertex_index = event.ind[0]
         self._moving_vertex_owner = event.artist.parent
+        if self.on_vertex_press is not None:
+            self.call_on_vertex_press(self._moving_vertex_owner)
 
     def _on_vertex_motion(self, event: Event):
         self._move_vertex(
@@ -305,6 +303,8 @@ class Tool:
         self._grabbed_owner = event.artist.parent
         self._grab_mouse_origin = event.mouseevent.xdata, event.mouseevent.ydata
         self._grabbed_owner_origin = self._grabbed_owner.xy
+        if self.on_drag_press is not None:
+            self.call_on_drag_press(self._grabbed_owner)
 
     def _move_owner(self, event: Event):
         if event.inaxes != self._ax:
