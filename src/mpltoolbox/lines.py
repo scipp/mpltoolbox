@@ -171,13 +171,13 @@ class Line:
     def set_picker(self, pick: float):
         self._line.set_picker(pick)
 
-    def is_moveable(self, artist: Artist):
+    def is_moveable(self, artist: Artist) -> bool:
         return True
 
-    def is_draggable(self, artist: Artist):
+    def is_draggable(self, artist: Artist) -> bool:
         return True
 
-    def is_removable(self, artist: Artist):
+    def is_removable(self, artist: Artist) -> bool:
         return True
 
 
