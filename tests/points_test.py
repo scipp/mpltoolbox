@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 import mpltoolbox as tbx
 
