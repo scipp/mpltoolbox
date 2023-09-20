@@ -2,6 +2,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/mpltoolbox/badges/version.svg)](https://anaconda.org/conda-forge/mpltoolbox)
 [![Documentation Status](https://readthedocs.org/projects/mpltoolbox/badge/?version=latest)](https://mpltoolbox.readthedocs.io/en/latest/?badge=latest)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/scipp/mpltoolbox/HEAD)
 
 # mpltoolbox
 
