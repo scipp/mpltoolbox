@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from .tool import Tool
 from .utils import parse_kwargs
@@ -12,39 +12,40 @@ import uuid
 
 
 class Polygon:
-
-    def __init__(self,
-                 x: float,
-                 y: float,
-                 number: int,
-                 ax: Axes,
-                 hide_vertices: bool = False,
-                 **kwargs):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        number: int,
+        ax: Axes,
+        hide_vertices: bool = False,
+        **kwargs,
+    ):
         self._max_clicks = 0
         self._ax = ax
         line_kwargs = parse_kwargs(kwargs, number)
         fill_kwargs = {}
-        for arg in ('ec', 'edgecolor', 'fc', 'facecolor', 'alpha'):
+        for arg in ("ec", "edgecolor", "fc", "facecolor", "alpha"):
             if arg in line_kwargs:
                 fill_kwargs[arg] = line_kwargs.pop(arg)
-        if set(['mfc', 'markerfacecolor']).isdisjoint(set(line_kwargs.keys())):
-            line_kwargs['mfc'] = 'None'
-        if set(['ls', 'linestyle']).isdisjoint(set(line_kwargs.keys())):
-            line_kwargs['ls'] = 'solid'
-        if 'marker' not in line_kwargs:
-            line_kwargs['marker'] = 'o'
-        if 'alpha' not in fill_kwargs:
-            fill_kwargs['alpha'] = 0.05
-        if set(['fc', 'facecolor']).isdisjoint(set(fill_kwargs.keys())):
-            fill_kwargs['fc'] = None
+        if set(["mfc", "markerfacecolor"]).isdisjoint(set(line_kwargs.keys())):
+            line_kwargs["mfc"] = "None"
+        if set(["ls", "linestyle"]).isdisjoint(set(line_kwargs.keys())):
+            line_kwargs["ls"] = "solid"
+        if "marker" not in line_kwargs:
+            line_kwargs["marker"] = "o"
+        if "alpha" not in fill_kwargs:
+            fill_kwargs["alpha"] = 0.05
+        if set(["fc", "facecolor"]).isdisjoint(set(fill_kwargs.keys())):
+            fill_kwargs["fc"] = None
 
-        self._vertices, = self._ax.plot(x, y, **line_kwargs)
-        if fill_kwargs['fc'] is None:
-            fill_kwargs['fc'] = self._vertices.get_color()
-        self._fill, = self._ax.fill(x, y, **fill_kwargs)
+        (self._vertices,) = self._ax.plot(x, y, **line_kwargs)
+        if fill_kwargs["fc"] is None:
+            fill_kwargs["fc"] = self._vertices.get_color()
+        (self._fill,) = self._ax.fill(x, y, **fill_kwargs)
         if hide_vertices:
-            self.mec = 'None'
-            self.mfc = 'None'
+            self.mec = "None"
+            self.mfc = "None"
         self._fill.parent = self
         self._vertices.parent = self
         self.id = uuid.uuid1().hex
@@ -53,8 +54,10 @@ class Polygon:
         self._first_point_position_axes = self._data_to_axes_transform(x, y)
 
     def __repr__(self):
-        return (f'Polygon: x={self.x}, y={self.y}, '
-                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+        return (
+            f"Polygon: x={self.x}, y={self.y}, "
+            f"edgecolor={self.edgecolor}, facecolor={self.facecolor}"
+        )
 
     def __str__(self):
         return repr(self)
@@ -64,8 +67,10 @@ class Polygon:
 
     def after_persist_vertex(self, event: Event):
         new_data = self.xy
-        self.xy = (np.append(new_data[0],
-                             new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
+        self.xy = (
+            np.append(new_data[0], new_data[0][-1]),
+            np.append(new_data[1], new_data[1][-1]),
+        )
 
     def _data_to_axes_transform(self, x: float, y: float) -> Tuple[float]:
         trans = self._ax.transData.transform((x, y))
@@ -73,8 +78,10 @@ class Polygon:
 
     def _get_distance_from_first_point(self, x: float, y: float) -> float:
         xdisplay, ydisplay = self._data_to_axes_transform(x, y)
-        dist = np.sqrt((xdisplay - self._first_point_position_axes[0])**2 +
-                       (ydisplay - self._first_point_position_axes[1])**2)
+        dist = np.sqrt(
+            (xdisplay - self._first_point_position_axes[0]) ** 2
+            + (ydisplay - self._first_point_position_axes[1]) ** 2
+        )
         return dist
 
     def move_vertex(self, event: Event, ind: int):

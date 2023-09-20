@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from .utils import parse_kwargs
 from matplotlib.pyplot import Axes, Artist
@@ -10,28 +10,27 @@ import uuid
 
 
 class Patch:
-
-    def __init__(self,
-                 x: float,
-                 y: float,
-                 number: int,
-                 ax: Axes,
-                 hide_vertices: bool = False,
-                 **kwargs):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        number: int,
+        ax: Axes,
+        hide_vertices: bool = False,
+        **kwargs,
+    ):
         self._max_clicks = 2
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
-        defaut_color = f'C{number}'
-        if set(['ec', 'edgecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['ec'] = defaut_color
-        if set(['fc', 'facecolor']).isdisjoint(set(kwargs.keys())):
-            kwargs['fc'] = to_rgb(defaut_color) + (0.05, )
+        defaut_color = f"C{number}"
+        if set(["ec", "edgecolor"]).isdisjoint(set(kwargs.keys())):
+            kwargs["ec"] = defaut_color
+        if set(["fc", "facecolor"]).isdisjoint(set(kwargs.keys())):
+            kwargs["fc"] = to_rgb(defaut_color) + (0.05,)
         self._make_patch(x=x, y=y, **kwargs)
-        self._vertices, = self._ax.plot(*self._make_vertices(),
-                                        'o',
-                                        ls='None',
-                                        mec=self.edgecolor,
-                                        mfc='None')
+        (self._vertices,) = self._ax.plot(
+            *self._make_vertices(), "o", ls="None", mec=self.edgecolor, mfc="None"
+        )
         if hide_vertices:
             self._vertices.set_visible(False)
         self._vertices.parent = self
@@ -141,11 +140,11 @@ class Patch:
         elif ind == 7:
             width = xopp - x
             corner[0] = x
-        out = {'corner': corner}
+        out = {"corner": corner}
         if width is not None:
-            out['width'] = width
+            out["width"] = width
         if height is not None:
-            out['height'] = height
+            out["height"] = height
         return out
 
     def after_persist_vertex(self, event: Event):

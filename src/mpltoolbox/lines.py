@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from .tool import Tool
 from .utils import parse_kwargs
@@ -12,31 +12,32 @@ from typing import Tuple
 
 
 class Line:
-
-    def __init__(self,
-                 x: float,
-                 y: float,
-                 number: int,
-                 ax: Axes,
-                 n=2,
-                 hide_vertices: bool = False,
-                 **kwargs):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        number: int,
+        ax: Axes,
+        n=2,
+        hide_vertices: bool = False,
+        **kwargs,
+    ):
         self._max_clicks = n
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
-        if set(['ls', 'linestyle']).isdisjoint(set(kwargs.keys())):
-            kwargs['ls'] = 'solid'
-        if 'marker' not in kwargs:
-            kwargs['marker'] = 'o'
-        self._line, = self._ax.plot(x, y, **kwargs)
+        if set(["ls", "linestyle"]).isdisjoint(set(kwargs.keys())):
+            kwargs["ls"] = "solid"
+        if "marker" not in kwargs:
+            kwargs["marker"] = "o"
+        (self._line,) = self._ax.plot(x, y, **kwargs)
         if hide_vertices:
-            self.mec = 'None'
-            self.mfc = 'None'
+            self.mec = "None"
+            self.mfc = "None"
         self._line.parent = self
         self.id = uuid.uuid1().hex
 
     def __repr__(self):
-        return f'Line: x={self.x}, y={self.y}, color={self.color}'
+        return f"Line: x={self.x}, y={self.y}, color={self.color}"
 
     def __str__(self):
         return repr(self)
@@ -55,8 +56,10 @@ class Line:
     def after_persist_vertex(self, event: Event):
         # Duplicate the last vertex
         new_data = self.xy
-        self.xy = (np.append(new_data[0],
-                             new_data[0][-1]), np.append(new_data[1], new_data[1][-1]))
+        self.xy = (
+            np.append(new_data[0], new_data[0][-1]),
+            np.append(new_data[1], new_data[1][-1]),
+        )
 
     @property
     def x(self) -> np.ndarray:

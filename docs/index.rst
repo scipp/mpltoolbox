@@ -109,6 +109,12 @@ Example
    :maxdepth: 2
    :hidden:
 
+   programmatic-control
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
    api
 
 .. toctree::

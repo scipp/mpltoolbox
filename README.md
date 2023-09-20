@@ -1,3 +1,8 @@
+[![PyPI version](https://badge.fury.io/py/mpltoolbox.svg)](https://pypi.org/project/mpltoolbox)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/mpltoolbox/badges/version.svg)](https://anaconda.org/conda-forge/mpltoolbox)
+[![Documentation Status](https://readthedocs.org/projects/mpltoolbox/badge/?version=latest)](https://mpltoolbox.readthedocs.io/en/latest/?badge=latest)
+[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
+
 # mpltoolbox
 
 Mpltoolbox aims to provide some basic tools (that other libraries such as bokeh or plotly support) for drawing points, lines, rectangles, polygons on Matplotlib figures.

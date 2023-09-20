@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Mpltoolbox contributors (https://github.com/mpltoolbox)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from .patch import Patch
 from .tool import Tool
@@ -12,13 +12,14 @@ from typing import Tuple
 
 
 class Rectangle(Patch):
-
     def __init__(self, x: float, y: float, number: int, ax: Axes, **kwargs):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
 
     def __repr__(self):
-        return (f'Rectangle: xy={self.xy}, width={self.width}, height={self.height}, '
-                f'edgecolor={self.edgecolor}, facecolor={self.facecolor}')
+        return (
+            f"Rectangle: xy={self.xy}, width={self.width}, height={self.height}, "
+            f"edgecolor={self.edgecolor}, facecolor={self.facecolor}"
+        )
 
     def _make_patch(self, x: float, y: float, **kwargs):
         self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
@@ -42,7 +43,7 @@ class Rectangle(Patch):
 
     def move_vertex(self, event: Event, ind: int):
         props = super().get_new_patch_props(event=event, ind=ind)
-        props['xy'] = props.pop('corner')
+        props["xy"] = props.pop("corner")
         self.update(**props)
 
     @property
