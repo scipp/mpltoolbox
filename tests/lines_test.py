@@ -7,7 +7,7 @@ import numpy as np
 import mpltoolbox as tbx
 
 
-def test_line_creation():
+def test_lines_creation():
     _, ax = plt.subplots()
     lines = tbx.Lines(ax=ax, n=2)
     assert len(ax.lines) == 0
@@ -32,7 +32,7 @@ def test_line_creation():
     assert np.allclose(data[:, 1], y)
 
 
-def test_line_creation_3_vertices():
+def test_lines_creation_3_vertices():
     _, ax = plt.subplots()
     lines = tbx.Lines(ax=ax, n=3)
     assert len(ax.lines) == 0
@@ -48,7 +48,7 @@ def test_line_creation_3_vertices():
     assert np.allclose(data[:, 1], y)
 
 
-def test_line_calls_on_create():
+def test_lines_calls_on_create():
     _, ax = plt.subplots()
 
     my_event_list = []
@@ -66,7 +66,7 @@ def test_line_calls_on_create():
     assert len(my_event_list) == 1
 
 
-def test_line_remove():
+def test_lines_remove():
     _, ax = plt.subplots()
     lines = tbx.Lines(ax=ax, n=2)
     assert len(ax.lines) == 0
@@ -89,7 +89,7 @@ def test_line_remove():
     assert len(ax.lines) == 0
 
 
-def test_line_calls_on_remove():
+def test_lines_calls_on_remove():
     _, ax = plt.subplots()
 
     my_event_list = []
