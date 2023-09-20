@@ -41,9 +41,9 @@ jobs:
         pip install -r docs/requirements.txt
         sudo apt install pandoc
         ln -s $(pwd)/src/mpltoolbox .
-    # - name: Run python tests
-    #   run: |
-    #     python -m pytest test
+    - name: Run python tests
+      run: |
+        python -m pytest tests
     - name: Build documentation
       run: |
         sphinx-build -b html docs/. docs/build
