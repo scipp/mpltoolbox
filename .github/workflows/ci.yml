@@ -43,7 +43,7 @@ jobs:
         ln -s $(pwd)/src/mpltoolbox .
     - name: Run python tests
       run: |
-        python -m pytest test
+        python -m pytest tests
     - name: Build documentation
       run: |
         sphinx-build -b html docs/. docs/build
