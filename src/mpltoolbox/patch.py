@@ -40,6 +40,9 @@ class Patch:
     def __str__(self):
         return repr(self)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def _update_vertices(self):
         self._vertices.set_data(*self._make_vertices())
 
