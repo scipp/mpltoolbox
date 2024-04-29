@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) Scipp contributors (https://github.com/scipp)
 
 from .utils import parse_kwargs
 from matplotlib.pyplot import Axes, Artist
