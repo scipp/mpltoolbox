@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PY_VERSION }}
     - name: Install dependencies
@@ -45,7 +45,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PY_VERSION }}
     - name: Install dependencies
@@ -53,6 +53,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest
         python -m pip install -r docs/requirements.txt
+        python -m pip install -e .
     - name: Run python tests
       run: |
         python -m pytest tests
@@ -64,7 +65,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PY_VERSION }}
     - name: Install dependencies
@@ -93,7 +94,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PY_VERSION }}
     - name: Install dependencies
