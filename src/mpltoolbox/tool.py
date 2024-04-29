@@ -244,9 +244,11 @@ class Tool:
             self.call_on_create(child)
 
     def _on_pick(self, event: Event):
-        mev = event.mouseevent
         if self._get_active_tool():
             return
+        if event.artist.parent not in self.children:
+            return
+        mev = event.mouseevent
         if mev.inaxes != self._ax:
             return
         art = event.artist
