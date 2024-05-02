@@ -168,22 +168,36 @@ class Tool:
 
     def stop(self):
         """
-        Dectivate the tool.
+        Dectivate adding new children, but resizing and moving existing children is
+        still possible.
         """
         self._disconnect(
             [key for key in self._connections.keys() if key != "pick_event"]
         )
+
+    def freeze(self):
+        """
+        Deactivate the tool but keep the children. No new children can be added and
+        existing children cannot be moved or resized.
+        """
+        self._disconnect(list(self._connections.keys()))
+
+    def clear(self):
+        """
+        Remove all children from the axes.
+        """
+        for a in self.children:
+            a.remove()
+        self.children.clear()
+        self._draw()
 
     def shutdown(self):
         """
         Deactivate the tool and remove all children from the axes.
         """
         self.stop()
-        for a in self.children:
-            a.remove()
-        self.children.clear()
         self._connections.clear()
-        self._draw()
+        self.clear()
 
     def _get_active_tool(self) -> str:
         return self._fig.canvas.toolbar.mode
@@ -333,7 +347,7 @@ class Tool:
     def _release_owner(self, event: Event, kind: str):
         self._disconnect(["motion_notify_event", "button_release_event"])
         self._pick_lock = False
-        self._ax._mpltoolbox_lock = True
+        self._ax._mpltoolbox_lock = False
         if (kind == "vertex") and (self.on_vertex_release is not None):
             self.call_on_vertex_release(self._moving_vertex_owner)
         elif (kind == "drag") and (self.on_drag_release is not None):
