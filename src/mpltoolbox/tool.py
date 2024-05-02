@@ -161,15 +161,18 @@ class Tool:
         self._connections["button_press_event"] = self._fig.canvas.mpl_connect(
             "button_press_event", self._on_button_press
         )
-        self._connections["pick_event"] = self._fig.canvas.mpl_connect(
-            "pick_event", self._on_pick
-        )
+        if "pick_event" not in self._connections:
+            self._connections["pick_event"] = self._fig.canvas.mpl_connect(
+                "pick_event", self._on_pick
+            )
 
     def stop(self):
         """
         Dectivate the tool.
         """
-        self._disconnect(list(self._connections.keys()))
+        self._disconnect(
+            [key for key in self._connections.keys() if key != "pick_event"]
+        )
 
     def shutdown(self):
         """
@@ -184,6 +187,9 @@ class Tool:
 
     def _get_active_tool(self) -> str:
         return self._fig.canvas.toolbar.mode
+
+    def _locked_by_other_tool(self) -> bool:
+        return getattr(self._ax, "_mpltoolbox_lock", False)
 
     def _disconnect(self, keys: List[str]):
         for key in keys:
@@ -200,10 +206,10 @@ class Tool:
             event.button != 1
             or self._pick_lock
             or self._get_active_tool()
+            or self._locked_by_other_tool()
             or event.modifiers
+            or event.inaxes != self._ax
         ):
-            return
-        if event.inaxes != self._ax:
             return
         if "motion_notify_event" not in self._connections:
             self._nclicks = 0
@@ -244,18 +250,19 @@ class Tool:
             self.call_on_create(child)
 
     def _on_pick(self, event: Event):
-        if self._get_active_tool():
-            return
-        if event.artist.parent not in self.children:
-            return
         mev = event.mouseevent
-        if mev.inaxes != self._ax:
+        if (
+            self._get_active_tool()
+            or event.artist.parent not in self.children
+            or mev.inaxes != self._ax
+        ):
             return
         art = event.artist
         if (mev.button == 1) and ("ctrl" not in mev.modifiers):
             if not art.parent.is_moveable(art):
                 return
             self._pick_lock = True
+            self._ax._mpltoolbox_lock = True
             self._grab_vertex(event)
         if mev.button == 3:
             if not art.parent.is_draggable(art):
@@ -326,6 +333,7 @@ class Tool:
     def _release_owner(self, event: Event, kind: str):
         self._disconnect(["motion_notify_event", "button_release_event"])
         self._pick_lock = False
+        self._ax._mpltoolbox_lock = True
         if (kind == "vertex") and (self.on_vertex_release is not None):
             self.call_on_vertex_release(self._moving_vertex_owner)
         elif (kind == "drag") and (self.on_drag_release is not None):
