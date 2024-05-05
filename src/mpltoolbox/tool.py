@@ -165,6 +165,8 @@ class Tool:
             self._connections["pick_event"] = self._fig.canvas.mpl_connect(
                 "pick_event", self._on_pick
             )
+        for child in self.children:
+            child._vertices.set_visible(True)
 
     def stop(self):
         """
@@ -181,6 +183,8 @@ class Tool:
         existing children cannot be moved or resized.
         """
         self._disconnect(list(self._connections.keys()))
+        for child in self.children:
+            child._vertices.set_visible(False)
 
     def clear(self):
         """
