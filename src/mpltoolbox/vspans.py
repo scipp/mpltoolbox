@@ -99,6 +99,10 @@ class Vspan(Patch):
         self._patch.set_xy(corners)
         self._update_vertices()
 
+    def set(self, **kwargs):
+        super().set(**kwargs)
+        self._median.set(**kwargs)
+
 
 Vspans = partial(Tool, spawner=Vspan)
 Vspans.__doc__ = """

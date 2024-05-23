@@ -93,6 +93,10 @@ class Patch:
     def vertices(self):
         return self._vertices.get_data()
 
+    def set(self, **kwargs):
+        self._patch.set(**kwargs)
+        self._vertices.set(**kwargs)
+
     def set_picker(self, pick: float):
         self._patch.set_picker(pick)
         self._vertices.set_picker(pick)

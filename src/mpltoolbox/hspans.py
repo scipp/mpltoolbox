@@ -93,6 +93,10 @@ class Hspan(Patch):
         self._patch.set_xy(corners)
         self._update_vertices()
 
+    def set(self, **kwargs):
+        super().set(**kwargs)
+        self._median.set(**kwargs)
+
 
 Hspans = partial(Tool, spawner=Hspan)
 Hspans.__doc__ = """
