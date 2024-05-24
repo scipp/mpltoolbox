@@ -14,8 +14,8 @@ class Hspan(Patch):
         self, x: float, y: float, number: int, ax: Axes, hide_median=False, **kwargs
     ):
         super().__init__(x=x, y=y, number=number, ax=ax, **kwargs)
-        self._vertices.set_transform(self._patch.get_transform())
         self._median = self._ax.axhline(y, ls="dashed", color=self.edgecolor)
+        self._vertices.set_transform(self._median.get_transform())
         if hide_median:
             self._median.set_visible(False)
 
@@ -27,8 +27,7 @@ class Hspan(Patch):
 
     def _update_vertices(self):
         super()._update_vertices()
-        corners = self._patch.get_xy()
-        mid = 0.5 * (corners[0, 1] + corners[1, 1])
+        mid = 0.5 * (self.bottom + self.top)
         self._median.set_ydata([mid, mid])
 
     def _make_patch(self, x, y, **kwargs):
@@ -50,47 +49,63 @@ class Hspan(Patch):
 
     @property
     def bottom(self) -> float:
-        return self._patch.get_xy()[0, 1]
+        xy = self._patch.get_xy()
+        if len(xy) > 2:
+            return xy[0, 1]
+        return xy[1]
 
     @bottom.setter
     def bottom(self, y: float):
-        corners = self._patch.get_xy()
-        for i in [0, 3]:
-            corners[i, 1] = y
-        if len(corners) > 3:
-            corners[4, 1] = y
+        xy = self._patch.get_xy()
+        if len(xy) > 2:
+            for i in [0, 3]:
+                xy[i, 1] = y
+            if len(xy) > 3:
+                xy[4, 1] = y
+            else:
+                xy += [xy[0, 0], y]
+            self._patch.set_xy(xy)
         else:
-            corners += [corners[0, 0], y]
-        self._patch.set_xy(corners)
+            self._patch.set(height=xy[1] - y + self.height, xy=(0, y))
         self._update_vertices()
 
     @property
     def top(self) -> float:
-        return self._patch.get_xy()[1, 1]
+        xy = self._patch.get_xy()
+        if len(xy) > 2:
+            return xy[1, 1]
+        return xy[1] + self.height
 
     @top.setter
     def top(self, y: float):
-        corners = self._patch.get_xy()
-        for i in [1, 2]:
-            corners[i, 1] = y
-        self._patch.set_xy(corners)
+        xy = self._patch.get_xy()
+        if len(xy) > 2:
+            for i in [1, 2]:
+                xy[i, 1] = y
+            self._patch.set_xy(xy)
+        else:
+            self._patch.set(height=y - xy[1])
         self._update_vertices()
 
     @property
     def height(self) -> float:
+        if hasattr(self._patch, "get_height"):
+            return self._patch.get_height()
         corners = self._patch.get_xy()
         return corners[1, 1] - corners[0, 1]
 
     @property
     def xy(self) -> Tuple[float]:
-        corners = self._patch.get_xy().copy()
-        return (corners[:, 0], corners[:, 1])
+        return (0, self.bottom)
 
     @xy.setter
-    def xy(self, xy: Tuple[float]):
-        corners = self._patch.get_xy()
-        corners[:, 1] = xy[1]
-        self._patch.set_xy(corners)
+    def xy(self, value: Tuple[float]):
+        _xy = self._patch.get_xy()
+        if len(_xy) > 2:
+            _xy[:, 1] += value[1] - _xy[0, 1]
+        else:
+            _xy = (0, value[1])
+        self._patch.set_xy(_xy)
         self._update_vertices()
 
     def set(self, **kwargs):
