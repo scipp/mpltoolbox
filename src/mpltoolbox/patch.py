@@ -23,9 +23,9 @@ class Patch:
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
         defaut_color = f"C{number}"
-        if set(["ec", "edgecolor"]).isdisjoint(set(kwargs.keys())):
+        if {"ec", "edgecolor"}.isdisjoint(set(kwargs.keys())):
             kwargs["ec"] = defaut_color
-        if set(["fc", "facecolor"]).isdisjoint(set(kwargs.keys())):
+        if {"fc", "facecolor"}.isdisjoint(set(kwargs.keys())):
             kwargs["fc"] = to_rgb(defaut_color) + (0.05,)
         self._make_patch(x=x, y=y, **kwargs)
         (self._vertices,) = self._ax.plot(
@@ -92,6 +92,10 @@ class Patch:
     @property
     def vertices(self):
         return self._vertices.get_data()
+
+    def set(self, **kwargs):
+        self._patch.set(**kwargs)
+        self._vertices.set(**kwargs)
 
     def set_picker(self, pick: float):
         self._patch.set_picker(pick)
