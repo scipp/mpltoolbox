@@ -2,7 +2,6 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 from matplotlib.pyplot import Axes
 
@@ -17,4 +16,4 @@ class DummyEvent:
     ydata: float
     inaxes: Axes
     button: int
-    modifiers: Optional[List[str]]
+    modifiers: list[str] | None

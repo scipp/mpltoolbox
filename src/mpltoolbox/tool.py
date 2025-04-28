@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+from collections.abc import Callable
 from functools import partial
-from typing import Callable, List, Tuple, Union
 
 from matplotlib.backend_bases import Event
 from matplotlib.pyplot import Axes
@@ -17,15 +17,15 @@ class Tool:
         spawner,
         *,
         autostart: bool = True,
-        on_create: Callable = None,
-        on_remove: Callable = None,
-        on_change: Callable = None,
-        on_vertex_press: Callable = None,
-        on_vertex_move: Callable = None,
-        on_vertex_release: Callable = None,
-        on_drag_press: Callable = None,
-        on_drag_move: Callable = None,
-        on_drag_release: Callable = None,
+        on_create: Callable | None = None,
+        on_remove: Callable | None = None,
+        on_change: Callable | None = None,
+        on_vertex_press: Callable | None = None,
+        on_vertex_move: Callable | None = None,
+        on_vertex_release: Callable | None = None,
+        on_drag_press: Callable | None = None,
+        on_drag_move: Callable | None = None,
+        on_drag_release: Callable | None = None,
         **kwargs,
     ):
         self._ax = ax
@@ -172,7 +172,7 @@ class Tool:
 
     def stop(self):
         """
-        Dectivate adding new children, but resizing and moving existing children is
+        Deactivate adding new children, but resizing and moving existing children is
         still possible.
         """
         self._disconnect(
@@ -211,7 +211,7 @@ class Tool:
     def _locked_by_other_tool(self) -> bool:
         return getattr(self._ax, "_mpltoolbox_lock", False)
 
-    def _disconnect(self, keys: List[str]):
+    def _disconnect(self, keys: list[str]):
         for key in keys:
             if key in self._connections:
                 self._fig.canvas.mpl_disconnect(self._connections[key])
@@ -361,11 +361,11 @@ class Tool:
 
     def click(
         self,
-        x: Union[float, Tuple[float]],
-        y: float = None,
+        x: float | tuple[float, float],
+        y: float | None = None,
         *,
         button: int = 1,
-        modifiers: List[str] = None,
+        modifiers: list[str] | None = None,
     ):
         """
         Simulate a click on the figure.

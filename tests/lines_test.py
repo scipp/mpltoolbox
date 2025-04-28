@@ -39,7 +39,7 @@ def test_lines_creation_3_vertices():
 
     x = [20, 60, 80]
     y = [40, 70, 10]
-    for xx, yy in zip(x, y):
+    for xx, yy in zip(x, y, strict=True):
         lines.click(x=xx, y=yy)
     assert len(ax.lines) == 1
     data = ax.lines[0].get_xydata()

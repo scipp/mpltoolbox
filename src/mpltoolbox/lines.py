@@ -3,7 +3,6 @@
 
 import uuid
 from functools import partial
-from typing import Tuple
 
 import numpy as np
 from matplotlib.backend_bases import Event
@@ -27,7 +26,7 @@ class Line:
         self._max_clicks = n
         self._ax = ax
         kwargs = parse_kwargs(kwargs, number)
-        if set(["ls", "linestyle"]).isdisjoint(set(kwargs.keys())):
+        if {"ls", "linestyle"}.isdisjoint(set(kwargs.keys())):
             kwargs["ls"] = "solid"
         if "marker" not in kwargs:
             kwargs["marker"] = "o"
@@ -80,11 +79,11 @@ class Line:
         self._line.set_ydata(y)
 
     @property
-    def xy(self) -> Tuple[np.ndarray]:
+    def xy(self) -> tuple[np.ndarray, np.ndarray]:
         return self._line.get_data()
 
     @xy.setter
-    def xy(self, xy: Tuple[np.ndarray]):
+    def xy(self, xy: tuple[np.ndarray, np.ndarray]):
         self._line.set_data(xy)
 
     @property

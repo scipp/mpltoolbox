@@ -2,7 +2,6 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 from functools import partial
-from typing import Tuple
 
 from matplotlib.backend_bases import Event
 from matplotlib.pyplot import Axes
@@ -35,7 +34,7 @@ class Hspan(Patch):
     def _make_patch(self, x, y, **kwargs):
         self._patch = self._ax.axhspan(y, y, **kwargs)
 
-    def _make_vertices(self) -> Tuple[float]:
+    def _make_vertices(self) -> tuple[tuple[float, float], tuple[float, float]]:
         return ([0.5, 0.5], [self.bottom, self.top])
 
     def move_vertex(self, event: Event, ind: int):
@@ -97,11 +96,11 @@ class Hspan(Patch):
         return corners[1, 1] - corners[0, 1]
 
     @property
-    def xy(self) -> Tuple[float]:
+    def xy(self) -> tuple[float, float]:
         return (0, self.bottom)
 
     @xy.setter
-    def xy(self, value: Tuple[float]):
+    def xy(self, value: tuple[float, float]):
         _xy = self._patch.get_xy()
         if len(_xy) > 2:
             _xy[:, 1] += value[1] - _xy[0, 1]
