@@ -39,6 +39,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
+    "ipympl",
 ]
 
 [project.urls]
@@ -60,6 +61,7 @@ addopts = """
 testpaths = "tests"
 filterwarnings = [
   "error",
+  'ignore:Passing unrecognized arguments to super:DeprecationWarning',
 ]
 
 [tool.ruff]
