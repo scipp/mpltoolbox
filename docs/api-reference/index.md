@@ -9,6 +9,15 @@
    :toctree: ../generated/classes
    :template: class-template.rst
    :recursive:
+
+   Ellipses
+   Hspans
+   Lines
+   Points
+   Polygons
+   Rectangles
+   Tool
+   Vspans
 ```
 
 ## Top-level functions

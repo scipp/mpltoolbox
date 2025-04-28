@@ -1,13 +1,13 @@
 :::{image} _static/logo.svg
 :class: only-light
 :alt: Mpltoolbox
-:width: 60%
+:width: 30%
 :align: center
 :::
 :::{image} _static/logo-dark.svg
 :class: only-dark
 :alt: Mpltoolbox
-:width: 60%
+:width: 30%
 :align: center
 :::
 
@@ -28,9 +28,56 @@
   </br></br>
 </span>
 
-:::{include} user-guide/installation.md
-:heading-offset: 1
-:::
+Mpltoolbox aims to provide some basic tools
+(that other libraries such as
+[bokeh](http://docs.bokeh.org/en/latest/) or
+[plotly](https://plotly.com/python/) support)
+for drawing points, lines, rectangles, polygons on Matplotlib figures.
+
+There are many interactive examples in the Matplotlib
+[documentation pages](https://matplotlib.org/stable/gallery/index.html#event-handling),
+but the code snippets are often long and potentially not straightforward to maintain.
+
+With ``mpltoolbox``, activating these tools should (hopefully) just be a on-liner.
+
+## Installation
+
+To install Mpltoolbox and all of its dependencies, use
+
+`````{tab-set}
+````{tab-item} pip
+```sh
+pip install mpltoolbox
+```
+````
+````{tab-item} conda
+```sh
+conda install -c conda-forge mpltoolbox
+```
+````
+`````
+
+## Example
+
+```python
+import matplotlib.pyplot as plt
+import mpltoolbox as tbx
+%matplotlib widget
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+for ax in axes.flat:
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+
+points = tbx.Points(ax=axes[0, 0])
+lines = tbx.Lines(ax=axes[1, 1])
+rects = tbx.Rectangles(ax=axes[0, 1])
+ells = tbx.Ellipses(ax=axes[1, 0])
+```
+
+| ![points](_images/points_4_0.png) | ![rects](_images/rectangles_4_0.png) |
+|---|---|
+| ![ells](_images/ellipses_4_0.png) | ![lines](_images/lines_4_0.png) |
 
 ## Get in touch
 
@@ -42,7 +89,13 @@
 hidden:
 ---
 
-user-guide/index
+points
+lines
+rectangles
+ellipses
+polygons
+spans
+advanced
 api-reference/index
 developer/index
 about/index

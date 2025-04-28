@@ -394,10 +394,11 @@ class Tool:
         Remove an artist from the figure.
 
         :param child: The item to be removed. Can be supplied as:
+
             - an integer, in which case the artist with the corresponding position in
-              the list of children will be removed
+                the list of children will be removed
             - an artist (using `tool.children` will give a list of all artists the tool
-              is responsible for)
+                is responsible for)
             - a string, which should be the `id` (uuid) of the artist to be removed
         """
         if isinstance(child, int):
