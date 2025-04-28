@@ -1,0 +1,48 @@
+# Build artifacts
+build
+dist
+html
+.tox
+*.egg-info
+# we lock dependencies with pip-compile, not uv
+uv.lock
+
+*.sw?
+
+# Environments
+venv
+.venv
+
+# Caches
+*.DS_Store
+.clangd/
+*.ipynb_checkpoints
+__pycache__/
+.vs/
+.virtual_documents
+.hypothesis
+.pytest_cache
+.mypy_cache
+docs/generated/
+.ruff_cache
+
+# Editor settings
+.idea/
+.vscode/
+
+# Data files
+*.data
+*.dat
+*.csv
+*.xye
+*.h5
+*.hdf5
+*.hdf
+*.nxs
+*.raw
+*.cif
+*.rcif
+*.ort
+*.zip
+*.sqw
+*.nxspe

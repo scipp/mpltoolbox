@@ -1,0 +1,4 @@
+# Add test dependencies in basetest.in
+
+-r base.in
+-r basetest.in
