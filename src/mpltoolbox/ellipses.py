@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+from functools import partial
+from typing import Tuple
+
+import numpy as np
+from matplotlib import patches as mp
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Axes
+
 from .patch import Patch
 from .tool import Tool
-from functools import partial
-from matplotlib import patches as mp
-from matplotlib.pyplot import Axes
-from matplotlib.backend_bases import Event
-import numpy as np
-from typing import Tuple
 
 
 class Ellipse(Patch):

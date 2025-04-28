@@ -70,7 +70,9 @@ def as_nightly(repo: str) -> str:
 
 
 nightly = tuple(args.nightly.split(",") if args.nightly else [])
-nightly_dependencies = [dep for dep in dependencies + test_dependencies if not dep.startswith(nightly)]
+nightly_dependencies = [
+    dep for dep in dependencies + test_dependencies if not dep.startswith(nightly)
+]
 nightly_dependencies += [as_nightly(arg) for arg in nightly]
 
 write_dependencies("nightly", nightly_dependencies)

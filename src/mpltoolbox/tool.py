@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
-from .event import DummyEvent
 from functools import partial
-from matplotlib.pyplot import Axes
-from matplotlib.backend_bases import Event
 from typing import Callable, List, Tuple, Union
+
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Axes
+
+from .event import DummyEvent
 
 
 class Tool:
@@ -24,7 +26,7 @@ class Tool:
         on_drag_press: Callable = None,
         on_drag_move: Callable = None,
         on_drag_release: Callable = None,
-        **kwargs
+        **kwargs,
     ):
         self._ax = ax
         self._fig = ax.get_figure()
@@ -363,7 +365,7 @@ class Tool:
         y: float = None,
         *,
         button: int = 1,
-        modifiers: List[str] = None
+        modifiers: List[str] = None,
     ):
         """
         Simulate a click on the figure.

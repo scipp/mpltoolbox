@@ -9,25 +9,25 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from .event import DummyEvent
-from .tool import Tool
-from .lines import Lines
-from .rectangles import Rectangles
 from .ellipses import Ellipses
+from .event import DummyEvent
+from .hspans import Hspans
+from .lines import Lines
 from .points import Points
 from .polygons import Polygons
-from .hspans import Hspans
+from .rectangles import Rectangles
+from .tool import Tool
 from .vspans import Vspans
 
 __all__ = [
     "DummyEvent",
-    "Tool",
-    "Lines",
-    "Rectangles",
     "Ellipses",
+    "Hspans",
+    "Lines",
     "Points",
     "Polygons",
-    "Hspans",
+    "Rectangles",
+    "Tool",
     "Vspans",
 ]
 

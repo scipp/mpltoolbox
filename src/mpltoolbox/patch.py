@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
-from .utils import parse_kwargs
-from matplotlib.pyplot import Axes, Artist
+import uuid
+from typing import Dict
+
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
-from typing import Dict
-import uuid
+from matplotlib.pyplot import Artist, Axes
+
+from .utils import parse_kwargs
 
 
 class Patch:

@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+import uuid
+from functools import partial
+from typing import Tuple
+
+import numpy as np
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Artist, Axes
+
 from .tool import Tool
 from .utils import parse_kwargs
-import numpy as np
-from functools import partial
-from matplotlib.pyplot import Artist, Axes
-from matplotlib.backend_bases import Event
-import uuid
-from typing import Tuple
 
 
 class Line:
