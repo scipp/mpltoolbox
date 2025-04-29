@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+from functools import partial
+
+import numpy as np
+from matplotlib import patches as mp
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Axes
+
 from .patch import Patch
 from .tool import Tool
-from functools import partial
-from matplotlib import patches as mp
-from matplotlib.pyplot import Axes
-from matplotlib.backend_bases import Event
-import numpy as np
-from typing import Tuple
 
 
 class Rectangle(Patch):
@@ -25,7 +26,7 @@ class Rectangle(Patch):
         self._patch = mp.Rectangle((x, y), 0, 0, **kwargs)
         self._ax.add_patch(self._patch)
 
-    def _make_vertices(self) -> Tuple[np.ndarray]:
+    def _make_vertices(self) -> tuple[np.ndarray, np.ndarray]:
         xy = self.xy
         w = self.width
         h = self.height
@@ -47,11 +48,11 @@ class Rectangle(Patch):
         self.update(**props)
 
     @property
-    def xy(self) -> Tuple[float]:
+    def xy(self) -> tuple[float, float]:
         return self._patch.get_xy()
 
     @xy.setter
-    def xy(self, xy: Tuple[float]):
+    def xy(self, xy: tuple[float, float]):
         self._patch.set_xy(xy)
         self._update_vertices()
 

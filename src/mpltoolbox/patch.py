@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
-from .utils import parse_kwargs
-from matplotlib.pyplot import Axes, Artist
+import uuid
+
 from matplotlib.backend_bases import Event
 from matplotlib.colors import to_rgb
-from typing import Dict
-import uuid
+from matplotlib.pyplot import Artist, Axes
+
+from .utils import parse_kwargs
 
 
 class Patch:
@@ -26,7 +27,7 @@ class Patch:
         if {"ec", "edgecolor"}.isdisjoint(set(kwargs.keys())):
             kwargs["ec"] = defaut_color
         if {"fc", "facecolor"}.isdisjoint(set(kwargs.keys())):
-            kwargs["fc"] = to_rgb(defaut_color) + (0.05,)
+            kwargs["fc"] = (*to_rgb(defaut_color), 0.05)
         self._make_patch(x=x, y=y, **kwargs)
         (self._vertices,) = self._ax.plot(
             *self._make_vertices(), "o", ls="None", mec=self.edgecolor, mfc="None"
@@ -110,7 +111,7 @@ class Patch:
     def is_removable(self, artist: Artist) -> bool:
         return artist is self._patch
 
-    def get_new_patch_props(self, event: Event, ind: int) -> Dict[str, float]:
+    def get_new_patch_props(self, event: Event, ind: int) -> dict[str, float]:
         x = event.xdata
         y = event.ydata
         verts = self.vertices

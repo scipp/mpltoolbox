@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+from functools import partial
+
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Axes
+
 from .lines import Line
 from .tool import Tool
-from functools import partial
-from matplotlib.pyplot import Axes
-from matplotlib.backend_bases import Event
 
 
 class Point(Line):

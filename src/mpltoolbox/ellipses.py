@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+from functools import partial
+
+import numpy as np
+from matplotlib import patches as mp
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Axes
+
 from .patch import Patch
 from .tool import Tool
-from functools import partial
-from matplotlib import patches as mp
-from matplotlib.pyplot import Axes
-from matplotlib.backend_bases import Event
-import numpy as np
-from typing import Tuple
 
 
 class Ellipse(Patch):
@@ -26,7 +27,7 @@ class Ellipse(Patch):
         self._patch = mp.Ellipse((x, y), 0, 0, **kwargs)
         self._ax.add_patch(self._patch)
 
-    def _make_vertices(self) -> Tuple[np.ndarray]:
+    def _make_vertices(self) -> tuple[np.ndarray, np.ndarray]:
         center = self.center
         width = self.width
         height = self.height
@@ -53,20 +54,20 @@ class Ellipse(Patch):
         self.update(**props)
 
     @property
-    def center(self) -> Tuple[float]:
+    def center(self) -> tuple[float, float]:
         return self._patch.get_center()
 
     @center.setter
-    def center(self, center: Tuple[float]):
+    def center(self, center: tuple[float, float]):
         self._patch.set_center(center)
         self._update_vertices()
 
     @property
-    def xy(self) -> Tuple[float]:
+    def xy(self) -> tuple[float, float]:
         return self.center
 
     @xy.setter
-    def xy(self, xy: Tuple[float]):
+    def xy(self, xy: tuple[float, float]):
         self.center = xy
 
 

@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
+import uuid
+from functools import partial
+
+import numpy as np
+from matplotlib.backend_bases import Event
+from matplotlib.pyplot import Artist, Axes
+
 from .tool import Tool
 from .utils import parse_kwargs
-import numpy as np
-from functools import partial
-from matplotlib.pyplot import Artist, Axes
-from matplotlib.backend_bases import Event
-from typing import Tuple
-import uuid
 
 
 class Polygon:
@@ -28,15 +29,15 @@ class Polygon:
         for arg in ("ec", "edgecolor", "fc", "facecolor", "alpha"):
             if arg in line_kwargs:
                 fill_kwargs[arg] = line_kwargs.pop(arg)
-        if set(["mfc", "markerfacecolor"]).isdisjoint(set(line_kwargs.keys())):
+        if {"mfc", "markerfacecolor"}.isdisjoint(set(line_kwargs.keys())):
             line_kwargs["mfc"] = "None"
-        if set(["ls", "linestyle"]).isdisjoint(set(line_kwargs.keys())):
+        if {"ls", "linestyle"}.isdisjoint(set(line_kwargs.keys())):
             line_kwargs["ls"] = "solid"
         if "marker" not in line_kwargs:
             line_kwargs["marker"] = "o"
         if "alpha" not in fill_kwargs:
             fill_kwargs["alpha"] = 0.05
-        if set(["fc", "facecolor"]).isdisjoint(set(fill_kwargs.keys())):
+        if {"fc", "facecolor"}.isdisjoint(set(fill_kwargs.keys())):
             fill_kwargs["fc"] = None
 
         (self._vertices,) = self._ax.plot(x, y, **line_kwargs)
@@ -72,7 +73,7 @@ class Polygon:
             np.append(new_data[1], new_data[1][-1]),
         )
 
-    def _data_to_axes_transform(self, x: float, y: float) -> Tuple[float]:
+    def _data_to_axes_transform(self, x: float, y: float) -> tuple[float, float]:
         trans = self._ax.transData.transform((x, y))
         return self._ax.transAxes.inverted().transform(trans)
 
@@ -125,11 +126,11 @@ class Polygon:
         self._update_fill()
 
     @property
-    def xy(self) -> Tuple[np.ndarray]:
+    def xy(self) -> tuple[np.ndarray, np.ndarray]:
         return self._vertices.get_data()
 
     @xy.setter
-    def xy(self, xy: Tuple[np.ndarray]):
+    def xy(self, xy: tuple[np.ndarray, np.ndarray]):
         self._vertices.set_data(xy)
         self._update_fill()
 
