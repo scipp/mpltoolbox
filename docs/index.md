@@ -1,13 +1,13 @@
 :::{image} _static/logo.svg
 :class: only-light
 :alt: Mpltoolbox
-:width: 30%
+:width: 60%
 :align: center
 :::
 :::{image} _static/logo-dark.svg
 :class: only-dark
 :alt: Mpltoolbox
-:width: 30%
+:width: 60%
 :align: center
 :::
 
@@ -75,9 +75,13 @@ rects = tbx.Rectangles(ax=axes[0, 1])
 ells = tbx.Ellipses(ax=axes[1, 0])
 ```
 
-| ![points](_images/points_4_0.png) | ![rects](_images/rectangles_4_0.png) |
-|---|---|
-| ![ells](_images/ellipses_4_0.png) | ![lines](_images/lines_4_0.png) |
+<table><tr>
+<td><img src="_static/points.png"></td>
+<td><img src="_static/rectangles.png"></td>
+</tr><tr>
+<td><img src="_static/ellipses.png"></td>
+<td><img src="_static/lines.png"></td>
+</tr></table>
 
 ## Get in touch
 
