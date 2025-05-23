@@ -11,6 +11,27 @@ from .event import DummyEvent
 
 
 class Tool:
+    """
+    A tool for creating and manipulating artists on a matplotlib figure.
+    This is the base class for all tools in mpltoolbox.
+
+    :param ax: The axes to which the tool is attached.
+    :param spawner: An object constructor that creates the artists.
+    :param autostart: If `True`, the tool is activated immediately.
+    :param on_create: A function to be called when a new artist is created.
+    :param on_remove: A function to be called when an artist is removed.
+    :param on_change: A function to be called when an artist is changed.
+    :param on_vertex_press: A function to be called when a vertex is pressed.
+    :param on_vertex_move: A function to be called when a vertex is moved.
+    :param on_vertex_release: A function to be called when a vertex is released.
+    :param on_drag_press: A function to be called when an artist is dragged.
+    :param on_drag_move: A function to be called when an artist is moved.
+    :param on_drag_release: A function to be called when an artist is released.
+    :param enable_drag: If `True`, dragging the artists is enabled.
+    :param enable_remove: If `True`, removing the artists is enabled.
+    :param kwargs: Additional keyword arguments for the artist constructor.
+    """
+
     def __init__(
         self,
         ax: Axes,
@@ -26,11 +47,16 @@ class Tool:
         on_drag_press: Callable | None = None,
         on_drag_move: Callable | None = None,
         on_drag_release: Callable | None = None,
+        enable_drag: bool = True,
+        enable_remove: bool = True,
         **kwargs,
     ):
         self._ax = ax
         self._fig = ax.get_figure()
         self._connections = {}
+
+        self._enable_drag = enable_drag
+        self._enable_remove = enable_remove
 
         self._on_create = []
         self._on_remove = []
@@ -285,12 +311,12 @@ class Tool:
             self._ax._mpltoolbox_lock = True
             self._grab_vertex(event)
         if mev.button == 3:
-            if not art.parent.is_draggable(art):
+            if (not art.parent.is_draggable(art)) or (not self._enable_drag):
                 return
             self._pick_lock = True
             self._grab_owner(event)
         if (mev.button == 2) or ((mev.button == 1) and ("ctrl" in mev.modifiers)):
-            if not art.parent.is_removable(art):
+            if (not art.parent.is_removable(art)) or (not self._enable_remove):
                 return
             self._remove_owner(art.parent)
 
