@@ -3,6 +3,7 @@
 
 from collections.abc import Callable
 from functools import partial
+from typing import Any
 
 from matplotlib.backend_bases import Event
 from matplotlib.pyplot import Axes
@@ -28,7 +29,12 @@ class Tool:
     :param on_drag_move: A function to be called when an artist is moved.
     :param on_drag_release: A function to be called when an artist is released.
     :param enable_drag: If `True`, dragging the artists is enabled.
+        If `'xonly'` or `'yonly'`, dragging is restricted to the x or y direction,
+        respectively. If `False`, dragging is disabled.
     :param enable_remove: If `True`, removing the artists is enabled.
+    :param enable_vertex_move: If `True`, moving the vertices of the artists is
+        enabled. If `'xonly'` or `'yonly'`, moving is restricted to the x or y
+        direction, respectively. If `False`, moving vertices is disabled.
     :param kwargs: Additional keyword arguments for the artist constructor.
     """
 
@@ -47,8 +53,9 @@ class Tool:
         on_drag_press: Callable | None = None,
         on_drag_move: Callable | None = None,
         on_drag_release: Callable | None = None,
-        enable_drag: bool = True,
-        enable_remove: bool = True,
+        enable_drag: bool | str = True,
+        enable_remove: bool | str = True,
+        enable_vertex_move: bool | str = True,
         **kwargs,
     ):
         self._ax = ax
@@ -57,6 +64,7 @@ class Tool:
 
         self._enable_drag = enable_drag
         self._enable_remove = enable_remove
+        self._enable_vertex_move = enable_vertex_move
 
         self._on_create = []
         self._on_remove = []
@@ -275,10 +283,17 @@ class Tool:
     def _on_motion_notify(self, event: Event):
         self._move_vertex(event=event, ind=None, owner=self.children[-1])
 
-    def _move_vertex(self, event: Event, ind: int, owner):
+    def _move_vertex(
+        self,
+        event: Event,
+        ind: int,
+        owner: Any,
+        move_x: bool = True,
+        move_y: bool = True,
+    ):
         if event.inaxes != self._ax:
             return
-        owner.move_vertex(event=event, ind=ind)
+        owner.move_vertex(event=event, ind=ind, move_x=move_x, move_y=move_y)
         self._draw()
 
     def _persist_vertex(self, event: Event, owner):
@@ -305,7 +320,7 @@ class Tool:
             return
         art = event.artist
         if (mev.button == 1) and ("ctrl" not in mev.modifiers):
-            if not art.parent.is_moveable(art):
+            if (not art.parent.is_moveable(art)) or (not self._enable_vertex_move):
                 return
             self._pick_lock = True
             self._ax._mpltoolbox_lock = True
@@ -340,8 +355,16 @@ class Tool:
             self.call_on_vertex_press(self._moving_vertex_owner)
 
     def _on_vertex_motion(self, event: Event):
+        # We only lock vertex movement here because we do not want to restrict x/y
+        # motion while the artist is being created, only when moving an existing vertex.
+        move_x = self._enable_vertex_move in (True, "xonly")
+        move_y = self._enable_vertex_move in (True, "yonly")
         self._move_vertex(
-            event=event, ind=self._moving_vertex_index, owner=self._moving_vertex_owner
+            event=event,
+            ind=self._moving_vertex_index,
+            owner=self._moving_vertex_owner,
+            move_x=move_x,
+            move_y=move_y,
         )
         if self.on_vertex_move is not None:
             self.call_on_vertex_move(self._moving_vertex_owner)
@@ -364,8 +387,10 @@ class Tool:
     def _move_owner(self, event: Event):
         if event.inaxes != self._ax:
             return
-        dx = event.xdata - self._grab_mouse_origin[0]
-        dy = event.ydata - self._grab_mouse_origin[1]
+        move_x = self._enable_drag in (True, "xonly")
+        move_y = self._enable_drag in (True, "yonly")
+        dx = (event.xdata - self._grab_mouse_origin[0]) if move_x else 0
+        dy = (event.ydata - self._grab_mouse_origin[1]) if move_y else 0
         self._grabbed_owner.xy = (
             self._grabbed_owner_origin[0] + dx,
             self._grabbed_owner_origin[1] + dy,

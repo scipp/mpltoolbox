@@ -46,12 +46,16 @@ class Line:
     def __len__(self):
         return len(self.x)
 
-    def move_vertex(self, event: Event, ind: int):
+    def move_vertex(
+        self, event: Event, ind: int, move_x: bool = True, move_y: bool = True
+    ):
         new_data = self.xy
         if ind is None:
             ind = -1
-        new_data[0][ind] = event.xdata
-        new_data[1][ind] = event.ydata
+        if move_x:
+            new_data[0][ind] = event.xdata
+        if move_y:
+            new_data[1][ind] = event.ydata
         self.xy = new_data
 
     def after_persist_vertex(self, event: Event):
