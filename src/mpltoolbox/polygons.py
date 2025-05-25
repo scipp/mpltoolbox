@@ -85,7 +85,9 @@ class Polygon:
         )
         return dist
 
-    def move_vertex(self, event: Event, ind: int):
+    def move_vertex(
+        self, event: Event, ind: int, move_x: bool = True, move_y: bool = True
+    ):
         x = event.xdata
         y = event.ydata
         if self._get_distance_from_first_point(x, y) < self._distance_from_first_point:
@@ -99,8 +101,10 @@ class Polygon:
             ind = -1
         elif ind in (0, len(new_data[0])):
             ind = [0, -1]
-        new_data[0][ind] = x
-        new_data[1][ind] = y
+        if move_x:
+            new_data[0][ind] = x
+        if move_y:
+            new_data[1][ind] = y
         self.xy = new_data
         self._update_fill()
 

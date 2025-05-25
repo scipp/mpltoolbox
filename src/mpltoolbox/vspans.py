@@ -43,7 +43,7 @@ class Vspan(Patch):
     def _make_vertices(self) -> tuple[tuple[float, float], tuple[float, float]]:
         return ([self.left, self.right], [0.5, 0.5])
 
-    def move_vertex(self, event: Event, ind: int):
+    def move_vertex(self, event: Event, ind: int, **ignored):
         x = event.xdata
         if ind == 0:
             self.left = x
