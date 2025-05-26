@@ -49,9 +49,13 @@ class Point(Line):
     def xy(self, xy: float):
         self._line.set_data([xy[0]], [xy[1]])
 
-    def move_vertex(self, event: Event, ind: int):
-        self.x = event.xdata
-        self.y = event.ydata
+    def move_vertex(
+        self, event: Event, ind: int, move_x: bool = True, move_y: bool = True
+    ):
+        if move_x:
+            self.x = event.xdata
+        if move_y:
+            self.y = event.ydata
 
     def after_persist_vertex(self, event: Event):
         return

@@ -42,7 +42,7 @@ class Ellipse(Patch):
             np.array([btm, btm, btm, mid, top, top, top, mid]),
         )
 
-    def move_vertex(self, event: Event, ind: int):
+    def move_vertex(self, event: Event, ind: int, **ignored):
         props = super().get_new_patch_props(event=event, ind=ind)
         center = list(self.center)
         if "width" in props:

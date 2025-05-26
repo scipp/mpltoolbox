@@ -37,7 +37,7 @@ class Hspan(Patch):
     def _make_vertices(self) -> tuple[tuple[float, float], tuple[float, float]]:
         return ([0.5, 0.5], [self.bottom, self.top])
 
-    def move_vertex(self, event: Event, ind: int):
+    def move_vertex(self, event: Event, ind: int, **ignored):
         y = event.ydata
         if ind == 0:
             self.bottom = y
