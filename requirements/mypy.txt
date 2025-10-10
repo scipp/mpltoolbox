@@ -6,7 +6,9 @@
 #    requirements upgrade
 #
 -r test.txt
-mypy==1.15.0
+mypy==1.18.2
     # via -r mypy.in
 mypy-extensions==1.1.0
+    # via mypy
+pathspec==0.12.1
     # via mypy
