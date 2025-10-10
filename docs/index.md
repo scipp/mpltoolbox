@@ -100,6 +100,7 @@ ellipses
 polygons
 spans
 advanced
+demo
 api-reference/index
 developer/index
 about/index
