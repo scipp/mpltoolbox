@@ -1,9 +1,9 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: '2247096'
+_commit: 7e41523
 _src_path: gh:scipp/copier_template
 description: Interactive tools for Matplotlib
 max_python: '3.13'
-min_python: '3.10'
+min_python: '3.11'
 namespace_package: ''
 nightly_deps: ''
 orgname: scipp
