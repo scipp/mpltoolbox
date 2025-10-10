@@ -2,7 +2,6 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 import mpltoolbox as tbx
 
@@ -19,8 +18,8 @@ def test_rectangles_creation():
     assert len(ax.patches) == 1
     p = ax.patches[0]
     xy = p.get_xy()
-    assert xy[0], x[0]
-    assert xy[1], y[0]
+    assert xy[0] == x[0]
+    assert xy[1] == y[0]
     assert p.get_width() == x[1] - x[0]
     assert p.get_height() == y[1] - y[0]
 
@@ -31,8 +30,8 @@ def test_rectangles_creation():
     assert len(ax.patches) == 2
     p = ax.patches[1]
     xy = p.get_xy()
-    assert np.allclose(xy[0], x[0])
-    assert np.allclose(xy[1], y[0])
+    assert xy[0] == x[0]
+    assert xy[1] == y[0]
     assert p.get_width() == x[1] - x[0]
     assert p.get_height() == y[1] - y[0]
 
