@@ -23,10 +23,10 @@
 
 # {transparent}`Mpltoolbox`
 
-<span style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted)">
+<div style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted);text-align:center;">
   Interactive tools for Matplotlib
   </br></br>
-</span>
+</div>
 
 Mpltoolbox aims to provide some basic tools
 (that other libraries such as
