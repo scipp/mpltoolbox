@@ -245,7 +245,7 @@ class Tool:
     def _locked_by_other_tool(self) -> bool:
         return getattr(self._ax, "_mpltoolbox_lock", False)
 
-    def _currently_moving_vertex_or_dragging(self) -> bool:
+    def _motion_connected(self) -> bool:
         return "motion_notify_event" in self._connections
 
     def _disconnect(self, keys: list[str]):
@@ -268,7 +268,7 @@ class Tool:
             or event.inaxes != self._ax
         ):
             return
-        if not self._currently_moving_vertex_or_dragging():
+        if not self._motion_connected():
             self._nclicks = 0
             self._spawn_new_owner(x=event.xdata, y=event.ydata)
             self._connect({"motion_notify_event": self._on_motion_notify})
@@ -316,7 +316,7 @@ class Tool:
     def _on_pick(self, event: Event):
         mev = event.mouseevent
         if (
-            self._currently_moving_vertex_or_dragging()
+            self._motion_connected()
             or self._get_active_tool()
             or event.artist.parent not in self.children
             or mev.inaxes != self._ax
@@ -440,7 +440,7 @@ class Tool:
         ev = DummyEvent(
             xdata=x, ydata=y, inaxes=self._ax, button=button, modifiers=modifiers
         )
-        if self._currently_moving_vertex_or_dragging():
+        if self._motion_connected():
             self._on_motion_notify(ev)
         self._on_button_press(ev)
 
