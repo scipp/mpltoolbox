@@ -231,11 +231,18 @@ class Tool:
         self.children.clear()
         self._draw()
 
+    def reset(self):
+        """
+        Reset the tool to its initial state.
+        """
+        self.clear()
+        self._owner_counter = 0
+
     def shutdown(self):
         """
         Deactivate the tool and remove all children from the axes.
         """
-        self.stop()
+        self._disconnect(list(self._connections.keys()))
         self._connections.clear()
         self.clear()
 
@@ -434,6 +441,8 @@ class Tool:
             right-click.
         :param modifiers: A list of modifier keys that were pressed during the click.
         """
+        if "button_press_event" not in self._connections:
+            return
         if y is None:
             y = x[1]
             x = x[0]
