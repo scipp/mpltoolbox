@@ -185,6 +185,12 @@ class Line:
     def is_removable(self, artist: Artist) -> bool:
         return True
 
+    def show_vertices(self):
+        pass
+
+    def hide_vertices(self):
+        pass
+
 
 Lines = partial(Tool, spawner=Line)
 Lines.__doc__ = """
