@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 7e41523
+_commit: '2888942'
 _src_path: gh:scipp/copier_template
 description: Interactive tools for Matplotlib
 max_python: '3.13'
@@ -10,4 +10,4 @@ orgname: scipp
 prettyname: Mpltoolbox
 projectname: mpltoolbox
 related_projects: Scipp,Plopp
-year: 2025
+year: 2026

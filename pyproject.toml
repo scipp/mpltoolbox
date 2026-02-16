@@ -37,8 +37,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "pytest",
     "ipympl",
+    "pytest>=8.0",
 ]
 
 [project.urls]
