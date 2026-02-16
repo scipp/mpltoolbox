@@ -78,3 +78,61 @@ def test_points_calls_on_remove():
     points.remove(0)
     assert len(ax.lines) == 0
     assert len(my_event_list) == 1
+
+
+def test_points_stop():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.stop()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+
+
+def test_points_start():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.stop()
+    points.start()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 2
+
+
+def test_points_freeze():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.freeze()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+    points.start()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 2
+
+
+def test_points_clear():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.click(x=25, y=55)
+    assert len(ax.lines) == 2
+    points.clear()
+    assert len(ax.lines) == 0
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+
+
+def test_points_shutdown():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.shutdown()
+    assert len(ax.lines) == 0
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 0
