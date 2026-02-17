@@ -18,8 +18,14 @@ def test_hspans_creation():
     assert len(ax.patches) == 1
     p = ax.patches[0]
     xy = p.get_xy()
+    # In older versions of MPL, xy was a 2D array with all vertices of the patch
+    if not isinstance(xy, tuple):
+        height = xy[:, 1].max() - xy[:, 1].min()
+        xy = xy[0]
+    else:
+        height = p.get_height()
     assert xy[1] == y[0]
-    assert p.get_height() == y[1] - y[0]
+    assert height == y[1] - y[0]
 
     y = [30, 40]
     hspans.click(x=0, y=y[0])  # first horizontal line
@@ -27,8 +33,14 @@ def test_hspans_creation():
     assert len(ax.patches) == 2
     p = ax.patches[1]
     xy = p.get_xy()
+    # In older versions of MPL, xy was a 2D array with all vertices of the patch
+    if not isinstance(xy, tuple):
+        height = xy[:, 1].max() - xy[:, 1].min()
+        xy = xy[0]
+    else:
+        height = p.get_height()
     assert xy[1] == y[0]
-    assert p.get_height() == y[1] - y[0]
+    assert height == y[1] - y[0]
 
 
 def test_hspans_calls_on_create():

@@ -18,8 +18,14 @@ def test_vspans_creation():
     assert len(ax.patches) == 1
     p = ax.patches[0]
     xy = p.get_xy()
+    # In older versions of MPL, xy was a 2D array with all vertices of the patch
+    if not isinstance(xy, tuple):
+        width = xy[:, 0].max() - xy[:, 0].min()
+        xy = xy[0]
+    else:
+        width = p.get_width()
     assert xy[0] == x[0]
-    assert p.get_width() == x[1] - x[0]
+    assert width == x[1] - x[0]
 
     x = [30, 40]
     vspans.click(x=x[0], y=0)  # first vertical line
@@ -27,8 +33,14 @@ def test_vspans_creation():
     assert len(ax.patches) == 2
     p = ax.patches[1]
     xy = p.get_xy()
+    # In older versions of MPL, xy was a 2D array with all vertices of the patch
+    if not isinstance(xy, tuple):
+        width = xy[:, 0].max() - xy[:, 0].min()
+        xy = xy[0]
+    else:
+        width = p.get_width()
     assert xy[0] == x[0]
-    assert p.get_width() == x[1] - x[0]
+    assert width == x[1] - x[0]
 
 
 def test_vspans_calls_on_create():
