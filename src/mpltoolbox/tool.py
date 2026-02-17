@@ -202,7 +202,8 @@ class Tool:
                 "pick_event", self._on_pick
             )
         for child in self.children:
-            child._vertices.set_visible(True)
+            child.show_vertices()
+        self._draw()
 
     def stop(self):
         """
@@ -220,7 +221,8 @@ class Tool:
         """
         self._disconnect(list(self._connections.keys()))
         for child in self.children:
-            child._vertices.set_visible(False)
+            child.hide_vertices()
+        self._draw()
 
     def clear(self):
         """

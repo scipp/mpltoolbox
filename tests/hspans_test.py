@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -89,3 +90,93 @@ def test_hspans_calls_on_remove():
     hspans.remove(0)
     assert len(ax.patches) == 0
     assert len(my_event_list) == 1
+
+
+def test_hspans_stop():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=70)
+    assert len(ax.patches) == 1
+    hspans.stop()
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 1
+
+
+def test_hspans_start():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=70)
+    assert len(ax.patches) == 1
+    hspans.stop()
+    hspans.start()
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_hspans_freeze():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=70)
+    assert len(ax.patches) == 1
+    hspans.freeze()
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 1
+    hspans.start()
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_hspans_clear():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=70)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    hspans.click(x=0, y=55)
+    hspans.click(x=0, y=75)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    hspans.clear()
+    assert len(ax.patches) == 0
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C2")
+
+
+def test_hspans_reset():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=55)
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    hspans.reset()
+    assert len(ax.patches) == 0
+    hspans.click(x=0, y=40)
+    hspans.click(x=0, y=60)
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+
+
+def test_hspans_shutdown():
+    _, ax = plt.subplots()
+    hspans = tbx.Hspans(ax=ax)
+    hspans.click(x=0, y=50)
+    hspans.click(x=0, y=55)
+    assert len(ax.patches) == 1
+    hspans.shutdown()
+    assert len(ax.patches) == 0
+    hspans.click(x=0, y=60)
+    hspans.click(x=0, y=80)
+    assert len(ax.patches) == 0

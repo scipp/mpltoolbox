@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -78,3 +79,78 @@ def test_points_calls_on_remove():
     points.remove(0)
     assert len(ax.lines) == 0
     assert len(my_event_list) == 1
+
+
+def test_points_stop():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.stop()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+
+
+def test_points_start():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.stop()
+    points.start()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 2
+
+
+def test_points_freeze():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.freeze()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+    points.start()
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 2
+
+
+def test_points_clear():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
+    points.click(x=25, y=55)
+    assert len(ax.lines) == 2
+    assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
+    points.clear()
+    assert len(ax.lines) == 0
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 1
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C2")
+
+
+def test_points_reset():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    points.click(x=25, y=55)
+    assert len(ax.lines) == 2
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
+    assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
+    points.reset()
+    assert len(ax.lines) == 0
+    points.click(x=21, y=40)
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
+
+
+def test_points_shutdown():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    assert len(ax.lines) == 1
+    points.shutdown()
+    assert len(ax.lines) == 0
+    points.click(x=30, y=60)
+    assert len(ax.lines) == 0

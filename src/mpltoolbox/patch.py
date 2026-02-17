@@ -33,7 +33,8 @@ class Patch:
             *self._make_vertices(), "o", ls="None", mec=self.edgecolor, mfc="None"
         )
         if hide_vertices:
-            self._vertices.set_visible(False)
+            self.hide_vertices()
+
         self._vertices.parent = self
         self._patch.parent = self
         self.id = uuid.uuid1().hex
@@ -93,6 +94,12 @@ class Patch:
     @property
     def vertices(self):
         return self._vertices.get_data()
+
+    def show_vertices(self):
+        self._vertices.set_visible(True)
+
+    def hide_vertices(self):
+        self._vertices.set_visible(False)
 
     def set(self, **kwargs):
         self._patch.set(**kwargs)

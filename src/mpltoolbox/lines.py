@@ -30,6 +30,8 @@ class Line:
             kwargs["ls"] = "solid"
         if "marker" not in kwargs:
             kwargs["marker"] = "o"
+        if "color" not in kwargs:
+            kwargs["color"] = f"C{number}"
         (self._line,) = self._ax.plot(x, y, **kwargs)
         if hide_vertices:
             self.mec = "None"
@@ -184,6 +186,12 @@ class Line:
 
     def is_removable(self, artist: Artist) -> bool:
         return True
+
+    def show_vertices(self):
+        pass
+
+    def hide_vertices(self):
+        pass
 
 
 Lines = partial(Tool, spawner=Line)

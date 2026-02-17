@@ -35,6 +35,8 @@ class Polygon:
             line_kwargs["ls"] = "solid"
         if "marker" not in line_kwargs:
             line_kwargs["marker"] = "o"
+        if "color" not in line_kwargs:
+            line_kwargs["color"] = f"C{number}"
         if "alpha" not in fill_kwargs:
             fill_kwargs["alpha"] = 0.05
         if {"fc", "facecolor"}.isdisjoint(set(fill_kwargs.keys())):
@@ -44,9 +46,9 @@ class Polygon:
         if fill_kwargs["fc"] is None:
             fill_kwargs["fc"] = self._vertices.get_color()
         (self._fill,) = self._ax.fill(x, y, **fill_kwargs)
+        self._vertices_colors_backup = {'mec': self.mec, 'mfc': self.mfc}
         if hide_vertices:
-            self.mec = "None"
-            self.mfc = "None"
+            self.hide_vertices()
         self._fill.parent = self
         self._vertices.parent = self
         self.id = uuid.uuid1().hex
@@ -242,6 +244,14 @@ class Polygon:
 
     def is_removable(self, artist: Artist) -> bool:
         return artist is self._fill
+
+    def show_vertices(self):
+        self.mec = self._vertices_colors_backup['mec']
+        self.mfc = self._vertices_colors_backup['mfc']
+
+    def hide_vertices(self):
+        self.mec = "None"
+        self.mfc = "None"
 
 
 Polygons = partial(Tool, spawner=Polygon)
