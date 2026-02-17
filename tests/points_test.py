@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -119,15 +120,15 @@ def test_points_clear():
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1
-    assert ax.lines[0].get_color() == "C0"
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
     points.click(x=25, y=55)
     assert len(ax.lines) == 2
-    assert ax.lines[1].get_color() == "C1"
+    assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
     points.clear()
     assert len(ax.lines) == 0
     points.click(x=30, y=60)
     assert len(ax.lines) == 1
-    assert ax.lines[0].get_color() == "C2"
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C2")
 
 
 def test_points_reset():
@@ -136,12 +137,12 @@ def test_points_reset():
     points.click(x=20, y=50)
     points.click(x=25, y=55)
     assert len(ax.lines) == 2
-    assert ax.lines[0].get_color() == "C0"
-    assert ax.lines[1].get_color() == "C1"
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
+    assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
     points.reset()
     assert len(ax.lines) == 0
     points.click(x=21, y=40)
-    assert ax.lines[0].get_color() == "C0"
+    assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
 
 
 def test_points_shutdown():

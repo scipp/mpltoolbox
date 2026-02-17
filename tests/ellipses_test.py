@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -100,3 +101,93 @@ def test_ellipses_calls_on_remove():
     ells.remove(0)
     assert len(ax.patches) == 0
     assert len(my_event_list) == 1
+
+
+def test_ellipses_stop():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    ellipses.stop()
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 1
+
+
+def test_ellipses_start():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    ellipses.stop()
+    ellipses.start()
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_ellipses_freeze():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    ellipses.freeze()
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 1
+    ellipses.start()
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_ellipses_clear():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    ellipses.click(x=25, y=55)
+    ellipses.click(x=35, y=75)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    ellipses.clear()
+    assert len(ax.patches) == 0
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C2")
+
+
+def test_ellipses_reset():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=25, y=55)
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    ellipses.reset()
+    assert len(ax.patches) == 0
+    ellipses.click(x=21, y=40)
+    ellipses.click(x=41, y=60)
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+
+
+def test_ellipses_shutdown():
+    _, ax = plt.subplots()
+    ellipses = tbx.Ellipses(ax=ax)
+    ellipses.click(x=20, y=50)
+    ellipses.click(x=25, y=55)
+    assert len(ax.patches) == 1
+    ellipses.shutdown()
+    assert len(ax.patches) == 0
+    ellipses.click(x=30, y=60)
+    ellipses.click(x=40, y=80)
+    assert len(ax.patches) == 0
