@@ -30,14 +30,14 @@ requires-python = ">=3.11"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-    "matplotlib",
+    "matplotlib>=3.7",
 ]
 
 dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "ipympl",
+    "ipympl>=0.8.4",
     "pytest>=8.0",
 ]
 
