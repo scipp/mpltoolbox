@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -100,3 +101,93 @@ def test_rectangles_calls_on_remove():
     rects.remove(0)
     assert len(ax.patches) == 0
     assert len(my_event_list) == 1
+
+
+def test_rectangles_stop():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    rects.stop()
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 1
+
+
+def test_rectangles_start():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    rects.stop()
+    rects.start()
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_rectangles_freeze():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    rects.freeze()
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 1
+    rects.start()
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 2
+
+
+def test_rectangles_clear():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=80, y=70)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    rects.click(x=25, y=55)
+    rects.click(x=35, y=75)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    rects.clear()
+    assert len(ax.patches) == 0
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C2")
+
+
+def test_rectangles_reset():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=25, y=55)
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    rects.reset()
+    assert len(ax.patches) == 0
+    rects.click(x=21, y=40)
+    rects.click(x=41, y=60)
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+
+
+def test_rectangles_shutdown():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=20, y=50)
+    rects.click(x=25, y=55)
+    assert len(ax.patches) == 1
+    rects.shutdown()
+    assert len(ax.patches) == 0
+    rects.click(x=30, y=60)
+    rects.click(x=40, y=80)
+    assert len(ax.patches) == 0

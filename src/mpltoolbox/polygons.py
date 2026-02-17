@@ -35,6 +35,8 @@ class Polygon:
             line_kwargs["ls"] = "solid"
         if "marker" not in line_kwargs:
             line_kwargs["marker"] = "o"
+        if "color" not in line_kwargs:
+            line_kwargs["color"] = f"C{number}"
         if "alpha" not in fill_kwargs:
             fill_kwargs["alpha"] = 0.05
         if {"fc", "facecolor"}.isdisjoint(set(fill_kwargs.keys())):

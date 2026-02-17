@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
 
@@ -88,3 +89,93 @@ def test_vspans_calls_on_remove():
     vspans.remove(0)
     assert len(ax.patches) == 0
     assert len(my_event_list) == 1
+
+
+def test_vspans_stop():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=80, y=0)
+    assert len(ax.patches) == 1
+    vspans.stop()
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 1
+
+
+def test_vspans_start():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=80, y=0)
+    assert len(ax.patches) == 1
+    vspans.stop()
+    vspans.start()
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 2
+
+
+def test_vspans_freeze():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=80, y=0)
+    assert len(ax.patches) == 1
+    vspans.freeze()
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 1
+    vspans.start()
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 2
+
+
+def test_vspans_clear():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=80, y=0)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    vspans.click(x=25, y=0)
+    vspans.click(x=35, y=0)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    vspans.clear()
+    assert len(ax.patches) == 0
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 1
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C2")
+
+
+def test_vspans_reset():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=25, y=0)
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 2
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+    assert to_hex(ax.patches[1].get_edgecolor()) == to_hex("C1")
+    vspans.reset()
+    assert len(ax.patches) == 0
+    vspans.click(x=21, y=0)
+    vspans.click(x=41, y=0)
+    assert to_hex(ax.patches[0].get_edgecolor()) == to_hex("C0")
+
+
+def test_vspans_shutdown():
+    _, ax = plt.subplots()
+    vspans = tbx.Vspans(ax=ax)
+    vspans.click(x=20, y=0)
+    vspans.click(x=25, y=0)
+    assert len(ax.patches) == 1
+    vspans.shutdown()
+    assert len(ax.patches) == 0
+    vspans.click(x=30, y=0)
+    vspans.click(x=40, y=0)
+    assert len(ax.patches) == 0
