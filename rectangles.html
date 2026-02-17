@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Rectangles &#8212; Mpltoolbox</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=721759c0"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'rectangles';</script>
+    <script src="_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ellipses" href="ellipses.html" />
+    <link rel="prev" title="Lines" href="lines.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.2.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.svg" class="logo__image only-light" alt="Mpltoolbox - Home"/>
+    <img src="_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="Mpltoolbox - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="points.html">
+    Points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lines.html">
+    Lines
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Rectangles
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ellipses.html">
+    Ellipses
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="polygons.html">
+    Polygons
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="spans.html">
+    Spans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="advanced.html">
+    Advanced
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="demo.html">
+    Mpltoolbox demo
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="about/index.html">
+    About
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/mpltoolbox" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/mpltoolbox/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/mpltoolbox" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/scipp.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="points.html">
+    Points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lines.html">
+    Lines
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Rectangles
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ellipses.html">
+    Ellipses
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="polygons.html">
+    Polygons
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="spans.html">
+    Spans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="advanced.html">
+    Advanced
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="demo.html">
+    Mpltoolbox demo
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="about/index.html">
+    About
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/mpltoolbox" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/mpltoolbox/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/mpltoolbox" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/scipp.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/rectangles.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Rectangles</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Rectangles">
+<h1>Rectangles<a class="headerlink" href="#Rectangles" title="Link to this heading">#</a></h1>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">Rectangles</span></code> tool to add rectangles to a plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> widget
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mpltoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tbx</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;contextlib.ExitStack at 0x7fbf45c9b2d0&gt;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">96</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">rects</span> <span class="o">=</span> <span class="n">tbx</span><span class="o">.</span><span class="n">Rectangles</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f5408d42e4b44a60baf4f4a61c0fc977"}</script></div>
+</div>
+<p><strong>Controls</strong></p>
+<ul class="simple">
+<li><p>Left-click and hold to make new rectangle</p></li>
+<li><p>Right-click and hold to drag/move rectangle</p></li>
+<li><p>Middle-click (or Ctrl + left-click) to delete rectangle</p></li>
+</ul>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"f942582de0af4697a5cd61ef79602645": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "f5408d42e4b44a60baf4f4a61c0fc977": {"model_name": "MPLCanvasModel", "model_module": "jupyter-matplotlib", "model_module_version": "^0.11", "state": {"_cursor": "pointer", "_data_url": "data:image/png;base64,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ZUaU0tJSq1evXtbBgwctSdb69esty7KsBx54wMrJyWn13rlz51pjx461o8yI9K1vfcu688472xxbvny51aVLF6uxsbFlW35+vtW/f/9wlRfRzjvvvFY/46urqy1J1ltvvcXc7yCbNm2yJLWa06czzyN9f8wRs9NQVVWlAwcO6MILL2zZ5nQ6NXz4cO3YscPGyiLfunXr1KdPH6Wnp0uSioqK1L9/f2VlZbW8Z8SIEfL7/dqzZ49dZUYMy7J0yy236P7771fv3r1bjRUVFbX6OyCFes/fgTPD7/dr27Ztio2N1YUXXqjMzExdcMEFeumllySp5dfGHb/Y5ogRI7Rv3z75fD67yo4Y99xzj1atWqVPP/1UjY2NevzxxzVgwACdd955zP0wOtU8j4b9cXQtp/slHfuhl5aW1mp7eno6PxA70IYNG7Rw4cKWHZMU+n/R1v+HY2P4agoKCmRZlmbMmHHCmM/n06BBg1pt4+/AmVNeXq5gMKhnn31Wr732moYPH65XXnlF3//+97Vly5ZTzn2Px2ND1ZFj5MiReu6559SjRw/FxsYqIyNDL7/8slwuF3M/jE41z63PrjWL5P0xR8xOw7EfeJWVla22V1RU8MOwg7z22mu69tpr9fzzz+uyyy5r2e7xeNr8/3BsDF/e3r179Ytf/EJPP/10m+Mn6z19PzNSUlIkSdOmTdOIESPkdDo1ZcoU5ebmatWqVcz9DhQMBjV27Fh169ZNXq9XdXV1WrJkiSZOnKiioiLmfhidap5Hw/6YYHYaUlNT1bdvX73zzjst25qamloOueLMWrlypaZOnao//elPJ/xi+ZycHO3fv19er7dl2/bt2+V2u0/4Fy3a54033pDX69UFF1ygrKysltPF11xzjWbMmKGcnJxWfwekUO/5O3BmpKamasCAAXI4HG2O5+TkaMeOHa3uYNu+fbv69+8fMTsku1RUVGjfvn368Y9/rIyMDDmdTl111VUaMGCACgsLmfthdKp5HhX7Y5uvces0HnroIatXr17We++9Z/n9fuunP/2p1aNHD6u6utru0iLK73//eystLc3aunVrm+PNzc3WsGHDrB/84AeWz+ezDh48aH3961+3brvttjBXGnlqa2ut0tLSVg9J1h//+EfL6/VaBw4csFwul/XEE09Y9fX11tatW63U1FTrpZdesrv0iJGfn29lZ2dbO3bssJqbm63Vq1dbCQkJ1ltvvWX5fD6rW7du1k9/+lPL7/db7733ntWrVy/r4YcftrvsiDB06FBr+vTpVlVVldXc3Gy9+uqrVnx8vLV+/Xrm/hnW1NRkBQIBq7Cw0JJk1dTUWIFAwGpubj6teR7p+2OC2WkKBoPWz372Mys7O9tyuVzWqFGjrJ07d9pdVsSRZDmdTispKanV4/igduDAAWvixIlWUlKSlZGRYc2ePduqq6uzserIpePuyrSs0F1UOTk5VmJiotWnTx/r8ccft7G6yPTggw9aPXv2tJKTk63hw4dbq1atahn7v//7P+tb3/qW5XK5rOzsbGvBggVWMBi0sdrIsWfPHuuqq66yunTpYqWkpFhnn3229eSTT7aMM/fPnGXLllmSTnhs2rTJsqxTz/NI3x87LIvVCQEAAEzANWYAAACGIJgBAAAYgmAGAABgCIIZAACAIQhmAAAAhiCYAQAAGIJgBgAAYAiCGQAAgCEIZgAAAIYgmAEAABiCYAYAAGAIghkAAIAhCGYAAACGIJgBAAAYgmAGAABgCIIZAACAIQhmAAAAhiCYAQAAGIJgBgAAYAiCGQAAgCEIZgAAAIYgmAEAABiCYAYAAGAIghkAAIAhCGYAAACGIJgBAAAYgmAGAABgCIIZAACAIQhmAAAAhiCYAQAAGOL/Ay+UZ4zIgplmAAAAAElFTkSuQmCC", "_dom_classes": [], "_figure_label": "Figure", "_image_mode": "full", "_message": "", "_model_module": "jupyter-matplotlib", "_model_module_version": "^0.11", "_model_name": "MPLCanvasModel", "_rubberband_height": 0, "_rubberband_width": 0, "_rubberband_x": 0, "_rubberband_y": 0, "_size": [614.4000000000001, 460.79999999999995], "_view_count": null, "_view_module": "jupyter-matplotlib", "_view_module_version": "^0.11", "_view_name": "MPLCanvasView", "capture_scroll": false, "footer_visible": true, "header_visible": true, "layout": "IPY_MODEL_f942582de0af4697a5cd61ef79602645", "pan_zoom_throttle": 33.0, "resizable": true, "tabbable": null, "toolbar": "IPY_MODEL_80e05b7127b14f48b3f20a21681ede46", "toolbar_position": "left", "toolbar_visible": "fade-in-fade-out", "tooltip": null}}, "61ad66ed140c40e5ae8d218c0897c5d7": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "80e05b7127b14f48b3f20a21681ede46": {"model_name": "ToolbarModel", "model_module": "jupyter-matplotlib", "model_module_version": "^0.11", "state": {"_current_action": "", "_dom_classes": [], "_model_module": "jupyter-matplotlib", "_model_module_version": "^0.11", "_model_name": "ToolbarModel", "_view_count": null, "_view_module": "jupyter-matplotlib", "_view_module_version": "^0.11", "_view_name": "ToolbarView", "button_style": "", "collapsed": true, "layout": "IPY_MODEL_61ad66ed140c40e5ae8d218c0897c5d7", "orientation": "vertical", "tabbable": null, "toolitems": [["Home", "Reset original view", "home", "home"], ["Back", "Back to previous view", "arrow-left", "back"], ["Forward", "Forward to next view", "arrow-right", "forward"], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "arrows", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "square-o", "zoom"], ["Download", "Download plot", "floppy-o", "save_figure"]], "tooltip": null}}}, "version_major": 2, "version_minor": 0}
+</script></section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lines.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lines</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ellipses.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Ellipses</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current Mpltoolbox version: 26.2.0 (<a href="https://github.com/scipp/mpltoolbox/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
