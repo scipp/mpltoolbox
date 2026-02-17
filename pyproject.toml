@@ -30,14 +30,15 @@ requires-python = ">=3.11"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-    "matplotlib",
+    "matplotlib>=3.8",
 ]
 
 dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "ipympl",
+    "ipykernel>=6.26,<7",
+    "ipympl>=0.9",
     "pytest>=8.0",
 ]
 
@@ -61,6 +62,11 @@ testpaths = "tests"
 filterwarnings = [
   "error",
   'ignore:Passing unrecognized arguments to super:DeprecationWarning',
+  # Warnings related to pyparsing deprecations: this is fixed in mpl==3.10.8 onwards
+  "ignore:'parseString' deprecated:DeprecationWarning",
+  "ignore:'resetCache' deprecated:DeprecationWarning",
+  "ignore:'enablePackrat' deprecated:DeprecationWarning",
+  "ignore:'parseAll' argument is deprecated:DeprecationWarning",
 ]
 
 [tool.ruff]
