@@ -5,10 +5,8 @@ from collections.abc import Callable
 from functools import partial
 from typing import Any
 
-from matplotlib.backend_bases import Event
+from matplotlib.backend_bases import Event, MouseEvent, PickEvent
 from matplotlib.pyplot import Axes
-
-from .event import DummyEvent
 
 
 class Tool:
@@ -267,6 +265,30 @@ class Tool:
         for key, func in connections.items():
             self._connections[key] = self._fig.canvas.mpl_connect(key, func)
 
+    def _make_click_event(
+        self,
+        x: float,
+        y: float,
+        button: int,
+        modifiers: list[str] | None,
+    ) -> MouseEvent:
+        display_x, display_y = self._ax.transData.transform((x, y))
+        event = MouseEvent(
+            name="button_press_event",
+            canvas=self._fig.canvas,
+            x=display_x,
+            y=display_y,
+            button=button,
+            modifiers=modifiers,
+        )
+        # ``click`` has always accepted data coordinates outside the current axes
+        # limits. Preserve that behavior while providing the display coordinates
+        # needed by Matplotlib's picking machinery.
+        event.inaxes = self._ax
+        event.xdata = x
+        event.ydata = y
+        return event
+
     def _on_button_press(self, event: Event):
         if (
             event.button != 1
@@ -322,7 +344,7 @@ class Tool:
         if self.on_create is not None:
             self.call_on_create(child)
 
-    def _on_pick(self, event: Event):
+    def _on_pick(self, event: PickEvent) -> str | None:
         mev = event.mouseevent
         if (
             self._motion_connected()
@@ -338,15 +360,43 @@ class Tool:
             self._pick_lock = True
             self._ax._mpltoolbox_lock = True
             self._grab_vertex(event)
+            return "vertex"
         if mev.button == 3:
             if (not art.parent.is_draggable(art)) or (not self._enable_drag):
                 return
             self._pick_lock = True
             self._grab_owner(event)
+            return "drag"
         if (mev.button == 2) or ((mev.button == 1) and ("ctrl" in mev.modifiers)):
             if (not art.parent.is_removable(art)) or (not self._enable_remove):
                 return
             self._remove_owner(art.parent)
+
+    def _pick(self, mouse_event: MouseEvent) -> str | None:
+        for artist in self._ax.get_children():
+            owner = getattr(artist, "parent", None)
+            if not artist.pickable() or not any(
+                owner is child for child in self.children
+            ):
+                continue
+            picker = artist.get_picker()
+            if callable(picker):
+                inside, properties = picker(artist, mouse_event)
+            else:
+                inside, properties = artist.contains(mouse_event)
+            if inside:
+                kind = self._on_pick(
+                    PickEvent(
+                        "pick_event",
+                        self._fig.canvas,
+                        mouse_event,
+                        artist,
+                        **properties,
+                    )
+                )
+                if kind is not None:
+                    return kind
+        return None
 
     def _remove_owner(self, owner):
         owner.remove()
@@ -432,7 +482,7 @@ class Tool:
         modifiers: list[str] | None = None,
     ):
         """
-        Simulate a click on the figure.
+        Apply a click to this tool using data coordinates.
 
         :param x: If only a float is given: the x coordinate for the click event. If a
             tuple of length 2 is given, it contains both the x and y coordinates for
@@ -448,12 +498,18 @@ class Tool:
         if y is None:
             y = x[1]
             x = x[0]
-        ev = DummyEvent(
-            xdata=x, ydata=y, inaxes=self._ax, button=button, modifiers=modifiers
+        click_event = self._make_click_event(
+            x=x,
+            y=y,
+            button=button,
+            modifiers=modifiers,
         )
         if self._motion_connected():
-            self._on_motion_notify(ev)
-        self._on_button_press(ev)
+            self._on_motion_notify(click_event)
+        if button == 1 and not modifiers:
+            self._on_button_press(click_event)
+        elif kind := self._pick(click_event):
+            self._release_owner(click_event, kind=kind)
 
     def remove(self, child):
         """

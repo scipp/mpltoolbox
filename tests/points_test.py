@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+from matplotlib.backend_bases import MouseEvent
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -79,6 +80,61 @@ def test_points_calls_on_remove():
     points.remove(0)
     assert len(ax.lines) == 0
     assert len(my_event_list) == 1
+
+
+def test_points_middle_click_removes_point():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+
+    points.click(x=20, y=50, button=2)
+
+    assert len(points.children) == 0
+    assert len(ax.lines) == 0
+
+
+def test_click_does_not_process_canvas_input_events():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    events = []
+    ax.figure.canvas.mpl_connect(
+        'button_press_event', lambda event: events.append(event.name)
+    )
+    ax.figure.canvas.mpl_connect(
+        'button_release_event', lambda event: events.append(event.name)
+    )
+    ax.figure.canvas.mpl_connect('pick_event', lambda event: events.append(event.name))
+
+    points.click(x=20, y=50)
+    points.click(x=20, y=50, button=2)
+
+    assert events == []
+
+
+def test_canvas_middle_click_removes_point():
+    _, ax = plt.subplots()
+    points = tbx.Points(ax=ax)
+    points.click(x=20, y=50)
+    ax.figure.canvas.draw()
+    x, y = ax.transData.transform((20, 50))
+    event = MouseEvent(
+        name='button_press_event', canvas=ax.figure.canvas, x=x, y=y, button=2
+    )
+
+    ax.figure.canvas.callbacks.process(event.name, event)
+
+    assert len(points.children) == 0
+
+
+def test_points_middle_click_with_log_scale():
+    _, ax = plt.subplots()
+    ax.set_xscale('log')
+    points = tbx.Points(ax=ax)
+    points.click(x=10, y=1)
+
+    points.click(x=10, y=1, button=2)
+
+    assert len(points.children) == 0
 
 
 def test_points_stop():

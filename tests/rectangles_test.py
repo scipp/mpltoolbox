@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+import pytest
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -103,6 +104,120 @@ def test_rectangles_calls_on_remove():
     assert len(my_event_list) == 1
 
 
+def test_rectangles_middle_click_removes_rectangle_and_calls_on_remove():
+    _, ax = plt.subplots()
+    removed = []
+    rects = tbx.Rectangles(ax=ax, on_remove=removed.append)
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+    rectangle = rects.children[0]
+
+    rects.click(x=3, y=3, button=2)
+
+    assert len(rects.children) == 0
+    assert len(ax.patches) == 0
+    assert removed == [rectangle]
+
+
+def test_rectangles_middle_click_outside_rectangle_does_not_remove():
+    _, ax = plt.subplots()
+    removed = []
+    rects = tbx.Rectangles(ax=ax, on_remove=removed.append)
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+
+    rects.click(x=3, y=-3, button=2)
+
+    assert len(rects.children) == 1
+    assert len(ax.patches) == 1
+    assert removed == []
+
+
+def test_rectangles_middle_click_respects_enable_remove():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax, enable_remove=False)
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+
+    rects.click(x=3, y=3, button=2)
+
+    assert len(rects.children) == 1
+    assert len(ax.patches) == 1
+
+
+def test_rectangles_ctrl_left_click_removes_rectangle():
+    _, ax = plt.subplots()
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+
+    rects.click(x=3, y=3, modifiers=['ctrl'])
+
+    assert len(rects.children) == 0
+    assert len(ax.patches) == 0
+
+
+def test_rectangles_right_click_releases_rectangle():
+    _, ax = plt.subplots()
+    pressed = []
+    released = []
+    rects = tbx.Rectangles(
+        ax=ax, on_drag_press=pressed.append, on_drag_release=released.append
+    )
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+    rectangle = rects.children[0]
+
+    rects.click(x=3, y=3, button=3)
+
+    assert pressed == [rectangle]
+    assert released == [rectangle]
+    assert not rects._pick_lock
+    assert not ax._mpltoolbox_lock
+
+
+def test_rectangles_shift_left_click_releases_vertex():
+    _, ax = plt.subplots()
+    pressed = []
+    released = []
+    rects = tbx.Rectangles(
+        ax=ax, on_vertex_press=pressed.append, on_vertex_release=released.append
+    )
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+    rectangle = rects.children[0]
+
+    rects.click(x=1, y=1, modifiers=['shift'])
+
+    assert pressed == [rectangle]
+    assert released == [rectangle]
+    assert not rects._pick_lock
+    assert not ax._mpltoolbox_lock
+
+
+@pytest.mark.parametrize('button', [2, 3])
+def test_click_only_affects_called_tool(button):
+    _, ax = plt.subplots()
+    removed = []
+    released = []
+    points = tbx.Points(
+        ax=ax, on_remove=removed.append, on_drag_release=released.append
+    )
+    points.click(x=3, y=3)
+    point = points.children[0]
+    rects = tbx.Rectangles(ax=ax)
+    rects.click(x=1, y=1)
+    rects.click(x=5, y=5)
+
+    rects.click(x=3, y=3, button=button)
+
+    assert points.children == [point]
+    assert removed == []
+    assert released == []
+    assert not points._pick_lock
+    assert not getattr(ax, '_mpltoolbox_lock', False)
+
+
 def test_rectangles_stop():
     _, ax = plt.subplots()
     rects = tbx.Rectangles(ax=ax)
@@ -112,6 +227,7 @@ def test_rectangles_stop():
     rects.stop()
     rects.click(x=30, y=60)
     rects.click(x=40, y=80)
+    rects.click(x=50, y=60, button=2)
     assert len(ax.patches) == 1
 
 
@@ -137,6 +253,7 @@ def test_rectangles_freeze():
     rects.freeze()
     rects.click(x=30, y=60)
     rects.click(x=40, y=80)
+    rects.click(x=50, y=60, button=2)
     assert len(ax.patches) == 1
     rects.start()
     rects.click(x=30, y=60)
