@@ -273,7 +273,7 @@ class Tool:
             or self._pick_lock
             or self._get_active_tool()
             or self._locked_by_other_tool()
-            # or event.modifiers
+            or ("ctrl" in event.modifiers)
             or event.inaxes != self._ax
         ):
             return

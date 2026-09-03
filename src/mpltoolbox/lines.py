@@ -51,11 +51,6 @@ class Line:
     def move_vertex(
         self, event: Event, ind: int, move_x: bool = True, move_y: bool = True
     ):
-        # if self._ax._mpltoolbox_shift_lock:
-        #     dx = np.abs(event.xdata - self.x[-2])
-        #     dy = np.abs(event.ydata - self.y[-2])
-        #     move_x = dx > dy
-        #     move_y = not move_x
         new_data = self.xy
         if ind is None:
             ind = -1
@@ -64,12 +59,13 @@ class Line:
         if move_y:
             new_data[1][ind] = event.ydata
         if self._ax._mpltoolbox_shift_pressed:
-            dx = np.abs(event.xdata - self.x[-2])
-            dy = np.abs(event.ydata - self.y[-2])
+            ind2 = 1 if ind == 0 else ind - 1
+            dx = np.abs(event.xdata - self.x[ind2])
+            dy = np.abs(event.ydata - self.y[ind2])
             if dx > dy:
-                new_data[1][ind] = self.y[-2]
+                new_data[1][ind] = self.y[ind2]
             else:
-                new_data[0][ind] = self.x[-2]
+                new_data[0][ind] = self.x[ind2]
         self.xy = new_data
 
     def after_persist_vertex(self, event: Event):
