@@ -273,7 +273,7 @@ class Tool:
             or self._pick_lock
             or self._get_active_tool()
             or self._locked_by_other_tool()
-            or event.modifiers
+            # or event.modifiers
             or event.inaxes != self._ax
         ):
             return
@@ -293,7 +293,13 @@ class Tool:
         self._draw()
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=None, owner=self.children[-1])
+        self._move_vertex(
+            event=event,
+            ind=None,
+            owner=self.children[-1],
+            move_x=self._enable_vertex_move in (True, "xonly"),
+            move_y=self._enable_vertex_move in (True, "yonly"),
+        )
 
     def _move_vertex(
         self,
