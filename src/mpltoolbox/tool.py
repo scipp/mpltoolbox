@@ -481,3 +481,22 @@ class Tool:
                     self._remove_owner(c)
         else:
             self._remove_owner(child)
+
+
+class ShiftKeypressMixin:
+    """
+    Mixin class to add shift key press functionality to a tool.
+    """
+
+    def connect_shift_keypress(self):
+        self._ax._mpltoolbox_shift_pressed = False
+        self._fig.canvas.mpl_connect("key_press_event", self.on_key_press)
+        self._fig.canvas.mpl_connect("key_release_event", self.on_key_release)
+
+    def on_key_press(self, event):
+        if event.key == "shift":
+            self._ax._mpltoolbox_shift_pressed = True
+
+    def on_key_release(self, event):
+        if event.key == "shift":
+            self._ax._mpltoolbox_shift_pressed = False

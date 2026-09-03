@@ -2,13 +2,12 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import uuid
-from functools import partial
 
 import numpy as np
 from matplotlib.backend_bases import Event
 from matplotlib.pyplot import Artist, Axes
 
-from .tool import Tool
+from .tool import ShiftKeypressMixin, Tool
 from .utils import parse_kwargs
 
 
@@ -202,61 +201,39 @@ class Line:
         pass
 
 
-# Lines = partial(Tool, spawner=Line)
-# Lines.__doc__ = """
-# Lines: Add lines to the supplied axes.
-
-# Controls:
-#   - Left-click to make new lines
-#   - Left-click and hold on line vertex to move vertex
-#   - Right-click and hold to drag/move the entire line
-#   - Middle-click to delete line
-
-# :param ax: The Matplotlib axes to which the Lines tool will be attached.
-# :param n: The number of vertices for each line. Default is 2.
-# :param autostart: Automatically activate the tool upon creation if `True`.
-# :param hide_vertices: Hide vertices if `True`.
-# :param on_create: Callback that fires when a line is created.
-# :param on_change: Callback that fires when a line is modified.
-# :param on_remove: Callback that fires when a line is removed.
-# :param on_vertex_press: Callback that fires when a vertex is left-clicked.
-# :param on_vertex_move: Callback that fires when a vertex is moved.
-# :param on_vertex_release: Callback that fires when a vertex is released.
-# :param on_drag_press: Callback that fires when a line is right-clicked.
-# :param on_drag_move: Callback that fires when a line is dragged.
-# :param on_drag_release: Callback that fires when a line is released.
-# :param kwargs: Matplotlib line parameters used for customization.
-#     Each parameter can be a single item (it will apply to all lines),
-#     a list of items (one entry per line), or a callable (which will be
-#     called every time a new line is created).
-# """
-
-
-class Lines(Tool):
+class Lines(Tool, ShiftKeypressMixin):
     def __init__(self, ax: Axes, n=2, **kwargs):
+        """
+        Add lines to the supplied axes.
+
+        Controls:
+          - Left-click to make new lines
+          - Left-click and hold on line vertex to move vertex
+          - Right-click and hold to drag/move the entire line
+          - Middle-click to delete line
+
+        Holding the shift key while moving a vertex will constrain the movement to
+        either the x or y direction, depending on which direction has the largest
+        change.
+
+        :param ax: The Matplotlib axes to which the Lines tool will be attached.
+        :param n: The number of vertices for each line. Default is 2.
+        :param autostart: Automatically activate the tool upon creation if `True`.
+        :param hide_vertices: Hide vertices if `True`.
+        :param on_create: Callback that fires when a line is created.
+        :param on_change: Callback that fires when a line is modified.
+        :param on_remove: Callback that fires when a line is removed.
+        :param on_vertex_press: Callback that fires when a vertex is left-clicked.
+        :param on_vertex_move: Callback that fires when a vertex is moved.
+        :param on_vertex_release: Callback that fires when a vertex is released.
+        :param on_drag_press: Callback that fires when a line is right-clicked.
+        :param on_drag_move: Callback that fires when a line is dragged.
+        :param on_drag_release: Callback that fires when a line is released.
+        :param kwargs: Matplotlib line parameters used for customization.
+            Each parameter can be a single item (it will apply to all lines),
+            a list of items (one entry per line), or a callable (which will be
+            called every time a new line is created).
+        """
         super().__init__(ax=ax, spawner=Line, n=n, **kwargs)
 
-        self._ax._mpltoolbox_shift_pressed = False
-        self._fig.canvas.mpl_connect('key_press_event', self.on_key_press)
-        self._fig.canvas.mpl_connect('key_release_event', self.on_key_release)
-
-    def on_key_press(self, event):
-        if event.key == 'shift':
-            self._ax._mpltoolbox_shift_pressed = True
-
-    def on_key_release(self, event):
-        if event.key == 'shift':
-            self._ax._mpltoolbox_shift_pressed = False
-
-    # def _move_vertex(
-    #         self,
-    #         event: Event,
-    #         ind: int,
-    #         owner: Any,
-    #         move_x: bool = True,
-    #         move_y: bool = True,
-    #     ):
-    #         if event.inaxes != self._ax:
-    #             return
-    #         owner.move_vertex(event=event, ind=ind, move_x=move_x, move_y=move_y)
-    #         self._draw()
+        self.connect_shift_keypress()

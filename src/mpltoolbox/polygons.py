@@ -2,13 +2,12 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import uuid
-from functools import partial
 
 import numpy as np
 from matplotlib.backend_bases import Event
 from matplotlib.pyplot import Artist, Axes
 
-from .tool import Tool
+from .tool import ShiftKeypressMixin, Tool
 from .utils import parse_kwargs
 
 
@@ -107,6 +106,16 @@ class Polygon:
             new_data[0][ind] = x
         if move_y:
             new_data[1][ind] = y
+
+        if self._ax._mpltoolbox_shift_pressed:
+            ind2 = 1 if ind == 0 else ind - 1
+            dx = np.abs(event.xdata - self.x[ind2])
+            dy = np.abs(event.ydata - self.y[ind2])
+            if dx > dy:
+                new_data[1][ind] = self.y[ind2]
+            else:
+                new_data[0][ind] = self.x[ind2]
+
         self.xy = new_data
         self._update_fill()
 
@@ -254,30 +263,34 @@ class Polygon:
         self.mfc = "None"
 
 
-Polygons = partial(Tool, spawner=Polygon)
-Polygons.__doc__ = """
-Polygons: Add closed polygons to the supplied axes.
+class Polygons(Tool, ShiftKeypressMixin):
+    def __init__(self, ax: Axes, **kwargs):
+        """
+        Add closed polygons to the supplied axes.
 
-Controls:
-  - Left-click to make new polygons
-  - Left-click and hold on polygon vertex to move vertex
-  - Right-click and hold to drag/move the entire polygon
-  - Middle-click to delete polygon
+        Controls:
+          - Left-click to make new polygons
+          - Left-click and hold on polygon vertex to move vertex
+          - Right-click and hold to drag/move the entire polygon
+          - Middle-click to delete polygon
 
-:param ax: The Matplotlib axes to which the Polygons tool will be attached.
-:param autostart: Automatically activate the tool upon creation if `True`.
-:param hide_vertices: Hide vertices if `True`.
-:param on_create: Callback that fires when a polygon is created.
-:param on_change: Callback that fires when a polygon is modified.
-:param on_remove: Callback that fires when a polygon is removed.
-:param on_vertex_press: Callback that fires when a vertex is left-clicked.
-:param on_vertex_move: Callback that fires when a vertex is moved.
-:param on_vertex_release: Callback that fires when a vertex is released.
-:param on_drag_press: Callback that fires when a polygon is right-clicked.
-:param on_drag_move: Callback that fires when a polygon is dragged.
-:param on_drag_release: Callback that fires when a polygon is released.
-:param kwargs: Matplotlib parameters used for customization.
-    Each parameter can be a single item (it will apply to all polygons),
-    a list of items (one entry per polygon), or a callable (which will be
-    called every time a new polygon is created).
-"""
+        :param ax: The Matplotlib axes to which the Polygons tool will be attached.
+        :param autostart: Automatically activate the tool upon creation if `True`.
+        :param hide_vertices: Hide vertices if `True`.
+        :param on_create: Callback that fires when a polygon is created.
+        :param on_change: Callback that fires when a polygon is modified.
+        :param on_remove: Callback that fires when a polygon is removed.
+        :param on_vertex_press: Callback that fires when a vertex is left-clicked.
+        :param on_vertex_move: Callback that fires when a vertex is moved.
+        :param on_vertex_release: Callback that fires when a vertex is released.
+        :param on_drag_press: Callback that fires when a polygon is right-clicked.
+        :param on_drag_move: Callback that fires when a polygon is dragged.
+        :param on_drag_release: Callback that fires when a polygon is released.
+        :param kwargs: Matplotlib parameters used for customization.
+            Each parameter can be a single item (it will apply to all polygons),
+            a list of items (one entry per polygon), or a callable (which will be
+            called every time a new polygon is created).
+        """
+        super().__init__(ax=ax, spawner=Polygon, **kwargs)
+
+        self.connect_shift_keypress()
