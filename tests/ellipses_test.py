@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+import pytest
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -9,6 +10,7 @@ import mpltoolbox as tbx
 
 def test_ellipses_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ells = tbx.Ellipses(ax=ax)
     assert len(ax.patches) == 0
 
@@ -19,10 +21,9 @@ def test_ellipses_creation():
     assert len(ax.patches) == 1
     p = ax.patches[0]
     xy = p.get_center()
-    assert xy[0] == 0.5 * (x[0] + x[1])
-    assert xy[1] == 0.5 * (y[0] + y[1])
-    assert p.get_width() == x[1] - x[0]
-    assert p.get_height() == y[1] - y[0]
+    assert xy == pytest.approx((0.5 * (x[0] + x[1]), 0.5 * (y[0] + y[1])))
+    assert p.get_width() == pytest.approx(x[1] - x[0])
+    assert p.get_height() == pytest.approx(y[1] - y[0])
 
     x = [30, 40]
     y = [10, 90]
@@ -31,14 +32,14 @@ def test_ellipses_creation():
     assert len(ax.patches) == 2
     p = ax.patches[1]
     xy = p.get_center()
-    assert xy[0] == 0.5 * (x[0] + x[1])
-    assert xy[1] == 0.5 * (y[0] + y[1])
-    assert p.get_width() == x[1] - x[0]
-    assert p.get_height() == y[1] - y[0]
+    assert xy == pytest.approx((0.5 * (x[0] + x[1]), 0.5 * (y[0] + y[1])))
+    assert p.get_width() == pytest.approx(x[1] - x[0])
+    assert p.get_height() == pytest.approx(y[1] - y[0])
 
 
 def test_ellipses_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -61,6 +62,7 @@ def test_ellipses_calls_on_create():
 
 def test_ellipses_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ells = tbx.Ellipses(ax=ax)
     assert len(ax.patches) == 0
 
@@ -84,6 +86,7 @@ def test_ellipses_remove():
 
 def test_ellipses_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -105,6 +108,7 @@ def test_ellipses_calls_on_remove():
 
 def test_ellipses_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=80, y=70)
@@ -117,6 +121,7 @@ def test_ellipses_stop():
 
 def test_ellipses_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=80, y=70)
@@ -130,6 +135,7 @@ def test_ellipses_start():
 
 def test_ellipses_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=80, y=70)
@@ -146,6 +152,7 @@ def test_ellipses_freeze():
 
 def test_ellipses_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=80, y=70)
@@ -165,6 +172,7 @@ def test_ellipses_clear():
 
 def test_ellipses_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=25, y=55)
@@ -182,6 +190,7 @@ def test_ellipses_reset():
 
 def test_ellipses_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     ellipses = tbx.Ellipses(ax=ax)
     ellipses.click(x=20, y=50)
     ellipses.click(x=25, y=55)

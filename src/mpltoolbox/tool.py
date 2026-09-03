@@ -3,12 +3,13 @@
 
 from collections.abc import Callable
 from functools import partial
+from inspect import signature
 from typing import Any
 
-from matplotlib.backend_bases import Event
+from matplotlib.backend_bases import Event, MouseButton, MouseEvent, PickEvent
 from matplotlib.pyplot import Axes
 
-from .event import DummyEvent
+_MOUSE_EVENT_SUPPORTS_BUTTONS = "buttons" in signature(MouseEvent).parameters
 
 
 class Tool:
@@ -210,6 +211,7 @@ class Tool:
         Deactivate adding new children, but resizing and moving existing children is
         still possible.
         """
+        self._cancel_interaction()
         self._disconnect(
             [key for key in self._connections.keys() if key != "pick_event"]
         )
@@ -219,6 +221,7 @@ class Tool:
         Deactivate the tool but keep the children. No new children can be added and
         existing children cannot be moved or resized.
         """
+        self._cancel_interaction()
         self._disconnect(list(self._connections.keys()))
         for child in self.children:
             child.hide_vertices()
@@ -228,6 +231,7 @@ class Tool:
         """
         Remove all children from the axes.
         """
+        self._cancel_interaction()
         for a in self.children:
             a.remove()
         self.children.clear()
@@ -257,6 +261,16 @@ class Tool:
     def _motion_connected(self) -> bool:
         return "motion_notify_event" in self._connections
 
+    def _cancel_interaction(self) -> None:
+        self._disconnect(["motion_notify_event", "button_release_event"])
+        if self._pick_lock:
+            self._pick_lock = False
+            self._ax._mpltoolbox_lock = False
+        if self._nclicks:
+            self.children.pop().remove()
+            self._nclicks = 0
+            self._draw()
+
     def _disconnect(self, keys: list[str]):
         for key in keys:
             if key in self._connections:
@@ -266,6 +280,30 @@ class Tool:
     def _connect(self, connections: dict):
         for key, func in connections.items():
             self._connections[key] = self._fig.canvas.mpl_connect(key, func)
+
+    def _process_mouse_event(
+        self,
+        name: str,
+        x: float,
+        y: float,
+        button: int,
+        modifiers: list[str] | None,
+    ) -> None:
+        display_x, display_y = self._ax.transData.transform((x, y))
+        mouse_button = MouseButton(button)
+        event_kwargs: dict[str, Any] = {}
+        if name == "motion_notify_event" and _MOUSE_EVENT_SUPPORTS_BUTTONS:
+            event_kwargs["buttons"] = {mouse_button}
+        event = MouseEvent(
+            name=name,
+            canvas=self._fig.canvas,
+            x=display_x,
+            y=display_y,
+            button=mouse_button,
+            modifiers=modifiers,
+            **event_kwargs,
+        )
+        self._fig.canvas.callbacks.process(event.name, event)
 
     def _on_button_press(self, event: Event):
         if (
@@ -277,10 +315,13 @@ class Tool:
             or event.inaxes != self._ax
         ):
             return
-        if not self._motion_connected():
-            self._nclicks = 0
+        if self._nclicks == 0:
             self._spawn_new_owner(x=event.xdata, y=event.ydata)
             self._connect({"motion_notify_event": self._on_motion_notify})
+        else:
+            # Persist the preview vertex at the press coordinates. This is required
+            # for click(), which intentionally emits no separate motion event.
+            self._on_motion_notify(event)
         self._nclicks += 1
         self._persist_vertex(event=event, owner=self.children[-1])
 
@@ -311,6 +352,7 @@ class Tool:
     def _persist_vertex(self, event: Event, owner):
         if self._nclicks == owner._max_clicks:
             self._disconnect(["motion_notify_event"])
+            self._nclicks = 0
             self._finalize_owner()
         else:
             owner.after_persist_vertex(event)
@@ -322,7 +364,7 @@ class Tool:
         if self.on_create is not None:
             self.call_on_create(child)
 
-    def _on_pick(self, event: Event):
+    def _on_pick(self, event: PickEvent) -> None:
         mev = event.mouseevent
         if (
             self._motion_connected()
@@ -430,9 +472,9 @@ class Tool:
         *,
         button: int = 1,
         modifiers: list[str] | None = None,
-    ):
+    ) -> None:
         """
-        Simulate a click on the figure.
+        Simulate a mouse-button press followed by a release at the same position.
 
         :param x: If only a float is given: the x coordinate for the click event. If a
             tuple of length 2 is given, it contains both the x and y coordinates for
@@ -443,17 +485,63 @@ class Tool:
             right-click.
         :param modifiers: A list of modifier keys that were pressed during the click.
         """
-        if "button_press_event" not in self._connections:
-            return
         if y is None:
             y = x[1]
             x = x[0]
-        ev = DummyEvent(
-            xdata=x, ydata=y, inaxes=self._ax, button=button, modifiers=modifiers
+        self._process_mouse_event(
+            name="button_press_event",
+            x=x,
+            y=y,
+            button=button,
+            modifiers=modifiers,
         )
-        if self._motion_connected():
-            self._on_motion_notify(ev)
-        self._on_button_press(ev)
+        self._process_mouse_event(
+            name="button_release_event",
+            x=x,
+            y=y,
+            button=button,
+            modifiers=modifiers,
+        )
+
+    def click_and_drag(
+        self,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        *,
+        button: int = 1,
+        modifiers: list[str] | None = None,
+    ) -> None:
+        """
+        Simulate a press, one drag motion, and a release.
+
+        :param start: The data coordinates where the mouse button is pressed.
+        :param end: The data coordinates to which the mouse is dragged and where the
+            button is released.
+        :param button: 1 is for left-click, 2 is for middle-click, 3 is for
+            right-click.
+        :param modifiers: A list of modifier keys held during the interaction.
+        """
+        self._process_mouse_event(
+            name="button_press_event",
+            x=start[0],
+            y=start[1],
+            button=button,
+            modifiers=modifiers,
+        )
+        self._process_mouse_event(
+            name="motion_notify_event",
+            x=end[0],
+            y=end[1],
+            button=button,
+            modifiers=modifiers,
+        )
+        self._process_mouse_event(
+            name="button_release_event",
+            x=end[0],
+            y=end[1],
+            button=button,
+            modifiers=modifiers,
+        )
 
     def remove(self, child):
         """

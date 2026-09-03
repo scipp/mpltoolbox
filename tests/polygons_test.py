@@ -10,6 +10,7 @@ import mpltoolbox as tbx
 
 def test_polygons_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     assert len(ax.patches) == 0
 
@@ -39,6 +40,7 @@ def test_polygons_creation():
 
 def test_polygons_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -60,6 +62,7 @@ def test_polygons_calls_on_create():
 
 def test_polygons_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     assert len(ax.patches) == 0
 
@@ -86,6 +89,7 @@ def test_polygons_remove():
 
 def test_polygons_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     my_event_list = []
 
     def on_remove(event):
@@ -106,6 +110,7 @@ def test_polygons_calls_on_remove():
 
 def test_polygons_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]
@@ -113,13 +118,14 @@ def test_polygons_stop():
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 1
     polys.stop()
-    for xi, yi in zip(np.array(x) + 1, np.array(y) + 1, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 1
 
 
 def test_polygons_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]
@@ -128,13 +134,14 @@ def test_polygons_start():
     assert len(ax.patches) == 1
     polys.stop()
     polys.start()
-    for xi, yi in zip(np.array(x) + 1, np.array(y) + 1, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 2
 
 
 def test_polygons_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]
@@ -142,17 +149,18 @@ def test_polygons_freeze():
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 1
     polys.freeze()
-    for xi, yi in zip(np.array(x) + 1, np.array(y) + 1, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 1
     polys.start()
-    for xi, yi in zip(np.array(x) + 1, np.array(y) + 1, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 2
 
 
 def test_polygons_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]
@@ -160,7 +168,7 @@ def test_polygons_clear():
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 1
     assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
-    for xi, yi in zip(np.array(x) + 1, np.array(y) + 1, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 2
     assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
@@ -174,12 +182,13 @@ def test_polygons_clear():
 
 def test_polygons_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]
     for xi, yi in zip(x, y, strict=True):
         polys.click(x=xi, y=yi)
-    for xi, yi in zip(np.array(x) + 3, np.array(y) + 3, strict=True):
+    for xi, yi in zip(np.array(x) + 50, np.array(y) + 50, strict=True):
         polys.click(x=xi, y=yi)
     assert len(ax.patches) == 2
     assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
@@ -193,6 +202,7 @@ def test_polygons_reset():
 
 def test_polygons_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     polys = tbx.Polygons(ax=ax)
     x = [30, 90, 60, 30]
     y = [20, 20, 50, 20]

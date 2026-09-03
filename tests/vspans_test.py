@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+import pytest
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -9,6 +10,7 @@ import mpltoolbox as tbx
 
 def test_vspans_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     assert len(ax.patches) == 0
 
@@ -24,8 +26,8 @@ def test_vspans_creation():
         xy = xy[0]
     else:
         width = p.get_width()
-    assert xy[0] == x[0]
-    assert width == x[1] - x[0]
+    assert xy[0] == pytest.approx(x[0])
+    assert width == pytest.approx(x[1] - x[0])
 
     x = [30, 40]
     vspans.click(x=x[0], y=0)  # first vertical line
@@ -39,12 +41,13 @@ def test_vspans_creation():
         xy = xy[0]
     else:
         width = p.get_width()
-    assert xy[0] == x[0]
-    assert width == x[1] - x[0]
+    assert xy[0] == pytest.approx(x[0])
+    assert width == pytest.approx(x[1] - x[0])
 
 
 def test_vspans_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -65,6 +68,7 @@ def test_vspans_calls_on_create():
 
 def test_vspans_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     assert len(ax.patches) == 0
 
@@ -86,6 +90,7 @@ def test_vspans_remove():
 
 def test_vspans_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -105,6 +110,7 @@ def test_vspans_calls_on_remove():
 
 def test_vspans_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=80, y=0)
@@ -117,6 +123,7 @@ def test_vspans_stop():
 
 def test_vspans_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=80, y=0)
@@ -130,6 +137,7 @@ def test_vspans_start():
 
 def test_vspans_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=80, y=0)
@@ -146,6 +154,7 @@ def test_vspans_freeze():
 
 def test_vspans_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=80, y=0)
@@ -165,6 +174,7 @@ def test_vspans_clear():
 
 def test_vspans_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=25, y=0)
@@ -182,6 +192,7 @@ def test_vspans_reset():
 
 def test_vspans_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     vspans = tbx.Vspans(ax=ax)
     vspans.click(x=20, y=0)
     vspans.click(x=25, y=0)
