@@ -2,7 +2,8 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
-from matplotlib.backend_bases import MouseEvent
+import pytest
+from matplotlib.backend_bases import MouseButton
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -10,6 +11,7 @@ import mpltoolbox as tbx
 
 def test_points_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     assert len(ax.lines) == 0
 
@@ -19,18 +21,19 @@ def test_points_creation():
     assert len(ax.lines) == 1
     data = ax.lines[0].get_xydata()
     assert data.shape == (1, 2)
-    assert data[0, 0] == x[0]
-    assert data[0, 1] == y[0]
+    assert data[0, 0] == pytest.approx(x[0])
+    assert data[0, 1] == pytest.approx(y[0])
 
     points.click(x=x[1], y=y[1])
     assert len(ax.lines) == 2
     data = ax.lines[1].get_xydata()
-    assert data[0, 0] == x[1]
-    assert data[0, 1] == y[1]
+    assert data[0, 0] == pytest.approx(x[1])
+    assert data[0, 1] == pytest.approx(y[1])
 
 
 def test_points_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -48,6 +51,7 @@ def test_points_calls_on_create():
 
 def test_points_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     assert len(ax.lines) == 0
 
@@ -67,6 +71,7 @@ def test_points_remove():
 
 def test_points_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -82,63 +87,59 @@ def test_points_calls_on_remove():
     assert len(my_event_list) == 1
 
 
-def test_points_middle_click_removes_point():
+def test_click_processes_canvas_press_pick_and_release_events():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
+    mouse_events = []
+    pick_events = []
+    ax.figure.canvas.mpl_connect('button_press_event', mouse_events.append)
+    ax.figure.canvas.mpl_connect('motion_notify_event', mouse_events.append)
+    ax.figure.canvas.mpl_connect('button_release_event', mouse_events.append)
+    ax.figure.canvas.mpl_connect('pick_event', pick_events.append)
 
-    points.click(x=20, y=50, button=2)
+    points.click(x=20, y=50, button=MouseButton.MIDDLE)
 
-    assert len(points.children) == 0
-    assert len(ax.lines) == 0
+    assert [event.name for event in mouse_events] == [
+        'button_press_event',
+        'button_release_event',
+    ]
+    assert len(pick_events) == 1
+    press, release = mouse_events
+    assert pick_events[0].mouseevent is press
+    assert press.button is MouseButton.MIDDLE
+    assert release.button is MouseButton.MIDDLE
+    assert (release.x, release.y) == (press.x, press.y)
+    assert release.xdata == pytest.approx(press.xdata)
+    assert release.ydata == pytest.approx(press.ydata)
 
 
-def test_click_does_not_process_canvas_input_events():
+def test_click_outside_axes_does_not_create_point():
     _, ax = plt.subplots()
     points = tbx.Points(ax=ax)
-    events = []
-    ax.figure.canvas.mpl_connect(
-        'button_press_event', lambda event: events.append(event.name)
-    )
-    ax.figure.canvas.mpl_connect(
-        'button_release_event', lambda event: events.append(event.name)
-    )
-    ax.figure.canvas.mpl_connect('pick_event', lambda event: events.append(event.name))
 
     points.click(x=20, y=50)
-    points.click(x=20, y=50, button=2)
 
-    assert events == []
-
-
-def test_canvas_middle_click_removes_point():
-    _, ax = plt.subplots()
-    points = tbx.Points(ax=ax)
-    points.click(x=20, y=50)
-    ax.figure.canvas.draw()
-    x, y = ax.transData.transform((20, 50))
-    event = MouseEvent(
-        name='button_press_event', canvas=ax.figure.canvas, x=x, y=y, button=2
-    )
-
-    ax.figure.canvas.callbacks.process(event.name, event)
-
-    assert len(points.children) == 0
+    assert points.children == []
 
 
 def test_points_middle_click_with_log_scale():
     _, ax = plt.subplots()
+    ax.set(xlim=(1, 100), ylim=(-100, 200))
     ax.set_xscale('log')
     points = tbx.Points(ax=ax)
     points.click(x=10, y=1)
+    assert len(points.children) == 1
 
-    points.click(x=10, y=1, button=2)
+    points.click(x=10, y=1, button=MouseButton.MIDDLE)
 
     assert len(points.children) == 0
 
 
 def test_points_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1
@@ -149,6 +150,7 @@ def test_points_stop():
 
 def test_points_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1
@@ -160,6 +162,7 @@ def test_points_start():
 
 def test_points_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1
@@ -173,6 +176,7 @@ def test_points_freeze():
 
 def test_points_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1
@@ -189,6 +193,7 @@ def test_points_clear():
 
 def test_points_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     points.click(x=25, y=55)
@@ -203,6 +208,7 @@ def test_points_reset():
 
 def test_points_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     points = tbx.Points(ax=ax)
     points.click(x=20, y=50)
     assert len(ax.lines) == 1

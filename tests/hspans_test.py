@@ -2,6 +2,7 @@
 # Copyright (c) Scipp contributors (https://github.com/scipp)
 
 import matplotlib.pyplot as plt
+import pytest
 from matplotlib.colors import to_hex
 
 import mpltoolbox as tbx
@@ -9,6 +10,7 @@ import mpltoolbox as tbx
 
 def test_hspans_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     assert len(ax.patches) == 0
 
@@ -24,8 +26,8 @@ def test_hspans_creation():
         xy = xy[0]
     else:
         height = p.get_height()
-    assert xy[1] == y[0]
-    assert height == y[1] - y[0]
+    assert xy[1] == pytest.approx(y[0])
+    assert height == pytest.approx(y[1] - y[0])
 
     y = [30, 40]
     hspans.click(x=0, y=y[0])  # first horizontal line
@@ -39,12 +41,13 @@ def test_hspans_creation():
         xy = xy[0]
     else:
         height = p.get_height()
-    assert xy[1] == y[0]
-    assert height == y[1] - y[0]
+    assert xy[1] == pytest.approx(y[0])
+    assert height == pytest.approx(y[1] - y[0])
 
 
 def test_hspans_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -65,6 +68,7 @@ def test_hspans_calls_on_create():
 
 def test_hspans_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     assert len(ax.patches) == 0
 
@@ -86,6 +90,7 @@ def test_hspans_remove():
 
 def test_hspans_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -106,6 +111,7 @@ def test_hspans_calls_on_remove():
 
 def test_hspans_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=70)
@@ -118,6 +124,7 @@ def test_hspans_stop():
 
 def test_hspans_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=70)
@@ -131,6 +138,7 @@ def test_hspans_start():
 
 def test_hspans_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=70)
@@ -147,6 +155,7 @@ def test_hspans_freeze():
 
 def test_hspans_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=70)
@@ -166,6 +175,7 @@ def test_hspans_clear():
 
 def test_hspans_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=55)
@@ -183,6 +193,7 @@ def test_hspans_reset():
 
 def test_hspans_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     hspans = tbx.Hspans(ax=ax)
     hspans.click(x=0, y=50)
     hspans.click(x=0, y=55)

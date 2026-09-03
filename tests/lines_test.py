@@ -10,6 +10,7 @@ import mpltoolbox as tbx
 
 def test_lines_creation():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(ax=ax, n=2)
     assert len(ax.lines) == 0
 
@@ -35,6 +36,7 @@ def test_lines_creation():
 
 def test_lines_creation_3_vertices():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(ax=ax, n=3)
     assert len(ax.lines) == 0
 
@@ -51,6 +53,7 @@ def test_lines_creation_3_vertices():
 
 def test_lines_calls_on_create():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -69,6 +72,7 @@ def test_lines_calls_on_create():
 
 def test_lines_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(ax=ax, n=2)
     assert len(ax.lines) == 0
 
@@ -92,6 +96,7 @@ def test_lines_remove():
 
 def test_lines_calls_on_remove():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
 
     my_event_list = []
 
@@ -112,6 +117,7 @@ def test_lines_calls_on_remove():
 
 def test_lines_stop():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=80, y=70)
@@ -124,6 +130,7 @@ def test_lines_stop():
 
 def test_lines_start():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=80, y=70)
@@ -137,6 +144,7 @@ def test_lines_start():
 
 def test_lines_freeze():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=80, y=70)
@@ -153,30 +161,32 @@ def test_lines_freeze():
 
 def test_lines_clear():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=80, y=70)
     assert len(ax.lines) == 1
     assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
-    lines.click(x=25, y=55)
-    lines.click(x=35, y=75)
+    lines.click(x=25, y=5)
+    lines.click(x=35, y=15)
     assert len(ax.lines) == 2
     assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
     lines.clear()
     assert len(ax.lines) == 0
-    lines.click(x=30, y=60)
-    lines.click(x=40, y=80)
+    lines.click(x=60, y=20)
+    lines.click(x=70, y=30)
     assert len(ax.lines) == 1
     assert to_hex(ax.lines[0].get_color()) == to_hex("C2")
 
 
 def test_lines_reset():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=25, y=55)
-    lines.click(x=30, y=60)
-    lines.click(x=40, y=80)
+    lines.click(x=60, y=20)
+    lines.click(x=70, y=30)
     assert len(ax.lines) == 2
     assert to_hex(ax.lines[0].get_color()) == to_hex("C0")
     assert to_hex(ax.lines[1].get_color()) == to_hex("C1")
@@ -189,6 +199,7 @@ def test_lines_reset():
 
 def test_lines_shutdown():
     _, ax = plt.subplots()
+    ax.set(xlim=(-100, 200), ylim=(-100, 200))
     lines = tbx.Lines(n=2, ax=ax)
     lines.click(x=20, y=50)
     lines.click(x=25, y=55)
