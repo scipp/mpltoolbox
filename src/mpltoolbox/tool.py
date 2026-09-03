@@ -273,7 +273,7 @@ class Tool:
             or self._pick_lock
             or self._get_active_tool()
             or self._locked_by_other_tool()
-            or event.modifiers
+            or ("ctrl" in event.modifiers)
             or event.inaxes != self._ax
         ):
             return
@@ -293,7 +293,13 @@ class Tool:
         self._draw()
 
     def _on_motion_notify(self, event: Event):
-        self._move_vertex(event=event, ind=None, owner=self.children[-1])
+        self._move_vertex(
+            event=event,
+            ind=None,
+            owner=self.children[-1],
+            move_x=self._enable_vertex_move in (True, "xonly"),
+            move_y=self._enable_vertex_move in (True, "yonly"),
+        )
 
     def _move_vertex(
         self,
@@ -475,3 +481,22 @@ class Tool:
                     self._remove_owner(c)
         else:
             self._remove_owner(child)
+
+
+class ShiftKeypressMixin:
+    """
+    Mixin class to add shift key press functionality to a tool.
+    """
+
+    def connect_shift_keypress(self):
+        self._ax._mpltoolbox_shift_pressed = False
+        self._fig.canvas.mpl_connect("key_press_event", self.on_key_press)
+        self._fig.canvas.mpl_connect("key_release_event", self.on_key_release)
+
+    def on_key_press(self, event):
+        if event.key == "shift":
+            self._ax._mpltoolbox_shift_pressed = True
+
+    def on_key_release(self, event):
+        if event.key == "shift":
+            self._ax._mpltoolbox_shift_pressed = False
