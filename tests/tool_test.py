@@ -65,3 +65,52 @@ def test_middle_click_removes_owner_and_calls_callback(make_tool, vertices, targ
 
     assert tool.children == []
     assert removed == [owner]
+
+
+@pytest.mark.parametrize("operation", ["clear", "reset", "stop", "freeze"])
+def test_interrupting_creation_discards_unfinished_owner(operation):
+    _, ax = plt.subplots()
+    ax.set(xlim=(-10, 10), ylim=(-10, 10))
+    tool = tbx.Rectangles(ax=ax)
+    tool.click((-4, -4))
+
+    getattr(tool, operation)()
+
+    assert tool.children == []
+    if operation in ("stop", "freeze"):
+        tool.start()
+    tool.click((1, 1))
+    tool.click((3, 3))
+    assert len(tool.children) == 1
+    rectangle = tool.children[0]
+    assert rectangle.xy == pytest.approx((1, 1))
+    assert rectangle.width == pytest.approx(2)
+    assert rectangle.height == pytest.approx(2)
+
+
+def test_stopping_during_drag_releases_interaction_lock():
+    _, ax = plt.subplots()
+    ax.set(xlim=(-10, 10), ylim=(-10, 10))
+    tool = tbx.Rectangles(ax=ax)
+    tool.on_drag_move(lambda _: tool.stop())
+    tool.click((-4, -4))
+    tool.click((-2, -2))
+
+    tool.click_and_drag((-3, -3), (-1, -1), button=MouseButton.RIGHT)
+
+    tool.start()
+    tool.click((2, 2))
+    tool.click((4, 4))
+    assert len(tool.children) == 2
+
+
+def test_on_create_can_stop_tool_without_removing_created_owner():
+    _, ax = plt.subplots()
+    ax.set(xlim=(-10, 10), ylim=(-10, 10))
+    tool = tbx.Rectangles(ax=ax)
+    tool.on_create(lambda _: tool.stop())
+
+    tool.click((1, 1))
+    tool.click((3, 3))
+
+    assert len(tool.children) == 1

@@ -211,6 +211,7 @@ class Tool:
         Deactivate adding new children, but resizing and moving existing children is
         still possible.
         """
+        self._cancel_interaction()
         self._disconnect(
             [key for key in self._connections.keys() if key != "pick_event"]
         )
@@ -220,6 +221,7 @@ class Tool:
         Deactivate the tool but keep the children. No new children can be added and
         existing children cannot be moved or resized.
         """
+        self._cancel_interaction()
         self._disconnect(list(self._connections.keys()))
         for child in self.children:
             child.hide_vertices()
@@ -229,6 +231,7 @@ class Tool:
         """
         Remove all children from the axes.
         """
+        self._cancel_interaction()
         for a in self.children:
             a.remove()
         self.children.clear()
@@ -257,6 +260,16 @@ class Tool:
 
     def _motion_connected(self) -> bool:
         return "motion_notify_event" in self._connections
+
+    def _cancel_interaction(self) -> None:
+        self._disconnect(["motion_notify_event", "button_release_event"])
+        if self._pick_lock:
+            self._pick_lock = False
+            self._ax._mpltoolbox_lock = False
+        if self._nclicks:
+            self.children.pop().remove()
+            self._nclicks = 0
+            self._draw()
 
     def _disconnect(self, keys: list[str]):
         for key in keys:
@@ -302,14 +315,12 @@ class Tool:
             or event.inaxes != self._ax
         ):
             return
-        if not self._motion_connected():
-            self._nclicks = 0
+        if self._nclicks == 0:
             self._spawn_new_owner(x=event.xdata, y=event.ydata)
             self._connect({"motion_notify_event": self._on_motion_notify})
         else:
-            # The press fixes the next vertex at the press position. Interactive
-            # backends normally emit a motion event before a click at a new position,
-            # but the press coordinates are authoritative.
+            # Persist the preview vertex at the press coordinates. This is required
+            # for click(), which intentionally emits no separate motion event.
             self._on_motion_notify(event)
         self._nclicks += 1
         self._persist_vertex(event=event, owner=self.children[-1])
@@ -341,6 +352,7 @@ class Tool:
     def _persist_vertex(self, event: Event, owner):
         if self._nclicks == owner._max_clicks:
             self._disconnect(["motion_notify_event"])
+            self._nclicks = 0
             self._finalize_owner()
         else:
             owner.after_persist_vertex(event)
